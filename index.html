@@ -3,364 +3,1113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DownAllApp</title>
+    <title>GameVerse - Download Game PC Terbaik</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome CDN for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" xintegrity="sha512-iecdLmasl8P7+Qy0v55o6zX+R8s8t7p+r+r+eL4J+S0lS7+x6y4I5Z/B+eU6/lQ55E2dD0J1hG/T+yA+K8E2w==" crossorigin="anonymous" referrerpolicy="no-eferer" />
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body {
-            font-family: Arial, sans-serif;
-            background-color: #333;
-            color: #ccc;
-            margin: 0;
-            padding: 0;
-            transition: background-color 0.3s, color 0.3s;
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
         }
-
-        body.light-mode {
-            background-color: #f4f4f4;
-            color: #333;
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 2rem 1rem;
         }
-
-        .header {
-            background-color: #222;
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #444;
-            transition: background-color 0.3s, border-bottom 0.3s;
+        .card {
+            background-color: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
         }
-
-        .light-mode .header {
-            background-color: #fff;
-            border-bottom: 1px solid #ddd;
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.15);
         }
-
-        .header-left {
-            display: flex;
-            align-items: center;
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 50;
         }
-
-        .logo {
-            font-size: 2em;
-            font-weight: bold;
-            color: #fff;
-            transition: color 0.3s;
+        .modal-content {
+            z-index: 60;
         }
-        
-        .light-mode .logo {
-            color: #333;
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
         }
-
-        .nav a {
-            color: #ccc;
-            text-decoration: none;
-            margin-left: 20px;
-            transition: color 0.3s;
+        .scrollbar-hide {
+            -ms-overflow-style: none; /* IE and Edge */
+            scrollbar-width: none; /* Firefox */
         }
-
-        .light-mode .nav a {
-            color: #555;
-        }
-
-        .main-content {
-            padding: 40px;
-            text-align: center;
-        }
-
-        .download-section h1 {
-            font-size: 2.5em;
-            color: #fff;
-            margin-bottom: 20px;
-            transition: color 0.3s;
-        }
-        
-        .light-mode .download-section h1 {
-            color: #333;
-        }
-
-        .download-button {
-            background-color: #007bff;
-            color: white;
-            padding: 15px 30px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1.2em;
-            text-decoration: none;
-            display: inline-block;
-            margin-top: 20px;
-            transition: background-color 0.3s;
-        }
-
-        .download-button:hover {
-            background-color: #0056b3;
-        }
-
-        .info-section {
-            background-color: #222;
-            padding: 40px;
-            margin-top: 40px;
-            border-top: 1px solid #444;
-            text-align: left;
-            transition: background-color 0.3s, border-top 0.3s;
-        }
-
-        .light-mode .info-section {
-            background-color: #fff;
-            border-top: 1px solid #ddd;
-        }
-
-        .info-section h2 {
-            color: #fff;
-            font-size: 1.8em;
-            border-bottom: 1px solid #444;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-            transition: color 0.3s, border-bottom 0.3s;
-        }
-        
-        .light-mode .info-section h2 {
-            color: #333;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .info-section p, .info-section ul {
-            margin-bottom: 20px;
-            line-height: 1.6;
-        }
-
-        .info-section ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        .info-section li {
-            margin-bottom: 10px;
-        }
-
-        .contact-info {
-            font-style: italic;
-        }
-
-        .theme-switch {
-            background-color: transparent;
-            color: #ccc;
-            border: 1px solid #ccc;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: color 0.3s, background-color 0.3s, border 0.3s;
-        }
-
-        .light-mode .theme-switch {
-            color: #333;
-            border: 1px solid #333;
-        }
-        
-        /* Gaya baru untuk daftar aplikasi */
-        .app-list {
-            list-style: none;
-            padding: 0;
-            margin-top: 20px;
-            text-align: left;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .app-item {
-            display: flex;
-            align-items: center;
-            padding: 12px;
-            border-bottom: 1px solid #444;
-            transition: background-color 0.3s;
-        }
-
-        .light-mode .app-item {
-            border-bottom: 1px solid #ddd;
-        }
-        
-        .app-item:hover {
-            background-color: #444;
-        }
-
-        .light-mode .app-item:hover {
-            background-color: #eee;
-        }
-
-        .app-item a {
-            color: #007bff;
-            text-decoration: none;
-            flex-grow: 1;
-        }
-
-        /* Gaya untuk pesan */
-        .message-box {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 8px;
-            background-color: #28a745; /* Hijau untuk pesan sukses */
-            color: white;
-            display: none; /* Sembunyikan secara default */
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-            animation: fadeIn 0.5s;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        /* Style for disabled buttons */
+        .btn-disabled {
+            @apply bg-gray-400 cursor-not-allowed;
         }
     </style>
 </head>
-<body>
+<body class="bg-gray-100 flex min-h-screen">
 
-<div class="header">
-    <div class="header-left">
-        <span class="logo">DownAllApp</span>
-        <div class="nav">
-            <a href="#">Home</a>
-            <a href="#">Downloads</a>
-            <a href="#">FAQ</a>
-            <a href="#">Support</a>
-            <a href="#">Contact</a>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="fixed inset-0 bg-gray-900 bg-opacity-90 flex items-center justify-center text-white z-50">
+        <div class="text-center">
+            <i class="fas fa-spinner fa-spin text-4xl text-blue-500"></i>
+            <p class="mt-4 text-lg">Memuat...</p>
         </div>
     </div>
-    <button id="theme-switch-button" class="theme-switch">Mode Terang</button>
-</div>
 
-<div class="main-content">
-    <div class="download-section">
-        <h1>Instal Aplikasi Sekaligus</h1>
-        
-        <ul class="app-list" id="app-list">
-            <!-- Aplikasi akan diisi oleh JavaScript -->
-        </ul>
-        
-        <a href="#" class="download-button" id="download-all-button">
-            Instal Semua Versi
-        </a>
+    <!-- Admin Panel Sidebar -->
+    <aside id="admin-sidebar" class="hidden flex-col w-64 bg-gray-800 text-white min-h-screen p-4 transition-all duration-300 ease-in-out">
+        <div class="text-2xl font-bold mb-8 text-center text-blue-400">Admin Panel</div>
+        <nav>
+            <ul class="space-y-2">
+                <li><a href="#" id="nav-upload-game" class="block p-3 rounded-lg hover:bg-gray-700 transition-colors duration-200"><i class="fas fa-upload mr-3"></i>Upload Game</a></li>
+                <li><a href="#" id="nav-manage-games" class="block p-3 rounded-lg hover:bg-gray-700 transition-colors duration-200"><i class="fas fa-edit mr-3"></i>Kelola Game</a></li>
+                <li><a href="#" id="nav-maintenance" class="block p-3 rounded-lg hover:bg-gray-700 transition-colors duration-200"><i class="fas fa-wrench mr-3"></i>Mode Maintenance</a></li>
+                <li><a href="#" id="nav-player-management" class="block p-3 rounded-lg hover:bg-gray-700 transition-colors duration-200"><i class="fas fa-users-cog mr-3"></i>Kelola Pemain</a></li>
+                <li><a href="#" id="nav-comments-reports" class="block p-3 rounded-lg hover:bg-gray-700 transition-colors duration-200"><i class="fas fa-comments mr-3"></i>Komentar & Laporan</a></li>
+            </ul>
+        </nav>
+    </aside>
 
-        <div id="thank-you-message" class="message-box"></div>
+    <!-- Main Website Content Area -->
+    <div class="flex-grow flex flex-col min-h-screen">
+
+        <!-- Header -->
+        <header class="bg-white shadow-md p-4 flex justify-between items-center">
+            <div class="flex items-center">
+                <a href="#" id="logo" class="text-2xl font-bold text-gray-800">GameVerse</a>
+                <span id="admin-indicator" class="ml-4 px-3 py-1 bg-blue-500 text-white text-xs font-semibold rounded-full hidden">Admin</span>
+            </div>
+            
+            <div id="auth-controls" class="space-x-4">
+                <button id="main-nav-home" class="text-gray-600 hover:text-blue-500 font-semibold transition-colors duration-200">Home</button>
+                <button id="btn-login" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-full transition-colors duration-200">Masuk</button>
+                <button id="btn-register" class="text-blue-500 border border-blue-500 hover:bg-blue-500 hover:text-white font-semibold py-2 px-4 rounded-full transition-colors duration-200">Daftar</button>
+            </div>
+            
+            <div id="user-controls" class="space-x-4 hidden">
+                <span id="username-display" class="font-semibold text-gray-700"></span>
+                <button id="btn-profile" class="text-gray-600 hover:text-blue-500 font-semibold transition-colors duration-200">Profil</button>
+                <button id="btn-logout" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-full transition-colors duration-200">Keluar</button>
+            </div>
+        </header>
+
+        <!-- Main Content Area (Dynamic) -->
+        <main id="main-content" class="flex-grow p-4 md:p-8"></main>
+
     </div>
 
-    <div class="info-section">
-        <h2>Tentang Aplikasi DownAllApp</h2>
-        <p><strong>DownAllApp</strong> adalah aplikasi yang dirancang untuk mempermudah proses instalasi beberapa aplikasi sekaligus. Dengan satu klik, Anda dapat mengunduh semua aplikasi rekomendasi yang telah kami kurasi. Tujuan kami adalah menghemat waktu dan menyederhanakan pengalaman Anda dalam menyiapkan perangkat baru.</p>
+    <!-- Modals -->
 
-        <h2>Kebijakan Download & Privasi</h2>
-        <p>Kami berkomitmen untuk menjaga keamanan dan privasi pengguna. DownAllApp tidak mengumpulkan data pribadi apa pun saat Anda menggunakan layanan kami. Semua tautan unduhan adalah tautan langsung ke situs web resmi pengembang aplikasi, memastikan integritas dan keamanan file. Kami tidak bertanggung jawab atas isi atau kebijakan privasi dari situs web pihak ketiga.</p>
-        
-        <h2>Pemilik</h2>
-        <p>Aplikasi ini dikembangkan dan dikelola oleh Rozak.</p>
-
-        <h2>Tujuan Aplikasi</h2>
-        <p>Tujuan utama dari DownAllApp adalah menyediakan cara yang efisien dan cepat untuk mengunduh dan menginstal aplikasi esensial yang paling umum digunakan, mengurangi kerepotan mengunduh setiap aplikasi secara terpisah.</p>
-
-        <h2>FAQ</h2>
-        <ul>
-            <li><strong>Apa itu DownAllApp?</strong> DownAllApp adalah alat bantu untuk mengunduh banyak aplikasi sekaligus.</li>
-            <li><strong>Apakah DownAllApp aman?</strong> Ya, kami hanya menyediakan tautan ke situs resmi, sehingga aman.</li>
-            <li><strong>Bagaimana cara kerjanya?</strong> Ketika Anda menekan tombol "Instal Semua", browser Anda akan secara otomatis memulai proses unduhan untuk setiap aplikasi.</li>
-        </ul>
-
-        <h2>Kontak</h2>
-        <p class="contact-info">Untuk pertanyaan lebih lanjut, silakan hubungi kami di: <a href="mailto:spctacularstudio@gmail.com">spctacularstudio@gmail.com</a></p>
+    <!-- Login/Register/Forgot Password Modal -->
+    <div id="auth-modal" class="fixed inset-0 flex items-center justify-center p-4 bg-gray-900 bg-opacity-75 hidden modal-overlay">
+        <div class="bg-white p-6 md:p-8 rounded-xl shadow-2xl w-full max-w-md modal-content">
+            <button id="close-auth-modal" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-xl">&times;</button>
+            <div id="auth-container">
+                <!-- Content will be injected here -->
+            </div>
+        </div>
     </div>
-</div>
 
-<script>
-    const downloadAllButton = document.getElementById('download-all-button');
-    const appList = document.getElementById('app-list');
-    const themeSwitchButton = document.getElementById('theme-switch-button');
-    const thankYouMessage = document.getElementById('thank-you-message');
-    const body = document.body;
+    <!-- User Profile Modal -->
+    <div id="profile-modal" class="fixed inset-0 flex items-center justify-center p-4 bg-gray-900 bg-opacity-75 hidden modal-overlay">
+        <div class="bg-white p-6 md:p-8 rounded-xl shadow-2xl w-full max-w-md modal-content">
+            <button id="close-profile-modal" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-xl">&times;</button>
+            <div id="profile-container">
+                <!-- Content will be injected here -->
+            </div>
+        </div>
+    </div>
 
-    // Data aplikasi dengan URL unduhan (menggunakan placeholder)
-    const applications = [
-        { name: "AnyDesk.exe", url: "https://example.com/anydesk" },
-        { name: "balenaEtcher-2.1.4.Setup.exe", url: "https://example.com/balenaetcher" },
-        { name: "BleachBit-5.0.0-setup.exe", url: "https://example.com/bleachbit" },
-        { name: "ChromeSetup.exe", url: "https://example.com/chrome" },
-        { name: "CrystalDiskMark8_2_0src.zip", url: "https://example.com/crystaldiskmark" },
-        { name: "DiscordSetup.exe", url: "https://example.com/discord" },
-        { name: "DropboxInstaller.exe", url: "https://example.com/dropbox" },
-        { name: "EAAppInstaller.exe", url: "https://example.com/eaappinstaller" },
-        { name: "EpicInstaller-18.8.1_2.msi", url: "https://example.com/epicinstaller" },
-        { name: "Everything-1.4.1.1028.x86-Setup.exe", url: "https://example.com/everything" },
-        { name: "GDevelop-5-Setup-5.5.239.exe", url: "https://example.com/gdevelop" },
-        { name: "GoogleDriveSetup.exe", url: "https://example.com/googledrive" },
-        { name: "hwi_830x.exe", url: "https://example.com/hwi" },
-        { name: "MBSetup.exe", url: "https://example.com/mbsetup" },
-        { name: "npp.8.8.5.Installer.x64.exe", url: "https://example.com/npp" },
-        { name: "OBS-Studio-31.1.2-Windows-x64-Installer.exe", url: "https://example.com/obsstudio" },
-        { name: "PowerToysUserSetup-0.93.0-x64.exe", url: "https://example.com/powertoys" },
-        { name: "qBittorrent_5.1.2_x64_setup.exe", url: "https://example.com/qbittorrent" },
-        { name: "revosetup.exe", url: "https://example.com/revosetup" },
-        { name: "rufus-4.9.exe", url: "https://example.com/rufus" },
-        { name: "ShareX-17.1.0-setup.exe", url: "https://example.com/sharex" },
-        { name: "SteamSetup.exe", url: "https://example.com/steam" },
-        { name: "TeamViewer_Setup_x64.exe", url: "https://example.com/teamviewer" },
-        { name: "tsetup-x64.6.0.2.exe", url: "https://example.com/tsetup" },
-        { name: "utweb_installer_rr2.exe", url: "https://example.com/utweb" },
-        { name: "VeraCrypt Setup 1.26.24.exe", url: "https://example.com/veracrypt" },
-        { name: "VSCodeUserSetup-x64-1.103.1.exe", url: "https://example.com/vscode" },
-        { name: "WhatsApp Installer.exe", url: "https://example.com/whatsapp" },
-        { name: "winrar-x64-713.exe", url: "https://example.com/winrar" }
-    ];
+    <!-- Countdown Modal -->
+    <div id="countdown-modal" class="fixed inset-0 flex items-center justify-center p-4 bg-gray-900 bg-opacity-75 hidden modal-overlay">
+        <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-sm text-center modal-content">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">Unduhan Akan Dimulai</h2>
+            <p class="text-4xl font-bold text-blue-600" id="countdown-timer">10</p>
+            <p class="text-gray-600 mt-2">Mohon tunggu...</p>
+        </div>
+    </div>
+    
+    <!-- General Message/Alert Modal -->
+    <div id="message-modal" class="fixed inset-0 flex items-center justify-center p-4 bg-gray-900 bg-opacity-75 hidden modal-overlay">
+        <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm text-center modal-content">
+            <h3 id="message-title" class="text-lg font-bold text-gray-800 mb-2"></h3>
+            <p id="message-body" class="text-gray-600 mb-4"></p>
+            <button id="close-message-modal" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-full transition-colors">OK</button>
+        </div>
+    </div>
 
-    // Fungsi untuk membuat item aplikasi
-    function createAppItem(app) {
-        const li = document.createElement('li');
-        li.className = 'app-item';
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Use global variables provided by the platform
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "AIzaSyAlGXpZSyQab7riDteV5ppS3DXDJQHywKw",
+            authDomain: "modmanagerpro-248f5.firebaseapp.com",
+            projectId: "modmanagerpro-248f5",
+            storageBucket: "modmanagerpro-248f5.firebasestorage.app",
+            messagingSenderId: "594650288669",
+            appId: "1:594650288669:web:3074c3f2f0249bc6f1ecf4",
+            measurementId: "G-VLWZDSRS3W"
+        };
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // --- GLOBAL VARIABLES AND FIREBASE SETUP ---
+        let db, auth;
+        let currentUser = null;
+        let isAdmin = false;
+        let maintenanceMode = false;
+
+        const adminEmail = 'rozaq@gmail.com';
+
+        // Get DOM elements
+        const loadingScreen = document.getElementById('loading-screen');
+        const authControls = document.getElementById('auth-controls');
+        const userControls = document.getElementById('user-controls');
+        const mainContent = document.getElementById('main-content');
+        const authModal = document.getElementById('auth-modal');
+        const profileModal = document.getElementById('profile-modal');
+        const countdownModal = document.getElementById('countdown-modal');
+        const messageModal = document.getElementById('message-modal');
+        const adminSidebar = document.getElementById('admin-sidebar');
+        const adminIndicator = document.getElementById('admin-indicator');
+
+        const messageTitleEl = document.getElementById('message-title');
+        const messageBodyEl = document.getElementById('message-body');
+        const closeMessageModalBtn = document.getElementById('close-message-modal');
+        const countdownTimerEl = document.getElementById('countdown-timer');
+
+        // --- UTILITY FUNCTIONS ---
         
-        li.innerHTML = `
-            <a href="${app.url}" target="_blank" download>${app.name}</a>
-        `;
-        return li;
-    }
+        // Show a generic message/alert modal
+        function showMessage(title, body, callback = null) {
+            messageTitleEl.textContent = title;
+            messageBodyEl.textContent = body;
+            messageModal.classList.remove('hidden');
+            closeMessageModalBtn.onclick = () => {
+                messageModal.classList.add('hidden');
+                if (callback) callback();
+            };
+        }
 
-    // Memuat daftar aplikasi ke halaman
-    applications.forEach(app => {
-        appList.appendChild(createAppItem(app));
-    });
+        // Show a modal by ID
+        function showModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+        }
 
-    // Event listener untuk tombol "Instal Semua"
-    downloadAllButton.addEventListener('click', (event) => {
-        event.preventDefault();
+        // Hide a modal by ID
+        function hideModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        // Toggle visibility of admin sidebar
+        function toggleAdminSidebar(show) {
+            if (show) {
+                adminSidebar.classList.remove('hidden');
+                adminSidebar.classList.add('flex');
+            } else {
+                adminSidebar.classList.add('hidden');
+                adminSidebar.classList.remove('flex');
+            }
+        }
+
+        // Render the main page with a list of games
+        function renderHomePage(games) {
+            let html = `
+                <div class="pb-8">
+                    <h1 class="text-4xl font-bold text-center text-gray-900 mb-2">GameVerse</h1>
+                    <p class="text-center text-gray-600 mb-8">Jelajahi, Unduh, dan Nikmati Permainan Terbaik!</p>
+                </div>
+                <div id="game-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            `;
+            if (games.length === 0) {
+                html += `<div class="col-span-full text-center text-gray-500 text-lg">Tidak ada game yang tersedia saat ini.</div>`;
+            }
+            games.forEach(game => {
+                const discountedPrice = game.discountPercentage ? (game.price * (1 - game.discountPercentage / 100)).toFixed(2) : null;
+                html += `
+                    <div class="card p-4">
+                        <img src="${game.photoUrl}" onerror="this.onerror=null; this.src='https://placehold.co/600x400/E5E7EB/9CA3AF?text=No+Image';" alt="${game.name}" class="rounded-t-lg w-full h-48 object-cover mb-4">
+                        <div class="p-4">
+                            <h2 class="text-2xl font-bold text-gray-800">${game.name}</h2>
+                            <p class="text-sm text-gray-500 mt-1 mb-3">${game.description}</p>
+                            <div class="text-gray-700 mb-3">
+                                <span class="font-semibold">Spesifikasi:</span>
+                                <p class="text-sm mt-1">${game.specs}</p>
+                            </div>
+                            <div class="flex items-center space-x-2 font-bold mb-4">
+                                <span class="${discountedPrice ? 'line-through text-gray-500' : 'text-blue-600'}">Rp${game.price.toLocaleString('id-ID')}</span>
+                                ${discountedPrice ? `<span class="text-red-500">Rp${parseFloat(discountedPrice).toLocaleString('id-ID')}</span>` : ''}
+                                ${game.discountPercentage ? `<span class="text-xs bg-green-500 text-white px-2 py-1 rounded-full">${game.discountPercentage}% OFF</span>` : ''}
+                            </div>
+                            <button class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-full transition-colors duration-200 download-btn" data-link="${game.downloadLink}">Unduh Sekarang</button>
+                            <div class="mt-4 flex space-x-2">
+                                <button class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-3 rounded-full transition-colors duration-200 open-comments-btn" data-game-id="${game.id}">Komentar</button>
+                                <button class="flex-1 bg-red-200 hover:bg-red-300 text-red-800 font-semibold py-2 px-3 rounded-full transition-colors duration-200 report-product-btn" data-game-id="${game.id}">Lapor</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            html += `</div>`;
+            mainContent.innerHTML = html;
+            addDownloadListeners();
+            addCommentsListeners();
+            addReportListeners();
+        }
+
+        // Attach listeners for download buttons
+        function addDownloadListeners() {
+            document.querySelectorAll('.download-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    const downloadLink = button.dataset.link;
+                    showModal('countdown-modal');
+                    let countdown = 10;
+                    countdownTimerEl.textContent = countdown;
+                    const timer = setInterval(() => {
+                        countdown--;
+                        countdownTimerEl.textContent = countdown;
+                        if (countdown <= 0) {
+                            clearInterval(timer);
+                            hideModal('countdown-modal');
+                            window.location.href = downloadLink;
+                        }
+                    }, 1000);
+                });
+            });
+        }
+
+        // Attach listeners for comments buttons
+        function addCommentsListeners() {
+            document.querySelectorAll('.open-comments-btn').forEach(button => {
+                button.addEventListener('click', async () => {
+                    if (!currentUser) {
+                        showMessage('Login Dibutuhkan', 'Anda harus login untuk melihat atau menulis komentar.');
+                        return;
+                    }
+                    const gameId = button.dataset.gameId;
+                    renderCommentsModal(gameId);
+                });
+            });
+        }
         
-        // Menampilkan pesan terima kasih
-        thankYouMessage.textContent = "terima kasih sudah download,kami akan terus berjuang untuk Semua aplikasi,kami hanya perlu dukungan melalui semangat,tidak perlu barang atau uang";
-        thankYouMessage.style.display = 'block';
+        // Attach listeners for report buttons
+        function addReportListeners() {
+            document.querySelectorAll('.report-product-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    if (!currentUser) {
+                        showMessage('Login Dibutuhkan', 'Anda harus login untuk melaporkan produk.');
+                        return;
+                    }
+                    const gameId = button.dataset.gameId;
+                    renderReportModal(gameId);
+                });
+            });
+        }
 
-        // Mengunduh semua aplikasi
-        applications.forEach(app => {
-            const link = document.createElement('a');
-            link.href = app.url;
-            link.setAttribute('download', '');
-            link.setAttribute('target', '_blank');
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+        // --- AUTH & USER MANAGEMENT ---
+
+        // Function to handle login
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = e.target.email.value;
+            const password = e.target.password.value;
+            try {
+                await firebase.auth().signInWithEmailAndPassword(email, password);
+                showMessage('Berhasil', 'Login berhasil! Selamat datang.');
+                hideModal('auth-modal');
+            } catch (error) {
+                showMessage('Login Gagal', `Error: ${error.message}`);
+            }
+        }
+
+        // Function to handle register
+        async function handleRegister(e) {
+            e.preventDefault();
+            const email = e.target.email.value;
+            const password = e.target.password.value;
+            const username = e.target.username.value;
+            try {
+                const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+                // Save user data to Firestore
+                await firebase.firestore().collection('users').doc(user.uid).set({
+                    username: username,
+                    email: email,
+                    friends: [],
+                    warnings: [],
+                    isBanned: false,
+                    isKicked: false,
+                    id: user.uid
+                });
+                showMessage('Berhasil', 'Pendaftaran berhasil! Silakan masuk.');
+                hideModal('auth-modal');
+                renderAuthForm('login');
+            } catch (error) {
+                showMessage('Pendaftaran Gagal', `Error: ${error.message}`);
+            }
+        }
+
+        // Function to handle password reset
+        async function handleForgotPassword(e) {
+            e.preventDefault();
+            const email = e.target.resetEmail.value;
+            try {
+                await firebase.auth().sendPasswordResetEmail(email);
+                showMessage('Berhasil', 'Link reset password telah dikirim ke email Anda.');
+                hideModal('auth-modal');
+            } catch (error) {
+                showMessage('Reset Password Gagal', `Error: ${error.message}`);
+            }
+        }
+
+        // Function to handle updating user profile
+        async function handleUpdateProfile(e) {
+            e.preventDefault();
+            const newUsername = e.target.newUsername.value;
+            const newEmail = e.target.newEmail.value;
+            const newPassword = e.target.newPassword.value;
+            try {
+                const userRef = db.collection('users').doc(currentUser.uid);
+                const updates = {};
+                if (newUsername) updates.username = newUsername;
+                if (newEmail && newEmail !== currentUser.email) {
+                    await firebase.auth().currentUser.updateEmail(newEmail);
+                    updates.email = newEmail;
+                }
+                if (newPassword) {
+                    await firebase.auth().currentUser.updatePassword(newPassword);
+                }
+                if (Object.keys(updates).length > 0) {
+                    await userRef.update(updates);
+                }
+                showMessage('Berhasil', 'Profil berhasil diperbarui!');
+                hideModal('profile-modal');
+            } catch (error) {
+                showMessage('Pembaruan Gagal', `Error: ${error.message}`);
+            }
+        }
+
+        // Function to handle adding a friend
+        async function handleAddFriend(e) {
+            e.preventDefault();
+            const friendEmail = e.target.friendEmail.value;
+            try {
+                const friendQuery = await db.collection('users').where('email', '==', friendEmail).get();
+                if (friendQuery.empty) {
+                    showMessage('Gagal', 'Email tidak ditemukan.');
+                    return;
+                }
+                const friendDoc = friendQuery.docs[0];
+                const friendId = friendDoc.id;
+                const userRef = db.collection('users').doc(currentUser.uid);
+                const userDoc = await userRef.get();
+                const currentFriends = userDoc.data().friends || [];
+                if (currentFriends.includes(friendId)) {
+                    showMessage('Gagal', 'Pengguna ini sudah ada di daftar teman Anda.');
+                    return;
+                }
+                await userRef.update({ friends: firebase.firestore.FieldValue.arrayUnion(friendId) });
+                showMessage('Berhasil', 'Teman berhasil ditambahkan!');
+                hideModal('profile-modal');
+            } catch (error) {
+                showMessage('Gagal', `Error: ${error.message}`);
+            }
+        }
+
+        // Function to handle comments
+        async function handleSubmitComment(e) {
+            e.preventDefault();
+            const gameId = e.target.gameId.value;
+            const commentText = e.target.commentText.value;
+            if (!commentText.trim()) {
+                showMessage('Gagal', 'Komentar tidak boleh kosong.');
+                return;
+            }
+            try {
+                await db.collection('comments').add({
+                    gameId: gameId,
+                    userId: currentUser.uid,
+                    username: currentUser.username,
+                    text: commentText,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                e.target.reset();
+            } catch (error) {
+                showMessage('Gagal', `Error: ${error.message}`);
+            }
+        }
+
+        // Function to handle product reports
+        async function handleSubmitReport(e) {
+            e.preventDefault();
+            const gameId = e.target.gameId.value;
+            const issue = e.target.issue.value;
+            try {
+                await db.collection('reports').add({
+                    gameId: gameId,
+                    userId: currentUser.uid,
+                    username: currentUser.username,
+                    issue: issue,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                showMessage('Laporan Terkirim', 'Laporan Anda telah berhasil dikirim ke admin. Terima kasih atas bantuannya!');
+                hideModal('auth-modal'); // Reusing auth modal for this
+            } catch (error) {
+                showMessage('Gagal', `Error: ${error.message}`);
+            }
+        }
+        
+        // Render auth form (login/register/forgot password)
+        function renderAuthForm(type) {
+            let html = '';
+            let title = '';
+            if (type === 'login') {
+                title = 'Masuk ke Akun Anda';
+                html = `
+                    <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">${title}</h2>
+                    <form id="login-form" class="space-y-4">
+                        <input type="email" name="email" placeholder="Email" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        <input type="password" name="password" placeholder="Password" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-200">Masuk</button>
+                    </form>
+                    <p class="text-center text-sm text-gray-500 mt-4">Belum punya akun? <a href="#" id="link-register" class="text-blue-500 hover:underline">Daftar sekarang</a></p>
+                    <p class="text-center text-sm text-gray-500 mt-2"><a href="#" id="link-forgot-password" class="text-blue-500 hover:underline">Lupa Password?</a></p>
+                `;
+            } else if (type === 'register') {
+                title = 'Buat Akun Baru';
+                html = `
+                    <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">${title}</h2>
+                    <form id="register-form" class="space-y-4">
+                        <input type="text" name="username" placeholder="Nama Pengguna" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        <input type="email" name="email" placeholder="Email" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        <input type="password" name="password" placeholder="Password" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-200">Daftar</button>
+                    </form>
+                    <p class="text-center text-sm text-gray-500 mt-4">Sudah punya akun? <a href="#" id="link-login" class="text-blue-500 hover:underline">Masuk sekarang</a></p>
+                `;
+            } else if (type === 'forgotPassword') {
+                title = 'Reset Password';
+                html = `
+                    <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">${title}</h2>
+                    <form id="forgot-password-form" class="space-y-4">
+                        <p class="text-sm text-gray-600 text-center">Masukkan email Anda untuk menerima link reset password.</p>
+                        <input type="email" name="resetEmail" placeholder="Email" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-200">Kirim Link</button>
+                    </form>
+                    <p class="text-center text-sm text-gray-500 mt-4"><a href="#" id="link-back-to-login" class="text-blue-500 hover:underline">Kembali ke halaman masuk</a></p>
+                `;
+            }
+
+            document.getElementById('auth-container').innerHTML = html;
+            showModal('auth-modal');
+
+            // Attach listeners
+            if (type === 'login') {
+                document.getElementById('login-form').addEventListener('submit', handleLogin);
+                document.getElementById('link-register').addEventListener('click', (e) => { e.preventDefault(); renderAuthForm('register'); });
+                document.getElementById('link-forgot-password').addEventListener('click', (e) => { e.preventDefault(); renderAuthForm('forgotPassword'); });
+            } else if (type === 'register') {
+                document.getElementById('register-form').addEventListener('submit', handleRegister);
+                document.getElementById('link-login').addEventListener('click', (e) => { e.preventDefault(); renderAuthForm('login'); });
+            } else if (type === 'forgotPassword') {
+                document.getElementById('forgot-password-form').addEventListener('submit', handleForgotPassword);
+                document.getElementById('link-back-to-login').addEventListener('click', (e) => { e.preventDefault(); renderAuthForm('login'); });
+            }
+        }
+
+        // Render profile modal
+        async function renderProfileModal() {
+            if (!currentUser) return;
+            const userRef = db.collection('users').doc(currentUser.uid);
+            const userDoc = await userRef.get();
+            const userData = userDoc.data();
+            
+            const friendPromises = (userData.friends || []).map(friendId => db.collection('users').doc(friendId).get());
+            const friendDocs = await Promise.all(friendPromises);
+            const friendList = friendDocs.map(doc => doc.data().username).join(', ') || 'Tidak ada teman.';
+
+            let warningsHtml = userData.warnings && userData.warnings.length > 0 ?
+                `<ul class="list-disc list-inside space-y-1">` + userData.warnings.map(warn => `<li><span class="text-red-500 font-semibold">Peringatan Admin:</span> ${warn}</li>`).join('') + `</ul>` :
+                `<p class="text-gray-500">Tidak ada peringatan.</p>`;
+
+            const html = `
+                <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">Profil Pengguna</h2>
+                <div class="space-y-6">
+                    <div>
+                        <p class="text-lg font-semibold text-gray-700">Informasi Dasar</p>
+                        <p><strong>Nama:</strong> ${userData.username}</p>
+                        <p><strong>Email:</strong> ${userData.email}</p>
+                        <p><strong>ID Pengguna:</strong> <span id="user-id-display" class="text-xs text-gray-500">${userData.id}</span></p>
+                    </div>
+                    <div>
+                        <p class="text-lg font-semibold text-gray-700">Daftar Teman</p>
+                        <p>${friendList}</p>
+                        <form id="add-friend-form" class="mt-4 flex space-x-2">
+                            <input type="email" name="friendEmail" placeholder="Email Teman" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">Tambah</button>
+                        </form>
+                    </div>
+                    <div>
+                        <p class="text-lg font-semibold text-gray-700">Peringatan</p>
+                        ${warningsHtml}
+                    </div>
+                    <div>
+                        <p class="text-lg font-semibold text-gray-700">Kelola Akun</p>
+                        <form id="update-profile-form" class="space-y-4 mt-2">
+                            <input type="text" name="newUsername" placeholder="Nama Pengguna Baru" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <input type="email" name="newEmail" placeholder="Email Baru" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <input type="password" name="newPassword" placeholder="Password Baru" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">Perbarui Profil</button>
+                        </form>
+                    </div>
+                </div>
+            `;
+            document.getElementById('profile-container').innerHTML = html;
+            showModal('profile-modal');
+            document.getElementById('update-profile-form').addEventListener('submit', handleUpdateProfile);
+            document.getElementById('add-friend-form').addEventListener('submit', handleAddFriend);
+        }
+
+        // Render comments modal
+        function renderCommentsModal(gameId) {
+            let html = `
+                <div class="fixed inset-0 flex items-center justify-center p-4 bg-gray-900 bg-opacity-75 hidden modal-overlay" id="comments-modal">
+                    <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-xl flex flex-col h-[80vh] modal-content">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-2xl font-bold text-gray-800">Komentar</h2>
+                            <button class="text-gray-500 hover:text-gray-800 text-xl" id="close-comments-modal">&times;</button>
+                        </div>
+                        <div id="comments-list" class="flex-grow overflow-y-auto scrollbar-hide space-y-4 pr-2">
+                            <p class="text-center text-gray-500">Memuat komentar...</p>
+                        </div>
+                        <form id="comment-form" class="mt-4 flex space-x-2">
+                            <input type="hidden" name="gameId" value="${gameId}">
+                            <textarea name="commentText" placeholder="Tulis komentar..." class="flex-grow p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+                            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">Kirim</button>
+                        </form>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', html);
+            const commentsModal = document.getElementById('comments-modal');
+            commentsModal.classList.remove('hidden');
+
+            document.getElementById('close-comments-modal').addEventListener('click', () => commentsModal.remove());
+            document.getElementById('comment-form').addEventListener('submit', handleSubmitComment);
+
+            // Listen for comments in real-time
+            db.collection('comments').where('gameId', '==', gameId).orderBy('timestamp', 'desc').onSnapshot(snapshot => {
+                const commentsList = document.getElementById('comments-list');
+                if (!commentsList) return;
+                let commentsHtml = '';
+                if (snapshot.empty) {
+                    commentsHtml = `<p class="text-center text-gray-500">Belum ada komentar.</p>`;
+                } else {
+                    snapshot.forEach(doc => {
+                        const comment = doc.data();
+                        const timestamp = comment.timestamp ? new Date(comment.timestamp.seconds * 1000).toLocaleString() : 'Baru saja';
+                        commentsHtml += `
+                            <div class="bg-gray-100 p-3 rounded-lg">
+                                <p class="text-sm font-semibold text-gray-800">${comment.username}</p>
+                                <p class="text-sm text-gray-600">${comment.text}</p>
+                                <p class="text-xs text-gray-400 mt-1">${timestamp}</p>
+                            </div>
+                        `;
+                    });
+                }
+                commentsList.innerHTML = commentsHtml;
+            });
+        }
+        
+        // Render report modal
+        function renderReportModal(gameId) {
+            let html = `
+                <div class="fixed inset-0 flex items-center justify-center p-4 bg-gray-900 bg-opacity-75 hidden modal-overlay" id="report-modal">
+                    <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm flex flex-col modal-content">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-2xl font-bold text-gray-800">Laporkan Produk</h2>
+                            <button class="text-gray-500 hover:text-gray-800 text-xl" id="close-report-modal">&times;</button>
+                        </div>
+                        <form id="report-form" class="space-y-4">
+                            <input type="hidden" name="gameId" value="${gameId}">
+                            <textarea name="issue" placeholder="Jelaskan masalahnya..." class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" rows="4"></textarea>
+                            <button type="submit" class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">Kirim Laporan</button>
+                        </form>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', html);
+            const reportModal = document.getElementById('report-modal');
+            reportModal.classList.remove('hidden');
+
+            document.getElementById('close-report-modal').addEventListener('click', () => reportModal.remove());
+            document.getElementById('report-form').addEventListener('submit', handleSubmitReport);
+        }
+
+        // --- ADMIN PANEL FUNCTIONS ---
+
+        // Render upload game form
+        function renderUploadGame() {
+            mainContent.innerHTML = `
+                <h2 class="text-3xl font-bold mb-6 text-gray-800">Upload Game Baru</h2>
+                <form id="upload-game-form" class="bg-white p-6 rounded-xl shadow-md space-y-4">
+                    <input type="text" name="gameName" placeholder="Nama Game" required class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2">
+                    <input type="url" name="photoUrl" placeholder="URL Foto Game" required class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2">
+                    <textarea name="description" placeholder="Deskripsi Game" required class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 resize-none"></textarea>
+                    <textarea name="specs" placeholder="Spesifikasi Game" required class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 resize-none"></textarea>
+                    <input type="url" name="downloadLink" placeholder="Link Download" required class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2">
+                    <input type="number" name="price" placeholder="Harga (Rp)" required class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2">
+                    <input type="number" name="discount" placeholder="Diskon (%) (opsional)" min="0" max="100" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2">
+                    <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-lg transition-colors">Upload Game</button>
+                </form>
+            `;
+            document.getElementById('upload-game-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const gameData = {
+                    name: e.target.gameName.value,
+                    photoUrl: e.target.photoUrl.value,
+                    description: e.target.description.value,
+                    specs: e.target.specs.value,
+                    downloadLink: e.target.downloadLink.value,
+                    price: parseFloat(e.target.price.value),
+                    discountPercentage: e.target.discount.value ? parseInt(e.target.discount.value) : null
+                };
+                try {
+                    await db.collection('games').add(gameData);
+                    showMessage('Berhasil', 'Game berhasil diupload!');
+                    e.target.reset();
+                } catch (error) {
+                    showMessage('Gagal', `Error: ${error.message}`);
+                }
+            });
+        }
+
+        // Render game management list
+        function renderManageGames() {
+            mainContent.innerHTML = `
+                <h2 class="text-3xl font-bold mb-6 text-gray-800">Kelola Game</h2>
+                <div id="games-management-list" class="space-y-4">
+                    <p class="text-center text-gray-500">Memuat data game...</p>
+                </div>
+            `;
+            db.collection('games').onSnapshot(snapshot => {
+                const gamesList = document.getElementById('games-management-list');
+                if (!gamesList) return;
+                let html = '';
+                if (snapshot.empty) {
+                    html = `<p class="text-center text-gray-500">Tidak ada game yang tersedia.</p>`;
+                } else {
+                    snapshot.forEach(doc => {
+                        const game = doc.data();
+                        html += `
+                            <div class="card p-4 flex items-center justify-between">
+                                <div class="flex-1">
+                                    <h3 class="font-bold text-lg">${game.name}</h3>
+                                    <p class="text-sm text-gray-500">${game.description.substring(0, 50)}...</p>
+                                </div>
+                                <div class="space-x-2">
+                                    <button class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg edit-game-btn" data-id="${doc.id}">Edit</button>
+                                    <button class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg delete-game-btn" data-id="${doc.id}">Hapus</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                gamesList.innerHTML = html;
+                document.querySelectorAll('.edit-game-btn').forEach(btn => btn.addEventListener('click', (e) => renderEditGameForm(e.target.dataset.id)));
+                document.querySelectorAll('.delete-game-btn').forEach(btn => btn.addEventListener('click', async (e) => {
+                    if (confirm('Apakah Anda yakin ingin menghapus game ini?')) {
+                        try {
+                            await db.collection('games').doc(e.target.dataset.id).delete();
+                            showMessage('Berhasil', 'Game berhasil dihapus.');
+                        } catch (error) {
+                            showMessage('Gagal', `Error: ${error.message}`);
+                        }
+                    }
+                }));
+            });
+        }
+        
+        // Render edit game form
+        async function renderEditGameForm(gameId) {
+            const gameDoc = await db.collection('games').doc(gameId).get();
+            if (!gameDoc.exists) {
+                showMessage('Error', 'Game tidak ditemukan.');
+                return;
+            }
+            const game = gameDoc.data();
+            mainContent.innerHTML = `
+                <h2 class="text-3xl font-bold mb-6 text-gray-800">Edit Game: ${game.name}</h2>
+                <form id="edit-game-form" class="bg-white p-6 rounded-xl shadow-md space-y-4">
+                    <input type="text" name="gameName" value="${game.name}" placeholder="Nama Game" required class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2">
+                    <input type="url" name="photoUrl" value="${game.photoUrl}" placeholder="URL Foto Game" required class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2">
+                    <textarea name="description" placeholder="Deskripsi Game" required class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 resize-none">${game.description}</textarea>
+                    <textarea name="specs" placeholder="Spesifikasi Game" required class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 resize-none">${game.specs}</textarea>
+                    <input type="url" name="downloadLink" value="${game.downloadLink}" placeholder="Link Download" required class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2">
+                    <input type="number" name="price" value="${game.price}" placeholder="Harga (Rp)" required class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2">
+                    <input type="number" name="discount" value="${game.discountPercentage || ''}" placeholder="Diskon (%) (opsional)" min="0" max="100" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2">
+                    <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-lg transition-colors">Simpan Perubahan</button>
+                </form>
+            `;
+            document.getElementById('edit-game-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const updatedGameData = {
+                    name: e.target.gameName.value,
+                    photoUrl: e.target.photoUrl.value,
+                    description: e.target.description.value,
+                    specs: e.target.specs.value,
+                    downloadLink: e.target.downloadLink.value,
+                    price: parseFloat(e.target.price.value),
+                    discountPercentage: e.target.discount.value ? parseInt(e.target.discount.value) : null
+                };
+                try {
+                    await db.collection('games').doc(gameId).update(updatedGameData);
+                    showMessage('Berhasil', 'Game berhasil diperbarui!');
+                } catch (error) {
+                    showMessage('Gagal', `Error: ${error.message}`);
+                }
+            });
+        }
+
+        // Render maintenance mode toggle
+        function renderMaintenanceMode() {
+            mainContent.innerHTML = `
+                <h2 class="text-3xl font-bold mb-6 text-gray-800">Mode Maintenance</h2>
+                <div class="card p-6 flex items-center justify-between">
+                    <div>
+                        <h3 class="text-xl font-semibold">Status</h3>
+                        <p id="maintenance-status" class="text-sm font-bold mt-1"></p>
+                    </div>
+                    <button id="maintenance-toggle-btn" class="py-2 px-4 rounded-full font-semibold"></button>
+                </div>
+            `;
+            const statusEl = document.getElementById('maintenance-status');
+            const toggleBtn = document.getElementById('maintenance-toggle-btn');
+            db.collection('app_status').doc('maintenance').onSnapshot(doc => {
+                if (doc.exists) {
+                    maintenanceMode = doc.data().active;
+                    statusEl.textContent = maintenanceMode ? 'AKTIF' : 'TIDAK AKTIF';
+                    statusEl.classList.toggle('text-red-500', maintenanceMode);
+                    statusEl.classList.toggle('text-green-500', !maintenanceMode);
+                    toggleBtn.textContent = maintenanceMode ? 'Nonaktifkan' : 'Aktifkan';
+                    toggleBtn.classList.toggle('bg-red-500', maintenanceMode);
+                    toggleBtn.classList.toggle('hover:bg-red-600', maintenanceMode);
+                    toggleBtn.classList.toggle('bg-green-500', !maintenanceMode);
+                    toggleBtn.classList.toggle('hover:bg-green-600', !maintenanceMode);
+                    toggleBtn.classList.add('text-white');
+                }
+            });
+            toggleBtn.addEventListener('click', async () => {
+                try {
+                    await db.collection('app_status').doc('maintenance').set({ active: !maintenanceMode });
+                    showMessage('Berhasil', 'Status mode maintenance berhasil diperbarui.');
+                } catch (error) {
+                    showMessage('Gagal', `Error: ${error.message}`);
+                }
+            });
+        }
+        
+        // Render player management
+        function renderPlayerManagement() {
+            mainContent.innerHTML = `
+                <h2 class="text-3xl font-bold mb-6 text-gray-800">Kelola Pemain</h2>
+                <div class="card p-6 mb-6">
+                    <form id="search-player-form" class="flex space-x-2">
+                        <input type="text" name="playerQuery" placeholder="Cari email/username..." required class="flex-grow p-2 border rounded-lg">
+                        <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg"><i class="fas fa-search"></i></button>
+                    </form>
+                    <div id="player-search-results" class="mt-4 space-y-4"></div>
+                </div>
+            `;
+            const searchForm = document.getElementById('search-player-form');
+            const resultsDiv = document.getElementById('player-search-results');
+            searchForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const query = e.target.playerQuery.value.trim();
+                resultsDiv.innerHTML = '<p class="text-center text-gray-500">Mencari...</p>';
+                try {
+                    const emailQuery = await db.collection('users').where('email', '==', query).get();
+                    const usernameQuery = await db.collection('users').where('username', '==', query).get();
+                    
+                    const users = [];
+                    emailQuery.forEach(doc => users.push({ ...doc.data(), id: doc.id }));
+                    usernameQuery.forEach(doc => {
+                        if (!users.some(u => u.id === doc.id)) {
+                            users.push({ ...doc.data(), id: doc.id });
+                        }
+                    });
+
+                    if (users.length === 0) {
+                        resultsDiv.innerHTML = '<p class="text-center text-gray-500">Pemain tidak ditemukan.</p>';
+                        return;
+                    }
+
+                    resultsDiv.innerHTML = users.map(user => `
+                        <div class="card p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between">
+                            <div>
+                                <h4 class="font-bold">${user.username}</h4>
+                                <p class="text-sm text-gray-500">${user.email}</p>
+                                <p class="text-xs text-gray-400 mt-1">ID: ${user.id}</p>
+                                ${user.isBanned ? `<span class="bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded-full mt-1 inline-block">BANNED</span>` : ''}
+                            </div>
+                            <div class="mt-4 sm:mt-0 space-x-2 flex flex-wrap justify-end">
+                                <button class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-3 rounded-lg ban-user-btn" data-id="${user.id}">${user.isBanned ? 'Unban' : 'Ban'}</button>
+                                <button class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-3 rounded-lg kick-user-btn" data-id="${user.id}">Kick</button>
+                                <button class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-3 rounded-lg send-warning-btn" data-id="${user.id}">Peringatan</button>
+                            </div>
+                        </div>
+                    `).join('');
+
+                    document.querySelectorAll('.ban-user-btn').forEach(btn => btn.addEventListener('click', async (e) => {
+                        const userId = e.target.dataset.id;
+                        const userDoc = await db.collection('users').doc(userId).get();
+                        const isBanned = userDoc.data().isBanned;
+                        await db.collection('users').doc(userId).update({ isBanned: !isBanned });
+                        showMessage('Berhasil', `${isBanned ? 'Unban' : 'Ban'} pengguna berhasil.`);
+                    }));
+                    document.querySelectorAll('.kick-user-btn').forEach(btn => btn.addEventListener('click', async (e) => {
+                        await db.collection('users').doc(e.target.dataset.id).update({ isKicked: true });
+                        showMessage('Berhasil', 'Pengguna berhasil ditendang.');
+                    }));
+                    document.querySelectorAll('.send-warning-btn').forEach(btn => btn.addEventListener('click', async (e) => {
+                        const warning = prompt('Masukkan pesan peringatan:');
+                        if (warning) {
+                            await db.collection('users').doc(e.target.dataset.id).update({
+                                warnings: firebase.firestore.FieldValue.arrayUnion(warning)
+                            });
+                            showMessage('Berhasil', 'Peringatan berhasil dikirim.');
+                        }
+                    }));
+                } catch (error) {
+                    showMessage('Gagal', `Error: ${error.message}`);
+                }
+            });
+        }
+        
+        // Render comments and reports management
+        function renderCommentsReports() {
+            mainContent.innerHTML = `
+                <h2 class="text-3xl font-bold mb-6 text-gray-800">Komentar & Laporan</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Comments Section -->
+                    <div>
+                        <h3 class="text-2xl font-bold mb-4 text-gray-700">Komentar</h3>
+                        <div id="admin-comments-list" class="space-y-4">
+                            <p class="text-center text-gray-500">Memuat komentar...</p>
+                        </div>
+                    </div>
+                    <!-- Reports Section -->
+                    <div>
+                        <h3 class="text-2xl font-bold mb-4 text-gray-700">Laporan Produk</h3>
+                        <div id="admin-reports-list" class="space-y-4">
+                            <p class="text-center text-gray-500">Memuat laporan...</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            db.collection('comments').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
+                const commentsList = document.getElementById('admin-comments-list');
+                if (!commentsList) return;
+                let html = '';
+                if (snapshot.empty) {
+                    html = '<p class="text-center text-gray-500">Tidak ada komentar.</p>';
+                } else {
+                    snapshot.forEach(doc => {
+                        const comment = doc.data();
+                        const timestamp = comment.timestamp ? new Date(comment.timestamp.seconds * 1000).toLocaleString() : 'Baru saja';
+                        html += `
+                            <div class="card p-4 flex items-center justify-between">
+                                <div class="flex-1">
+                                    <p class="font-bold">${comment.username}</p>
+                                    <p class="text-sm text-gray-600 truncate">${comment.text}</p>
+                                    <p class="text-xs text-gray-400">${timestamp}</p>
+                                </div>
+                                <button class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-3 rounded-lg delete-comment-btn" data-id="${doc.id}">Hapus</button>
+                            </div>
+                        `;
+                    });
+                }
+                commentsList.innerHTML = html;
+                document.querySelectorAll('.delete-comment-btn').forEach(btn => btn.addEventListener('click', async (e) => {
+                    if (confirm('Apakah Anda yakin ingin menghapus komentar ini?')) {
+                        try {
+                            await db.collection('comments').doc(e.target.dataset.id).delete();
+                            showMessage('Berhasil', 'Komentar berhasil dihapus.');
+                        } catch (error) {
+                            showMessage('Gagal', `Error: ${error.message}`);
+                        }
+                    }
+                }));
+            });
+
+            db.collection('reports').onSnapshot(snapshot => {
+                const reportsList = document.getElementById('admin-reports-list');
+                if (!reportsList) return;
+                let html = '';
+                if (snapshot.empty) {
+                    html = '<p class="text-center text-gray-500">Tidak ada laporan.</p>';
+                } else {
+                    snapshot.forEach(doc => {
+                        const report = doc.data();
+                        const timestamp = report.timestamp ? new Date(report.timestamp.seconds * 1000).toLocaleString() : 'Baru saja';
+                        html += `
+                            <div class="card p-4">
+                                <p class="font-bold text-red-700">Laporan dari ${report.username}</p>
+                                <p class="text-sm text-gray-600 mt-1">${report.issue}</p>
+                                <p class="text-xs text-gray-400 mt-1">Game ID: ${report.gameId}</p>
+                                <p class="text-xs text-gray-400">${timestamp}</p>
+                            </div>
+                        `;
+                    });
+                }
+                reportsList.innerHTML = html;
+            });
+        }
+
+        // --- MAIN LOGIC AND EVENT LISTENERS ---
+        
+        // Main function to run when the page loads
+        window.onload = async () => {
+            try {
+                // Initialize Firebase
+                firebase.initializeApp(firebaseConfig);
+                auth = firebase.auth();
+                db = firebase.firestore();
+                
+                // Set up real-time listener for maintenance mode
+                db.collection('app_status').doc('maintenance').onSnapshot(doc => {
+                    if (doc.exists) {
+                        maintenanceMode = doc.data().active;
+                    }
+                });
+
+                // Set up auth state listener
+                auth.onAuthStateChanged(async (user) => {
+                    if (user) {
+                        // User is signed in.
+                        currentUser = user;
+                        // Fetch user data from Firestore
+                        const userDoc = await db.collection('users').doc(user.uid).get();
+                        if (userDoc.exists) {
+                            const userData = userDoc.data();
+                            currentUser = { ...user, ...userData };
+                            isAdmin = currentUser.email === adminEmail;
+
+                            // Check for ban/kick
+                            if (userData.isBanned) {
+                                await auth.signOut();
+                                showMessage('Akun Diblokir', 'Akun Anda telah diblokir oleh admin.');
+                                return;
+                            }
+                            if (userData.isKicked) {
+                                await db.collection('users').doc(user.uid).update({ isKicked: false });
+                                await auth.signOut();
+                                showMessage('Anda Ditendang', 'Anda telah ditendang dari sesi oleh admin. Silakan masuk kembali.');
+                                return;
+                            }
+                        }
+
+                        // Update UI for logged-in user
+                        authControls.classList.add('hidden');
+                        userControls.classList.remove('hidden');
+                        document.getElementById('username-display').textContent = `Halo, ${currentUser.username}`;
+                        toggleAdminSidebar(isAdmin);
+                        if (isAdmin) {
+                            adminIndicator.classList.remove('hidden');
+                            renderUploadGame(); // Default admin view
+                        } else {
+                            adminIndicator.classList.add('hidden');
+                            renderHomePageWithData(); // Default user view
+                        }
+                    } else {
+                        // User is signed out.
+                        currentUser = null;
+                        isAdmin = false;
+                        authControls.classList.remove('hidden');
+                        userControls.classList.add('hidden');
+                        adminIndicator.classList.add('hidden');
+                        toggleAdminSidebar(false);
+                        renderHomePageWithData(); // Default user view
+                    }
+                    loadingScreen.classList.add('hidden');
+                });
+                
+                // Sign in with custom token if available, otherwise anonymously
+                if (initialAuthToken) {
+                    await auth.signInWithCustomToken(initialAuthToken);
+                } else {
+                    await auth.signInAnonymously();
+                }
+
+            } catch (e) {
+                console.error("Initialization Error: ", e);
+                loadingScreen.classList.add('hidden');
+                showMessage('Error', `Gagal memuat aplikasi. Coba segarkan halaman. Error: ${e.message}`);
+            }
+        };
+
+        // Render home page with real-time data from Firestore
+        function renderHomePageWithData() {
+            db.collection('games').onSnapshot(snapshot => {
+                if (maintenanceMode && !isAdmin) {
+                    mainContent.innerHTML = `
+                        <div class="flex flex-col items-center justify-center p-8 text-center text-gray-700">
+                            <i class="fas fa-tools text-6xl text-blue-500 mb-4 animate-pulse"></i>
+                            <h1 class="text-3xl font-bold mb-2">Situs Sedang Dalam Perbaikan</h1>
+                            <p class="text-lg">Mohon maaf, GameVerse sedang dalam mode maintenance. Kami akan segera kembali!</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const games = [];
+                snapshot.forEach(doc => {
+                    games.push({ id: doc.id, ...doc.data() });
+                });
+                renderHomePage(games);
+            });
+        }
+
+        // --- EVENT LISTENERS FOR UI ELEMENTS ---
+        
+        // Header buttons
+        document.getElementById('btn-login').addEventListener('click', () => renderAuthForm('login'));
+        document.getElementById('btn-register').addEventListener('click', () => renderAuthForm('register'));
+        document.getElementById('btn-profile').addEventListener('click', renderProfileModal);
+        document.getElementById('btn-logout').addEventListener('click', async () => {
+            try {
+                await firebase.auth().signOut();
+                showMessage('Berhasil', 'Anda telah berhasil keluar.');
+            } catch (error) {
+                showMessage('Gagal', `Error: ${error.message}`);
+            }
+        });
+        document.getElementById('main-nav-home').addEventListener('click', () => {
+            renderHomePageWithData();
+        });
+        document.getElementById('logo').addEventListener('click', () => {
+            renderHomePageWithData();
         });
 
-        // Menyembunyikan pesan setelah 5 detik
-        setTimeout(() => {
-            thankYouMessage.style.display = 'none';
-        }, 5000);
-    });
+        // Modal close buttons
+        document.getElementById('close-auth-modal').addEventListener('click', () => hideModal('auth-modal'));
+        document.getElementById('close-profile-modal').addEventListener('click', () => hideModal('profile-modal'));
 
-    // Event listener untuk tombol mode gelap/terang
-    themeSwitchButton.addEventListener('click', () => {
-        body.classList.toggle('light-mode');
-        if (body.classList.contains('light-mode')) {
-            themeSwitchButton.textContent = "Mode Gelap";
-        } else {
-            themeSwitchButton.textContent = "Mode Terang";
-        }
-    });
+        // Admin sidebar navigation
+        document.getElementById('nav-upload-game').addEventListener('click', (e) => { e.preventDefault(); renderUploadGame(); });
+        document.getElementById('nav-manage-games').addEventListener('click', (e) => { e.preventDefault(); renderManageGames(); });
+        document.getElementById('nav-maintenance').addEventListener('click', (e) => { e.preventDefault(); renderMaintenanceMode(); });
+        document.getElementById('nav-player-management').addEventListener('click', (e) => { e.preventDefault(); renderPlayerManagement(); });
+        document.getElementById('nav-comments-reports').addEventListener('click', (e) => { e.preventDefault(); renderCommentsReports(); });
 
-</script>
-
+    </script>
 </body>
 </html>
