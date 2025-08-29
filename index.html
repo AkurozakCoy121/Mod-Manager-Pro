@@ -34,42 +34,88 @@
 </head>
 <body class="flex flex-col min-h-screen">
 
-    <div id="app-container" class="container mx-auto p-4 flex-grow flex items-center justify-center">
-        <!-- Main Container (Home Page) -->
-        <div id="main-ui" class="bg-card p-8 md:p-12 rounded-2xl shadow-xl w-full max-w-2xl text-center transition-all duration-300 transform scale-100 opacity-100 flex flex-col items-center justify-center">
-            <h1 class="text-5xl font-extrabold mb-4 text-primary">The Ultimate Link Shortener</h1>
-            <p class="text-xl text-secondary mb-4 max-w-lg">ShareU helps you shorten your long links into easy-to-share links. It's fast, free, and secure.</p>
-            <p class="text-lg text-secondary mb-8 max-w-lg">Start joining us and enjoy the features we have provided just for you!</p>
+    <!-- Kontainer utama dengan iklan dan konten -->
+    <div class="container mx-auto p-4 flex-grow flex flex-col items-center justify-center">
 
-            <!-- URL Input and Button -->
-            <div class="flex flex-col md:flex-row gap-4 mb-6 w-full">
-                <input type="url" id="long-url-input" placeholder="Enter your long URL here..." class="flex-grow p-4 rounded-xl border border-input bg-card text-white focus:outline-none focus:ring-2 focus:focus-ring-blue transition-all duration-300">
-                <button id="shorten-button" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-8 rounded-xl transition-colors duration-300 whitespace-nowrap">
-                    Create Link
-                </button>
-            </div>
-
-            <!-- Short Link and Copy Button -->
-            <div id="result-container" class="hidden flex flex-col md:flex-row gap-4 items-center justify-center bg-gray-700 p-4 rounded-xl border border-gray-600 w-full">
-                <div id="short-url-output" class="flex-grow text-gray-200 p-2 break-all font-mono text-lg text-left"></div>
-                <button id="copy-button" class="bg-green-500 hover:bg-green-600 text-white py-2 px-6 rounded-lg transition-colors duration-300">
-                    Copy
-                </button>
+        <!-- Placeholder Iklan Google AdSense -->
+        <div class="w-full max-w-4xl text-center mb-8 bg-card p-4 rounded-xl shadow-xl border border-gray-600">
+            <p class="text-sm text-gray-400">Placeholder Iklan Otomatis Google AdSense</p>
+            <div class="h-24 bg-gray-700 rounded mt-2 flex items-center justify-center">
+                <span class="text-gray-500">Iklan di Sini</span>
             </div>
         </div>
 
-        <!-- URL Redirect View with Countdown -->
-        <div id="redirect-ui" class="hidden flex-col items-center justify-center text-center">
-            <h1 class="text-4xl font-bold mb-4 text-primary" id="redirect-title">Creating Download Link</h1>
-            <p class="text-lg text-secondary mb-4" id="redirect-message">Please wait for 15 seconds...</p>
-            <div id="redirect-countdown" class="text-6xl font-bold text-blue-600 my-4">15</div>
-            <button id="download-button" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-4 px-8 rounded-xl transition-colors duration-300 hidden mt-4">
-                Download Now
-            </button>
-        </div>
+        <!-- Konten Utama dan Blog -->
+        <div class="flex flex-col lg:flex-row w-full max-w-4xl gap-8">
+            <!-- Konten Utama (Pemendek Tautan) -->
+            <div id="main-ui" class="bg-card p-8 md:p-12 rounded-2xl shadow-xl w-full text-center transition-all duration-300 transform scale-100 opacity-100 flex-grow flex flex-col items-center justify-center">
+                <h1 class="text-5xl font-extrabold mb-4 text-primary">The Ultimate Link Shortener</h1>
+                <p class="text-xl text-secondary mb-4 max-w-lg">ShareU helps you shorten your long links into easy-to-share links. It's fast, free, and secure.</p>
+                <p class="text-lg text-secondary mb-8 max-w-lg">Start joining us and enjoy the features we have provided just for you!</p>
 
+                <!-- URL Input and Button -->
+                <div class="flex flex-col md:flex-row gap-4 mb-6 w-full">
+                    <input type="url" id="long-url-input" placeholder="Enter your long URL here..." class="flex-grow p-4 rounded-xl border border-input bg-card text-white focus:outline-none focus:ring-2 focus:focus-ring-blue transition-all duration-300">
+                    <button id="shorten-button" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-8 rounded-xl transition-colors duration-300 whitespace-nowrap">
+                        Create Link
+                    </button>
+                </div>
+
+                <!-- Short Link and Copy Button -->
+                <div id="result-container" class="hidden flex flex-col md:flex-row gap-4 items-center justify-center bg-gray-700 p-4 rounded-xl border border-gray-600 w-full">
+                    <div id="short-url-output" class="flex-grow text-gray-200 p-2 break-all font-mono text-lg text-left"></div>
+                    <button id="copy-button" class="bg-green-500 hover:bg-green-600 text-white py-2 px-6 rounded-lg transition-colors duration-300">
+                        Copy
+                    </button>
+                </div>
+            </div>
+
+            <!-- Riwayat Link & Breaking News -->
+            <div class="w-full lg:w-1/3 flex flex-col gap-8">
+                <!-- Blog Breaking News -->
+                <div class="bg-card p-6 rounded-2xl shadow-xl">
+                    <h2 class="text-2xl font-bold mb-4 text-primary">Breaking News</h2>
+                    <div id="news-list" class="flex flex-col gap-4">
+                        <div class="p-3 bg-gray-700 rounded-lg">
+                            <h3 class="font-semibold text-lg text-white">Gemini Meluncurkan Versi Terbaru</h3>
+                            <p class="text-sm text-gray-400">Google mengumumkan versi terbaru model bahasa mereka, menjanjikan peningkatan performa dan efisiensi.</p>
+                            <a href="#" class="text-blue-400 text-sm mt-1 inline-block hover:underline">Baca Selengkapnya</a>
+                        </div>
+                        <div class="p-3 bg-gray-700 rounded-lg">
+                            <h3 class="font-semibold text-lg text-white">Peluncuran Smartphone Baru</h3>
+                            <p class="text-sm text-gray-400">Perusahaan teknologi terkemuka meluncurkan produk andalan terbarunya dengan fitur-fitur inovatif.</p>
+                            <a href="#" class="text-blue-400 text-sm mt-1 inline-block hover:underline">Baca Selengkapnya</a>
+                        </div>
+                        <div class="p-3 bg-gray-700 rounded-lg">
+                            <h3 class="font-semibold text-lg text-white">Tren AI dalam Kehidupan Sehari-hari</h3>
+                            <p class="text-sm text-gray-400">Analisis mendalam tentang bagaimana kecerdasan buatan mulai terintegrasi dalam berbagai aspek kehidupan kita.</p>
+                            <a href="#" class="text-blue-400 text-sm mt-1 inline-block hover:underline">Baca Selengkapnya</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Riwayat Link -->
+                <div class="bg-card p-6 rounded-2xl shadow-xl">
+                    <h2 class="text-2xl font-bold mb-4 text-primary">Link History</h2>
+                    <ul id="history-list" class="flex flex-col gap-3">
+                        <!-- Link history will be populated here -->
+                    </ul>
+                </div>
+            </div>
+
+        </div>
     </div>
     
+    <!-- URL Redirect View with Countdown -->
+    <div id="redirect-ui" class="hidden fixed inset-0 flex-col items-center justify-center text-center bg-gray-900 bg-opacity-90 z-50">
+        <h1 class="text-4xl font-bold mb-4 text-primary" id="redirect-title">Creating Download Link</h1>
+        <p class="text-lg text-secondary mb-4" id="redirect-message">Please wait for 15 seconds...</p>
+        <div id="redirect-countdown" class="text-6xl font-bold text-blue-600 my-4">15</div>
+        <button id="go-link-button" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-4 px-8 rounded-xl transition-colors duration-300 hidden mt-4">
+            Go Link
+        </button>
+    </div>
+
     <!-- Custom Message Box -->
     <div id="message-box" class="fixed bottom-4 right-4 bg-gray-800 text-white p-4 rounded-lg shadow-lg z-50 transform translate-y-full opacity-0 transition-all duration-500 ease-in-out">
         <p id="message-text"></p>
@@ -78,10 +124,10 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDocs, collection, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDocs, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
-
+        
         // Atur level log untuk debugging
         setLogLevel('debug');
 
@@ -92,7 +138,6 @@
         let authReady = false;
         
         // --- Konfigurasi Firebase ---
-        // Menggunakan konfigurasi yang Anda berikan.
         const firebaseConfig = {
             apiKey: "AIzaSyAlGXpZSyQab7riDteV5ppS3DXDJQHywKw",
             authDomain: "modmanagerpro-248f5.firebaseapp.com",
@@ -115,12 +160,13 @@
         const copyButton = document.getElementById('copy-button');
         const messageBox = document.getElementById('message-box');
         const messageText = document.getElementById('message-text');
+        const historyList = document.getElementById('history-list');
 
         // Elemen UI baru untuk alur pengalihan
         const redirectTitle = document.getElementById('redirect-title');
         const redirectMessage = document.getElementById('redirect-message');
         const redirectCountdown = document.getElementById('redirect-countdown');
-        const downloadButton = document.getElementById('download-button');
+        const goLinkButton = document.getElementById('go-link-button');
 
         // --- Fungsi Utilitas ---
         function showMessage(text) {
@@ -147,40 +193,101 @@
         }
 
         // --- Inisialisasi Firebase ---
-        if (firebaseConfig && firebaseConfig.projectId) {
+        try {
             app = initializeApp(firebaseConfig);
             db = getFirestore(app);
             auth = getAuth(app);
             const analytics = getAnalytics(app);
-            
-            // Pasang listener autentikasi hanya jika Firebase berhasil diinisialisasi
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    userId = user.uid;
-                    authReady = true;
-                    handleUrlPath();
-                } else {
-                    try {
-                        // Coba masuk dengan token kustom terlebih dahulu
-                        if (initialAuthToken) {
-                            await signInWithCustomToken(auth, initialAuthToken);
-                            console.log("Signed in with custom token.");
-                        } else {
-                            // Jika tidak ada token kustom, masuk secara anonim
-                            await signInAnonymously(auth);
-                            console.log("Signed in anonymously.");
-                        }
-                    } catch (error) {
-                        console.error("Failed to sign in:", error);
-                        showMessage("Failed to sign in. Please try again later.");
-                    }
-                }
-            });
 
-        } else {
-            console.error("Firebase configuration is invalid. Cannot initialize Firebase.");
+            // Perbaiki alur otentikasi
+            if (initialAuthToken) {
+                signInWithCustomToken(auth, initialAuthToken)
+                    .then(() => {
+                        console.log("Signed in with custom token.");
+                        onAuthStateChanged(auth, (user) => {
+                            if (user) {
+                                userId = user.uid;
+                                authReady = true;
+                                console.log("Signed in. User ID:", userId);
+                                handleUrlPath();
+                                setupRealtimeHistory();
+                            }
+                        });
+                    })
+                    .catch(error => {
+                        console.error("Failed to sign in with custom token:", error);
+                        signInAnonymously(auth)
+                            .then(() => {
+                                console.log("Signed in anonymously instead.");
+                                onAuthStateChanged(auth, (user) => {
+                                    if (user) {
+                                        userId = user.uid;
+                                        authReady = true;
+                                        console.log("Signed in. User ID:", userId);
+                                        handleUrlPath();
+                                        setupRealtimeHistory();
+                                    }
+                                });
+                            })
+                            .catch(anonError => {
+                                console.error("Failed to sign in anonymously:", anonError);
+                                showMessage("Failed to sign in. Please try again later.");
+                            });
+                    });
+            } else {
+                signInAnonymously(auth)
+                    .then(() => {
+                        console.log("Signed in anonymously.");
+                        onAuthStateChanged(auth, (user) => {
+                            if (user) {
+                                userId = user.uid;
+                                authReady = true;
+                                console.log("Signed in. User ID:", userId);
+                                handleUrlPath();
+                                setupRealtimeHistory();
+                            }
+                        });
+                    })
+                    .catch(anonError => {
+                        console.error("Failed to sign in anonymously:", anonError);
+                        showMessage("Failed to sign in. Please try again later.");
+                    });
+            }
+        } catch (e) {
+            console.error("Firebase initialization failed:", e);
             showMessage("Maaf, aplikasi tidak dapat terhubung. Silakan coba lagi nanti.");
         }
+
+        // --- Fungsi Riwayat Tautan ---
+        function setupRealtimeHistory() {
+            const linksCollection = collection(db, `artifacts/${appId}/public/data/short_urls`);
+            const q = query(linksCollection);
+
+            onSnapshot(q, (snapshot) => {
+                historyList.innerHTML = ''; // Clear existing list
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const fullShortUrl = `https://${window.location.hostname}/${data.shortCode}`;
+                    const listItem = document.createElement('li');
+                    listItem.className = "bg-gray-700 p-3 rounded-lg flex flex-col sm:flex-row justify-between items-center break-all";
+                    listItem.innerHTML = `
+                        <div class="flex flex-col text-left">
+                            <span class="text-sm text-gray-400">Tautan Asli:</span>
+                            <a href="${data.longUrl}" target="_blank" class="text-white text-sm hover:underline">${data.longUrl}</a>
+                        </div>
+                        <div class="flex flex-col text-right mt-2 sm:mt-0">
+                            <span class="text-sm text-gray-400">Tautan Pendek:</span>
+                            <a href="${fullShortUrl}" target="_blank" class="text-blue-400 font-mono hover:underline">${fullShortUrl}</a>
+                        </div>
+                    `;
+                    historyList.appendChild(listItem);
+                });
+            }, (error) => {
+                console.error("Error fetching link history: ", error);
+                showMessage("Gagal memuat riwayat tautan.");
+            });
+        }
+
 
         async function handleUrlPath() {
             if (!authReady) {
@@ -222,20 +329,20 @@
         }
 
         function startRedirectFlow(longUrl) {
-            redirectTitle.textContent = "Creating Download Link";
-            redirectMessage.textContent = "Please wait for 15 seconds...";
-            downloadButton.classList.add('hidden');
+            redirectTitle.textContent = "Sedang Membuat Tautan";
+            redirectMessage.textContent = "Mohon tunggu 15 detik...";
+            goLinkButton.classList.add('hidden');
 
             startCountdown(15, () => {}, () => {
-                redirectTitle.textContent = "Download Link Ready!";
-                redirectMessage.textContent = "Please click the button below to continue.";
-                downloadButton.classList.remove('hidden');
+                redirectTitle.textContent = "Tautan Siap!";
+                redirectMessage.textContent = "Silakan klik tombol di bawah untuk melanjutkan.";
+                goLinkButton.classList.remove('hidden');
             });
 
-            downloadButton.onclick = () => {
-                redirectTitle.textContent = "Confirming Download Link";
-                redirectMessage.textContent = "Please wait for 15 seconds...";
-                downloadButton.classList.add('hidden');
+            goLinkButton.onclick = () => {
+                redirectTitle.textContent = "Mengkonfirmasi Tautan";
+                redirectMessage.textContent = "Mohon tunggu 15 detik...";
+                goLinkButton.classList.add('hidden');
 
                 startCountdown(15, () => {}, () => {
                     window.location.href = longUrl;
