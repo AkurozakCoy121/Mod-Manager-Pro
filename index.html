@@ -15,6 +15,9 @@
             background-color: #f3f4f6;
             color: #1f2937;
         }
+        .modal {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
     </style>
 </head>
 <body class="flex flex-col min-h-screen">
@@ -51,6 +54,18 @@
             <p class="text-lg text-gray-600 mb-8">Please wait, you will be redirected to the destination.</p>
             <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
         </div>
+
+        <!-- Pop-up Download -->
+        <div id="download-ui" class="hidden flex flex-col items-center justify-center text-center">
+            <h1 class="text-2xl font-bold mb-2 text-gray-800">Link Download Siap!</h1>
+            <p class="text-gray-600 mb-4">Link Anda telah dibuat. Silakan klik tombol di bawah untuk melanjutkan.</p>
+            <div id="final-link-container" class="bg-gray-100 p-4 rounded-xl border border-gray-200 w-full max-w-md mb-4 break-all">
+                <span id="final-short-url" class="font-mono text-lg text-gray-700"></span>
+            </div>
+            <button id="download-button" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-4 px-8 rounded-xl transition-colors duration-300">
+                Download Sekarang
+            </button>
+        </div>
     </div>
     
     <!-- Custom Message Box -->
@@ -58,10 +73,19 @@
         <p id="message-text"></p>
     </div>
 
+    <!-- Countdown Modal -->
+    <div id="countdown-modal" class="modal fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4" id="modal-title"></h2>
+            <div class="text-6xl font-bold text-blue-600 mb-4" id="modal-countdown">15</div>
+            <p class="text-lg text-gray-600" id="modal-message"></p>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, getDocs, collection, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDocs, collection, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
         // Set log level for debugging
@@ -77,7 +101,7 @@
             appId: "1:594650288669:web:3308b084911e2ef7f1ecf4",
             measurementId: "G-TE9234E3LP"
         };
-        const customAppId = "modmanagerpro-248f5"; // Using your project ID as a custom app ID
+        const customAppId = "modmanagerpro-248f5";
         
         // --- Firebase Initialization ---
         const app = initializeApp(firebaseConfig);
@@ -85,8 +109,8 @@
         const auth = getAuth(app);
 
         let userId = null;
-        let isAuthReady = false;
 
+        // --- UI Elements ---
         const mainUI = document.getElementById('main-ui');
         const redirectUI = document.getElementById('redirect-ui');
         const longUrlInput = document.getElementById('long-url-input');
@@ -98,7 +122,16 @@
         const messageBox = document.getElementById('message-box');
         const messageText = document.getElementById('message-text');
 
-        // Function to show a temporary message
+        // New UI Elements for the download flow
+        const downloadUI = document.getElementById('download-ui');
+        const downloadButton = document.getElementById('download-button');
+        const finalShortUrlSpan = document.getElementById('final-short-url');
+        const countdownModal = document.getElementById('countdown-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalCountdown = document.getElementById('modal-countdown');
+        const modalMessage = document.getElementById('modal-message');
+
+        // --- Utility Functions ---
         function showMessage(text) {
             messageText.textContent = text;
             messageBox.classList.remove('translate-y-full', 'opacity-0');
@@ -109,33 +142,37 @@
             }, 3000);
         }
 
+        function startCountdown(duration, onTick, onComplete) {
+            let timer = duration;
+            const interval = setInterval(() => {
+                timer--;
+                onTick(timer);
+                if (timer <= 0) {
+                    clearInterval(interval);
+                    onComplete();
+                }
+            }, 1000);
+        }
+
         // --- Authentication and URL Logic ---
-        // Handle authentication
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 userId = user.uid;
             } else {
                 await signInAnonymously(auth);
-                console.log("Logging in anonymously.");
             }
             userIdSpan.textContent = userId;
-            isAuthReady = true;
-
-            // Call the redirect logic after authentication is ready
             handleUrlPath();
         });
 
-        // Handle URL path for redirection
         async function handleUrlPath() {
-            const path = window.location.pathname.substring(1); // Remove leading '/'
+            const path = window.location.pathname.substring(1);
             if (path && path.length > 0) {
-                // Hide main UI and show redirect UI
                 mainUI.classList.add('hidden');
                 redirectUI.classList.remove('hidden');
                 redirectUI.classList.add('flex');
 
                 try {
-                    // Query Firestore for the link
                     const linksCollection = collection(db, `artifacts/${customAppId}/public/data/short_urls`);
                     const q = query(linksCollection, where('shortCode', '==', path));
                     const querySnapshot = await getDocs(q);
@@ -144,23 +181,18 @@
                         const docData = querySnapshot.docs[0].data();
                         const longUrl = docData.longUrl;
                         if (longUrl) {
-                            // Redirect to the long URL
                             window.location.href = longUrl;
                         } else {
-                            // Link found but no URL, redirect to home
                             window.location.href = window.location.origin;
                         }
                     } else {
-                        // No matching link, redirect to home
                         window.location.href = window.location.origin;
                     }
                 } catch (e) {
                     console.error("Error fetching document: ", e);
-                    // On error, also redirect to home
                     window.location.href = window.location.origin;
                 }
             } else {
-                // Show the main UI for the home page
                 mainUI.classList.remove('hidden');
                 mainUI.classList.add('flex');
                 redirectUI.classList.add('hidden');
@@ -171,19 +203,19 @@
         shortenButton.addEventListener('click', async () => {
             const longUrl = longUrlInput.value.trim();
             if (!longUrl) {
-                showMessage("Please enter a valid URL.");
+                showMessage("Mohon masukkan URL yang valid.");
                 return;
             }
-
-            // Ensure URL has a protocol
+            
+            shortenButton.disabled = true;
+            showMessage("Membuat tautan, mohon tunggu...");
+            
             const urlWithProtocol = longUrl.startsWith('http://') || longUrl.startsWith('https://') ? longUrl : `https://${longUrl}`;
             
             try {
-                // Create a random short code
-                const shortCode = Math.random().toString(36).substring(2, 8); // 6 character random code
+                const shortCode = Math.random().toString(36).substring(2, 8);
                 const linksCollection = collection(db, `artifacts/${customAppId}/public/data/short_urls`);
-
-                // Save URL in Firestore
+                
                 await setDoc(doc(linksCollection, shortCode), {
                     longUrl: urlWithProtocol,
                     shortCode: shortCode,
@@ -191,28 +223,60 @@
                     createdBy: userId
                 });
                 
-                const fullShortUrl = `https://${window.location.hostname}/${shortCode}`;
-                shortUrlOutput.textContent = fullShortUrl;
-                resultContainer.classList.remove('hidden');
-                showMessage("Link created successfully!");
+                // Start the new flow
+                startNewLinkFlow(urlWithProtocol, shortCode);
 
             } catch (e) {
                 console.error("Error adding document: ", e);
-                showMessage("Failed to create link. Please try again.");
+                showMessage("Gagal membuat tautan. Silakan coba lagi.");
+                shortenButton.disabled = false;
             }
         });
 
+        // --- New Link Generation and Download Flow ---
+        function startNewLinkFlow(longUrl, shortCode) {
+            mainUI.classList.add('hidden');
+            countdownModal.classList.remove('hidden');
+            modalTitle.textContent = "Membuat Tautan Download";
+            modalMessage.textContent = "Mohon tunggu selama 15 detik...";
+            
+            startCountdown(15, (timer) => {
+                modalCountdown.textContent = timer;
+            }, () => {
+                countdownModal.classList.add('hidden');
+                downloadUI.classList.remove('hidden');
+                const fullShortUrl = `https://${window.location.hostname}/${shortCode}`;
+                finalShortUrlSpan.textContent = fullShortUrl;
+                longUrlInput.value = ""; // Clear the input
+                showMessage("Tautan siap! Silakan klik 'Download Sekarang'");
+                
+                // Add click listener for the final download button
+                downloadButton.addEventListener('click', () => {
+                    downloadUI.classList.add('hidden');
+                    countdownModal.classList.remove('hidden');
+                    modalTitle.textContent = "Mengonfirmasi Link Download";
+                    modalMessage.textContent = "Mohon tunggu selama 15 detik...";
+                    
+                    startCountdown(15, (timer) => {
+                        modalCountdown.textContent = timer;
+                    }, () => {
+                        // Final redirect
+                        window.location.href = longUrl;
+                    });
+                });
+            });
+        }
+        
         // --- Copy Link Logic ---
         copyButton.addEventListener('click', () => {
             const urlToCopy = shortUrlOutput.textContent;
-            // Use document.execCommand for better browser support in iframes
             const tempInput = document.createElement('textarea');
             tempInput.value = urlToCopy;
             document.body.appendChild(tempInput);
             tempInput.select();
             document.execCommand('copy');
             document.body.removeChild(tempInput);
-            showMessage("Link copied to clipboard!");
+            showMessage("Tautan berhasil disalin!");
         });
     </script>
 </body>
