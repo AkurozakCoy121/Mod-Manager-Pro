@@ -43,16 +43,28 @@
 
         <!-- Main Content (Link Shortener) -->
         <div class="bg-card p-8 md:p-12 rounded-2xl shadow-xl w-full max-w-2xl text-center transition-all duration-300 transform scale-100 opacity-100 flex flex-col items-center">
-            <h1 class="text-5xl font-extrabold mb-4 text-primary">ShareU Link Shortener</h1>
+            <h1 class="text-5xl font-extrabold mb-4 text-primary">The Ultimate Link Shortener</h1>
             <p class="text-xl text-secondary mb-4 max-w-lg">ShareU helps you shorten your long links into easy-to-share links. It's fast, free, and secure.</p>
             <p class="text-lg text-secondary mb-8 max-w-lg">Start joining us and enjoy the features we have provided just for you!</p>
 
             <!-- URL Input and Button -->
-            <div class="flex flex-col md:flex-row gap-4 mb-6 w-full">
+            <div class="flex flex-col md:flex-row gap-4 mb-4 w-full">
                 <input type="url" id="long-url-input" placeholder="Enter your long URL here..." class="flex-grow p-4 rounded-xl border border-input bg-card text-white focus:outline-none focus:ring-2 focus:focus-ring-blue transition-all duration-300">
                 <button id="shorten-button" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-8 rounded-xl transition-colors duration-300 whitespace-nowrap">
                     Create Link
                 </button>
+            </div>
+            
+            <!-- New Features Inputs -->
+            <div class="flex flex-col md:flex-row gap-4 mb-6 w-full">
+                <input type="text" id="custom-alias-input" placeholder="Enter a custom alias (optional)..." class="flex-grow p-4 rounded-xl border border-input bg-card text-white focus:outline-none focus:ring-2 focus:focus-ring-blue transition-all duration-300">
+                <select id="expiry-select" class="p-4 rounded-xl border border-input bg-card text-white focus:outline-none focus:ring-2 focus:focus-ring-blue transition-all duration-300">
+                    <option value="forever">Selamanya</option>
+                    <option value="1h">1 Jam</option>
+                    <option value="24h">24 Jam</option>
+                    <option value="7d">1 Minggu</option>
+                    <option value="30d">1 Bulan</option>
+                </select>
             </div>
 
             <!-- Short Link and Copy Button -->
@@ -68,7 +80,7 @@
         <div class="bg-card p-8 md:p-12 rounded-2xl shadow-xl w-full max-w-2xl mt-8">
             <h2 class="text-3xl font-bold mb-4 text-primary text-center">About This Web</h2>
             <p class="text-secondary text-center mb-4">This website is designed for educational purposes to demonstrate link shortening technology and its core functionalities, including user authentication and data storage using Firebase. It also showcases how to implement dynamic content and a basic security warning system for URLs.</p>
-            <p class="text-secondary text-center">Created by: Rozak</p>
+            <p class="text-secondary text-center">Created by: Gemini AI</p>
         </div>
 
         <!-- Link History Section -->
@@ -171,10 +183,19 @@
         </div>
     </div>
 
+    <!-- Expired Link Modal -->
+    <div id="expired-modal" class="modal hidden fixed inset-0 flex items-center justify-center z-50 p-4">
+        <div class="bg-red-800 p-6 rounded-2xl shadow-xl text-center">
+            <h2 class="text-2xl font-bold mb-4 text-white">Tautan Ini Telah Kedaluwarsa</h2>
+            <p class="text-sm text-red-200 mt-2">Maaf, tautan pendek yang Anda kunjungi tidak lagi aktif.</p>
+            <button id="close-expired-button" class="mt-6 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors duration-300">Kembali ke Beranda</button>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDocs, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, query, where, onSnapshot, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
         
@@ -205,6 +226,8 @@
         const warningUI = document.getElementById('warning-ui');
         const longUrlInput = document.getElementById('long-url-input');
         const shortenButton = document.getElementById('shorten-button');
+        const customAliasInput = document.getElementById('custom-alias-input');
+        const expirySelect = document.getElementById('expiry-select');
         const resultContainer = document.getElementById('result-container');
         const shortUrlOutput = document.getElementById('short-url-output');
         const copyButton = document.getElementById('copy-button');
@@ -219,6 +242,9 @@
         const qrModal = document.getElementById('qr-modal');
         const qrcodeContainer = document.getElementById('qrcode-container');
         const closeQrButton = document.getElementById('close-qr-button');
+        const expiredModal = document.getElementById('expired-modal');
+        const closeExpiredButton = document.getElementById('close-expired-button');
+
 
         // --- Utility Functions ---
         function showMessage(text) {
@@ -245,33 +271,32 @@
         }
 
         // --- Firebase Initialization ---
-        try {
-            app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            auth = getAuth(app);
-            const analytics = getAnalytics(app);
-
-            // Handle authentication
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    userId = user.uid;
-                    authReady = true;
-                    console.log("Signed in. User ID:", userId);
-                    handleUrlPath();
-                    setupRealtimeHistory();
+        async function initializeFirebase() {
+            try {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
                 } else {
-                    try {
-                        await signInAnonymously(auth);
-                    } catch (error) {
-                        console.error("Failed to sign in anonymously:", error);
-                        showMessage("Failed to sign in. Please try again later.");
-                    }
+                    await signInAnonymously(auth);
                 }
-            });
-        } catch (e) {
-            console.error("Firebase initialization failed:", e);
-            showMessage("Sorry, the application could not connect. Please try again later.");
+
+                userId = auth.currentUser.uid;
+                authReady = true;
+                console.log("Berhasil masuk. User ID:", userId);
+                
+                handleUrlPath();
+                setupRealtimeHistory();
+                
+            } catch (error) {
+                console.error("Gagal terhubung ke Firebase:", error);
+                showMessage("Gagal terhubung. Silakan coba lagi nanti.");
+            }
         }
+        
+        initializeFirebase();
 
         // --- Demo Blacklist for Warning System ---
         const blockedSites = [
@@ -281,24 +306,34 @@
         
         // --- Link History Functionality ---
         function setupRealtimeHistory() {
+            if (!userId) {
+                return;
+            }
             const linksCollection = collection(db, `artifacts/${appId}/public/data/short_urls`);
             const q = query(linksCollection, where('createdBy', '==', userId));
 
             onSnapshot(q, (snapshot) => {
-                historyList.innerHTML = ''; // Clear existing list
+                historyList.innerHTML = '';
                 snapshot.forEach((doc) => {
                     const data = doc.data();
                     const fullShortUrl = `https://${window.location.hostname}/${data.shortCode}`;
                     const listItem = document.createElement('li');
+                    
+                    const expiresText = data.expiresAt ? new Date(data.expiresAt.toDate()).toLocaleString() : 'Selamanya';
+                    const clicksText = data.clicks !== undefined ? `${data.clicks} Klik` : '0 Klik';
+
                     listItem.className = "bg-gray-700 p-3 rounded-lg flex flex-col sm:flex-row justify-between items-center break-all";
                     listItem.innerHTML = `
-                        <div class="flex flex-col text-left">
-                            <span class="text-sm text-gray-400">Original Link:</span>
+                        <div class="flex-1 flex flex-col text-left">
+                            <span class="text-sm text-gray-400">Original:</span>
                             <a href="${data.longUrl}" target="_blank" class="text-white text-sm hover:underline">${data.longUrl}</a>
+                            <span class="text-sm text-gray-400 mt-2">Kedaluwarsa:</span>
+                            <span class="text-white text-sm">${expiresText}</span>
                         </div>
                         <div class="flex flex-col text-right mt-2 sm:mt-0 items-end gap-2">
-                            <span class="text-sm text-gray-400">Short Link:</span>
+                            <span class="text-sm text-gray-400">Tautan Pendek:</span>
                             <a href="${fullShortUrl}" target="_blank" class="text-blue-400 font-mono hover:underline">${fullShortUrl}</a>
+                            <span class="text-sm font-semibold text-white mt-1">${clicksText}</span>
                             <button class="bg-gray-600 hover:bg-gray-500 text-white font-semibold py-1 px-3 rounded-lg text-xs transition-colors duration-300 create-qr-button" data-link="${fullShortUrl}">
                                 Buat QR
                             </button>
@@ -306,7 +341,6 @@
                     `;
                     historyList.appendChild(listItem);
                 });
-                // Add event listeners for QR buttons
                 document.querySelectorAll('.create-qr-button').forEach(button => {
                     button.addEventListener('click', (e) => {
                         const link = e.target.dataset.link;
@@ -314,14 +348,14 @@
                     });
                 });
             }, (error) => {
-                console.error("Error fetching link history: ", error);
-                showMessage("Failed to load link history.");
+                console.error("Kesalahan saat mengambil riwayat tautan: ", error);
+                showMessage("Gagal memuat riwayat tautan.");
             });
         }
         
         // --- QR Code Modal Logic ---
         function showQrModal(url) {
-            qrcodeContainer.innerHTML = ''; // Clear previous QR code
+            qrcodeContainer.innerHTML = '';
             new QRCode(qrcodeContainer, {
                 text: url,
                 width: 200,
@@ -349,11 +383,35 @@
                 
                 try {
                     const linksCollection = collection(db, `artifacts/${appId}/public/data/short_urls`);
-                    const q = query(linksCollection, where('shortCode', '==', path));
-                    const querySnapshot = await getDocs(q);
+                    const docRef = doc(linksCollection, path);
+                    const docSnap = await getDoc(docRef);
 
-                    if (!querySnapshot.empty) {
-                        const docData = querySnapshot.docs[0].data();
+                    if (docSnap.exists()) {
+                        const docData = docSnap.data();
+                        
+                        // Check for expiration
+                        const expiresAt = docData.expiresAt ? docData.expiresAt.toDate() : null;
+                        if (expiresAt && expiresAt < new Date()) {
+                            expiredModal.classList.remove('hidden');
+                            closeExpiredButton.onclick = () => { window.location.href = window.location.origin; };
+                            return; // Stop execution
+                        }
+
+                        // Increment click count using a transaction for safety
+                        try {
+                            await runTransaction(db, async (transaction) => {
+                                const sfDoc = await transaction.get(docRef);
+                                if (!sfDoc.exists()) {
+                                    throw "Document does not exist!";
+                                }
+                                const newClicks = (sfDoc.data().clicks || 0) + 1;
+                                transaction.update(docRef, { clicks: newClicks });
+                            });
+                            console.log("Click count successfully updated!");
+                        } catch (e) {
+                            console.error("Transaction failed: ", e);
+                        }
+
                         const longUrl = docData.longUrl;
                         if (longUrl) {
                             const urlHost = new URL(longUrl).hostname;
@@ -371,7 +429,7 @@
                         window.location.href = window.location.origin;
                     }
                 } catch (e) {
-                    console.error("Error fetching document: ", e);
+                    console.error("Kesalahan saat mengambil dokumen: ", e);
                     window.location.href = window.location.origin;
                 }
             } else {
@@ -424,29 +482,66 @@
         // --- Link Shortener Logic ---
         shortenButton.addEventListener('click', async () => {
             if (!authReady) {
-                showMessage("App is loading, please wait a moment.");
+                showMessage("Aplikasi sedang memuat, harap tunggu sebentar.");
                 return;
             }
             const longUrl = longUrlInput.value.trim();
+            const customAlias = customAliasInput.value.trim();
+            const expiryValue = expirySelect.value;
+
             if (!longUrl) {
-                showMessage("Please enter a valid URL.");
+                showMessage("Silakan masukkan URL yang valid.");
                 return;
             }
             
+            // Determine short code based on custom alias or generate random one
+            const shortCode = customAlias || Math.random().toString(36).substring(2, 8);
+            
             shortenButton.disabled = true;
-            showMessage("Creating link, please wait...");
+            showMessage("Membuat tautan, harap tunggu...");
             
             const urlWithProtocol = longUrl.startsWith('http://') || longUrl.startsWith('https://') ? longUrl : `https://${longUrl}`;
             
             try {
-                const shortCode = Math.random().toString(36).substring(2, 8);
                 const linksCollection = collection(db, `artifacts/${appId}/public/data/short_urls`);
+                const docRef = doc(linksCollection, shortCode);
+                const docSnap = await getDoc(docRef);
+
+                // Check if custom alias already exists
+                if (docSnap.exists() && customAlias) {
+                    showMessage("Alias kustom sudah ada. Silakan pilih yang lain.");
+                    shortenButton.disabled = false;
+                    return;
+                }
+
+                // Calculate expiry date
+                let expiresAt = null;
+                if (expiryValue !== 'forever') {
+                    const now = new Date();
+                    switch (expiryValue) {
+                        case '1h':
+                            now.setHours(now.getHours() + 1);
+                            break;
+                        case '24h':
+                            now.setDate(now.getDate() + 1);
+                            break;
+                        case '7d':
+                            now.setDate(now.getDate() + 7);
+                            break;
+                        case '30d':
+                            now.setDate(now.getDate() + 30);
+                            break;
+                    }
+                    expiresAt = now;
+                }
                 
-                await setDoc(doc(linksCollection, shortCode), {
+                await setDoc(docRef, {
                     longUrl: urlWithProtocol,
                     shortCode: shortCode,
                     createdAt: new Date(),
-                    createdBy: userId
+                    createdBy: userId,
+                    clicks: 0, // Initial click count
+                    expiresAt: expiresAt,
                 });
                 
                 const fullShortUrl = `https://${window.location.hostname}/${shortCode}`;
@@ -455,12 +550,13 @@
                 resultContainer.classList.add('flex');
                 
                 longUrlInput.value = "";
+                customAliasInput.value = "";
                 shortenButton.disabled = false;
-                showMessage("Link successfully created!");
+                showMessage("Tautan berhasil dibuat!");
 
             } catch (e) {
-                console.error("Error adding document: ", e);
-                showMessage("Failed to create link. Please try again.");
+                console.error("Kesalahan saat menambahkan dokumen: ", e);
+                showMessage("Gagal membuat tautan. Silakan coba lagi.");
                 shortenButton.disabled = false;
             }
         });
@@ -473,7 +569,7 @@
             document.body.appendChild(tempInput);
             document.execCommand('copy');
             document.body.removeChild(tempInput);
-            showMessage("Link copied!");
+            showMessage("Tautan disalin!");
         });
 
     </script>
