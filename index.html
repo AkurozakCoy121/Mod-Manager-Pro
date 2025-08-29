@@ -56,16 +56,8 @@
         </div>
 
         <!-- Pop-up Download -->
-        <div id="download-ui" class="hidden flex flex-col items-center justify-center text-center">
-            <h1 class="text-2xl font-bold mb-2 text-gray-800">Link Download Siap!</h1>
-            <p class="text-gray-600 mb-4">Link Anda telah dibuat. Silakan klik tombol di bawah untuk melanjutkan.</p>
-            <div id="final-link-container" class="bg-gray-100 p-4 rounded-xl border border-gray-200 w-full max-w-md mb-4 break-all">
-                <span id="final-short-url" class="font-mono text-lg text-gray-700"></span>
-            </div>
-            <button id="download-button" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-4 px-8 rounded-xl transition-colors duration-300">
-                Download Sekarang
-            </button>
-        </div>
+        <!-- Pop-up and countdown elements are no longer needed for this simplified flow -->
+
     </div>
     
     <!-- Custom Message Box -->
@@ -74,13 +66,7 @@
     </div>
 
     <!-- Countdown Modal -->
-    <div id="countdown-modal" class="modal fixed inset-0 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4" id="modal-title"></h2>
-            <div class="text-6xl font-bold text-blue-600 mb-4" id="modal-countdown">15</div>
-            <p class="text-lg text-gray-600" id="modal-message"></p>
-        </div>
-    </div>
+    <!-- Modal element is no longer needed for this simplified flow -->
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -92,7 +78,6 @@
         setLogLevel('debug');
 
         // --- Firebase Configuration ---
-        // Menggunakan variabel global yang disediakan untuk konfigurasi Firebase
         const firebaseConfig = JSON.parse(__firebase_config);
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         
@@ -116,15 +101,6 @@
         const messageBox = document.getElementById('message-box');
         const messageText = document.getElementById('message-text');
 
-        // New UI Elements for the download flow
-        const downloadUI = document.getElementById('download-ui');
-        const downloadButton = document.getElementById('download-button');
-        const finalShortUrlSpan = document.getElementById('final-short-url');
-        const countdownModal = document.getElementById('countdown-modal');
-        const modalTitle = document.getElementById('modal-title');
-        const modalCountdown = document.getElementById('modal-countdown');
-        const modalMessage = document.getElementById('modal-message');
-
         // --- Utility Functions ---
         function showMessage(text) {
             messageText.textContent = text;
@@ -136,28 +112,14 @@
             }, 3000);
         }
 
-        function startCountdown(duration, onTick, onComplete) {
-            let timer = duration;
-            const interval = setInterval(() => {
-                timer--;
-                onTick(timer);
-                if (timer <= 0) {
-                    clearInterval(interval);
-                    onComplete();
-                }
-            }, 1000);
-        }
-
         // --- Authentication and URL Logic ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                // Pengguna sudah masuk, atur userId
                 userId = user.uid;
                 userIdSpan.textContent = userId;
                 authReady = true;
                 handleUrlPath();
             } else {
-                // Belum ada pengguna, coba masuk
                 try {
                     const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
                     if (initialAuthToken) {
@@ -195,7 +157,6 @@
                         const docData = querySnapshot.docs[0].data();
                         const longUrl = docData.longUrl;
                         if (longUrl) {
-                            // Langsung redirect tanpa countdown
                             window.location.href = longUrl;
                         } else {
                             window.location.href = window.location.origin;
@@ -242,8 +203,15 @@
                     createdBy: userId
                 });
                 
-                // Start the new flow
-                startNewLinkFlow(urlWithProtocol, shortCode);
+                // --- Updated Logic to display the link ---
+                const fullShortUrl = `https://${window.location.hostname}/${shortCode}`;
+                shortUrlOutput.textContent = fullShortUrl;
+                resultContainer.classList.remove('hidden');
+                resultContainer.classList.add('flex');
+                
+                longUrlInput.value = ""; // Clear the input
+                shortenButton.disabled = false;
+                showMessage("Tautan berhasil dibuat!");
 
             } catch (e) {
                 console.error("Error adding document: ", e);
@@ -252,40 +220,6 @@
             }
         });
 
-        // --- New Link Generation and Download Flow ---
-        function startNewLinkFlow(longUrl, shortCode) {
-            mainUI.classList.add('hidden');
-            countdownModal.classList.remove('hidden');
-            modalTitle.textContent = "Membuat Tautan Download";
-            modalMessage.textContent = "Mohon tunggu selama 15 detik...";
-            
-            startCountdown(15, (timer) => {
-                modalCountdown.textContent = timer;
-            }, () => {
-                countdownModal.classList.add('hidden');
-                downloadUI.classList.remove('hidden');
-                const fullShortUrl = `https://${window.location.hostname}/${shortCode}`;
-                finalShortUrlSpan.textContent = fullShortUrl;
-                longUrlInput.value = ""; // Clear the input
-                showMessage("Tautan siap! Silakan klik 'Download Sekarang'");
-                
-                // Add click listener for the final download button
-                downloadButton.addEventListener('click', () => {
-                    downloadUI.classList.add('hidden');
-                    countdownModal.classList.remove('hidden');
-                    modalTitle.textContent = "Mengonfirmasi Link Download";
-                    modalMessage.textContent = "Mohon tunggu selama 15 detik...";
-                    
-                    startCountdown(15, (timer) => {
-                        modalCountdown.textContent = timer;
-                    }, () => {
-                        // Final redirect
-                        window.location.href = longUrl;
-                    });
-                });
-            });
-        }
-        
         // --- Copy Link Logic ---
         copyButton.addEventListener('click', () => {
             const urlToCopy = shortUrlOutput.textContent;
