@@ -29,7 +29,8 @@
     <!-- Header dan Navigasi -->
     <header class="container-bg custom-shadow sticky top-0 z-50">
         <nav class="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between p-4">
-            <h1 class="text-2xl font-bold">ShareU</h1>
+            <!-- Logo Gambar ShareU -->
+            <img src="https://iili.io/KFlsOAX.png" alt="ShareU Logo" class="h-10">
             <div class="flex gap-4 mt-4 md:mt-0">
                 <button class="nav-btn font-semibold text-gray-600 hover:text-blue-600 transition-colors duration-200" data-page="shortener">Shortener</button>
                 <button class="nav-btn font-semibold text-gray-600 hover:text-blue-600 transition-colors duration-200" data-page="history">History</button>
@@ -161,12 +162,12 @@
         // Menangani error saat variabel Canvas tidak terdefinisi
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-            apiKey: "AIzaSyAlGXpZSyQab7riDteV5ppS3DXDJQHywKw",
-            authDomain: "modmanagerpro-248f5.firebaseapp.com",
-            projectId: "modmanagerpro-248f5",
-            storageBucket: "modmanagerpro-248f5.firebasestorage.app",
-            messagingSenderId: "594650288669",
-            appId: "1:594650288669:web:3308b084911e2ef7f1ecf4"
+            apiKey: "dummy-api-key",
+            authDomain: "dummy-project-id.firebaseapp.com",
+            projectId: "dummy-project-id",
+            storageBucket: "dummy-project-id.appspot.com",
+            messagingSenderId: "1234567890",
+            appId: "1:1234567890:web:1234567890abcdef"
         };
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
@@ -270,7 +271,7 @@
                 userId = auth.currentUser.uid;
                 userIdSpan.textContent = userId;
                 
-                handleUrlPath();
+                await handleUrlPath();
                 setupRealtimeHistory();
                 setupForumListener();
 
@@ -301,40 +302,37 @@
                 return;
             }
 
-            if (shortCode) {
-                showPage('shortener'); // Tampilkan halaman shortener jika ada jalur
-                loadingSpinner.classList.remove('hidden');
-                
-                try {
-                    const docRef = doc(db, `artifacts/${appId}/public/data/short_urls`, shortCode);
-                    const docSnap = await getDoc(docRef);
+            // Langsung tampilkan UI pengalihan saat ada shortCode, bukan halaman shortener
+            redirectUI.classList.remove('hidden');
+            loadingSpinner.classList.remove('hidden');
+            
+            try {
+                const docRef = doc(db, `artifacts/${appId}/public/data/short_urls`, shortCode);
+                const docSnap = await getDoc(docRef);
 
-                    if (docSnap.exists()) {
-                        const docData = docSnap.data();
-                        const now = new Date();
-                        const expiryDate = docData.expiryDate ? new Date(docData.expiryDate) : null;
+                if (docSnap.exists()) {
+                    const docData = docSnap.data();
+                    const now = new Date();
+                    const expiryDate = docData.expiryDate ? new Date(docData.expiryDate) : null;
 
-                        if (expiryDate && now > expiryDate) {
-                            redirectUI.classList.remove('hidden');
-                            document.getElementById('redirect-title').textContent = 'Link Expired';
-                            document.getElementById('redirect-message').textContent = 'This link has expired and is no longer active.';
-                            document.getElementById('redirect-countdown').classList.add('hidden');
-                            goLinkButton.classList.add('hidden');
-                        } else {
-                            incrementClickCountAndRedirect(docRef, docData.longUrl);
-                        }
+                    if (expiryDate && now > expiryDate) {
+                        redirectUI.classList.remove('hidden');
+                        document.getElementById('redirect-title').textContent = 'Link Expired';
+                        document.getElementById('redirect-message').textContent = 'This link has expired and is no longer active.';
+                        document.getElementById('redirect-countdown').classList.add('hidden');
+                        goLinkButton.classList.add('hidden');
                     } else {
-                        // Jika tidak ada dokumen, kembali ke beranda
-                        window.location.href = window.location.origin;
+                        incrementClickCountAndRedirect(docRef, docData.longUrl);
                     }
-                } catch (e) {
-                    console.error("Error retrieving document:", e);
+                } else {
+                    // Jika tidak ada dokumen, kembali ke beranda
                     window.location.href = window.location.origin;
-                } finally {
-                    loadingSpinner.classList.add('hidden');
                 }
-            } else {
-                showPage('shortener');
+            } catch (e) {
+                console.error("Error retrieving document:", e);
+                window.location.href = window.location.origin;
+            } finally {
+                loadingSpinner.classList.add('hidden');
             }
         };
 
@@ -448,6 +446,7 @@
                 document.getElementById('redirect-title').textContent = 'Your Link is Ready!';
                 document.getElementById('redirect-message').textContent = 'Click below to proceed.';
                 document.getElementById('redirect-countdown').classList.add('hidden');
+                goLinkButton.textContent = 'Create'; // Mengubah teks tombol
                 goLinkButton.classList.remove('hidden');
                 goLinkButton.onclick = () => window.location.href = longUrl;
             });
