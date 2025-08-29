@@ -1,1115 +1,245 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GameVerse - Download Game PC Terbaik</title>
-    <!-- Tailwind CSS CDN -->
+    <title>ShareU - URL Shortener</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome CDN for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" xintegrity="sha512-iecdLmasl8P7+Qy0v55o6zX+R8s8t7p+r+r+eL4J+S0lS7+x6y4I5Z/B+eU6/lQ55E2dD0J1hG/T+yA+K8E2w==" crossorigin="anonymous" referrerpolicy="no-eferer" />
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f3f4f6;
             color: #1f2937;
         }
-        .container {
-            max-width: 1200px;
-            margin: auto;
-            padding: 2rem 1rem;
-        }
-        .card {
-            background-color: #ffffff;
-            border-radius: 1rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.15);
-        }
-        .modal-overlay {
-            background-color: rgba(0, 0, 0, 0.7);
-            z-index: 50;
-        }
-        .modal-content {
-            z-index: 60;
-        }
-        .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-        }
-        .scrollbar-hide {
-            -ms-overflow-style: none; /* IE and Edge */
-            scrollbar-width: none; /* Firefox */
-        }
-        /* Style for disabled buttons */
-        .btn-disabled {
-            @apply bg-gray-400 cursor-not-allowed;
-        }
     </style>
+    <!-- Google AdSense script -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4572281277105896"
+     crossorigin="anonymous"></script>
 </head>
-<body class="bg-gray-100 flex min-h-screen">
+<body class="flex flex-col min-h-screen">
 
-    <!-- Loading Screen -->
-    <div id="loading-screen" class="fixed inset-0 bg-gray-900 bg-opacity-90 flex items-center justify-center text-white z-50">
-        <div class="text-center">
-            <i class="fas fa-spinner fa-spin text-4xl text-blue-500"></i>
-            <p class="mt-4 text-lg">Memuat...</p>
-        </div>
-    </div>
+    <div id="app-container" class="container mx-auto p-4 flex-grow flex items-center justify-center">
+        <!-- Main Container -->
+        <div id="main-ui" class="bg-white p-8 md:p-12 rounded-2xl shadow-xl w-full max-w-2xl text-center transition-all duration-300 transform scale-100 opacity-100 flex flex-col items-center justify-center">
+            <h1 class="text-4xl font-bold mb-4 text-gray-800">ShareU</h1>
+            <p class="text-lg text-gray-600 mb-8 max-w-lg">ShareU helps you shorten your links in a flash. Simply paste your long URL below, get a new short link, and share it with the world! It's fast, free, and secure.</p>
 
-    <!-- Admin Panel Sidebar -->
-    <aside id="admin-sidebar" class="hidden flex-col w-64 bg-gray-800 text-white min-h-screen p-4 transition-all duration-300 ease-in-out">
-        <div class="text-2xl font-bold mb-8 text-center text-blue-400">Admin Panel</div>
-        <nav>
-            <ul class="space-y-2">
-                <li><a href="#" id="nav-upload-game" class="block p-3 rounded-lg hover:bg-gray-700 transition-colors duration-200"><i class="fas fa-upload mr-3"></i>Upload Game</a></li>
-                <li><a href="#" id="nav-manage-games" class="block p-3 rounded-lg hover:bg-gray-700 transition-colors duration-200"><i class="fas fa-edit mr-3"></i>Kelola Game</a></li>
-                <li><a href="#" id="nav-maintenance" class="block p-3 rounded-lg hover:bg-gray-700 transition-colors duration-200"><i class="fas fa-wrench mr-3"></i>Mode Maintenance</a></li>
-                <li><a href="#" id="nav-player-management" class="block p-3 rounded-lg hover:bg-gray-700 transition-colors duration-200"><i class="fas fa-users-cog mr-3"></i>Kelola Pemain</a></li>
-                <li><a href="#" id="nav-comments-reports" class="block p-3 rounded-lg hover:bg-gray-700 transition-colors duration-200"><i class="fas fa-comments mr-3"></i>Komentar & Laporan</a></li>
-            </ul>
-        </nav>
-    </aside>
+            <!-- URL Input and Button -->
+            <div class="flex flex-col md:flex-row gap-4 mb-6 w-full">
+                <input type="url" id="long-url-input" placeholder="Enter your long URL here..." class="flex-grow p-4 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300">
+                <button id="shorten-button" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-8 rounded-xl transition-colors duration-300 whitespace-nowrap">
+                    Create Link
+                </button>
+            </div>
 
-    <!-- Main Website Content Area -->
-    <div class="flex-grow flex flex-col min-h-screen">
-
-        <!-- Header -->
-        <header class="bg-white shadow-md p-4 flex justify-between items-center">
-            <div class="flex items-center">
-                <a href="#" id="logo" class="text-2xl font-bold text-gray-800">GameVerse</a>
-                <span id="admin-indicator" class="ml-4 px-3 py-1 bg-blue-500 text-white text-xs font-semibold rounded-full hidden">Admin</span>
+            <!-- Short Link and Copy Button -->
+            <div id="result-container" class="hidden flex flex-col md:flex-row gap-4 items-center justify-center bg-gray-100 p-4 rounded-xl border border-gray-200 w-full">
+                <div id="short-url-output" class="flex-grow text-gray-700 p-2 break-all font-mono text-lg text-left"></div>
+                <button id="copy-button" class="bg-green-500 hover:bg-green-600 text-white py-2 px-6 rounded-lg transition-colors duration-300">
+                    Copy
+                </button>
             </div>
             
-            <div id="auth-controls" class="space-x-4">
-                <button id="main-nav-home" class="text-gray-600 hover:text-blue-500 font-semibold transition-colors duration-200">Home</button>
-                <button id="btn-login" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-full transition-colors duration-200">Masuk</button>
-                <button id="btn-register" class="text-blue-500 border border-blue-500 hover:bg-blue-500 hover:text-white font-semibold py-2 px-4 rounded-full transition-colors duration-200">Daftar</button>
+            <!-- Google AdSense Ad Unit -->
+            <div id="ad-container" class="mt-8 w-full">
+                <ins class="adsbygoogle"
+                     style="display:block"
+                     data-ad-client="ca-pub-4572281277105896"
+                     data-ad-slot="YOUR_AD_SLOT_ID"
+                     data-ad-format="auto"
+                     data-full-width-responsive="true"></ins>
             </div>
-            
-            <div id="user-controls" class="space-x-4 hidden">
-                <span id="username-display" class="font-semibold text-gray-700"></span>
-                <button id="btn-profile" class="text-gray-600 hover:text-blue-500 font-semibold transition-colors duration-200">Profil</button>
-                <button id="btn-logout" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-full transition-colors duration-200">Keluar</button>
-            </div>
-        </header>
 
-        <!-- Main Content Area (Dynamic) -->
-        <main id="main-content" class="flex-grow p-4 md:p-8"></main>
-
-    </div>
-
-    <!-- Modals -->
-
-    <!-- Login/Register/Forgot Password Modal -->
-    <div id="auth-modal" class="fixed inset-0 flex items-center justify-center p-4 bg-gray-900 bg-opacity-75 hidden modal-overlay">
-        <div class="bg-white p-6 md:p-8 rounded-xl shadow-2xl w-full max-w-md modal-content">
-            <button id="close-auth-modal" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-xl">&times;</button>
-            <div id="auth-container">
-                <!-- Content will be injected here -->
-            </div>
+            <!-- User ID (for debugging and identification) -->
+            <p class="mt-8 text-xs text-gray-400">Your User ID: <span id="user-id">Loading...</span></p>
         </div>
-    </div>
 
-    <!-- User Profile Modal -->
-    <div id="profile-modal" class="fixed inset-0 flex items-center justify-center p-4 bg-gray-900 bg-opacity-75 hidden modal-overlay">
-        <div class="bg-white p-6 md:p-8 rounded-xl shadow-2xl w-full max-w-md modal-content">
-            <button id="close-profile-modal" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-xl">&times;</button>
-            <div id="profile-container">
-                <!-- Content will be injected here -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Countdown Modal -->
-    <div id="countdown-modal" class="fixed inset-0 flex items-center justify-center p-4 bg-gray-900 bg-opacity-75 hidden modal-overlay">
-        <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-sm text-center modal-content">
-            <h2 class="text-2xl font-bold mb-4 text-gray-800">Unduhan Akan Dimulai</h2>
-            <p class="text-4xl font-bold text-blue-600" id="countdown-timer">10</p>
-            <p class="text-gray-600 mt-2">Mohon tunggu...</p>
+        <!-- URL Redirect View -->
+        <div id="redirect-ui" class="hidden flex-col items-center justify-center">
+            <h1 class="text-4xl font-bold mb-4 text-gray-800">Redirecting...</h1>
+            <p class="text-lg text-gray-600 mb-8">Please wait, you will be redirected to the destination.</p>
+            <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
         </div>
     </div>
     
-    <!-- General Message/Alert Modal -->
-    <div id="message-modal" class="fixed inset-0 flex items-center justify-center p-4 bg-gray-900 bg-opacity-75 hidden modal-overlay">
-        <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm text-center modal-content">
-            <h3 id="message-title" class="text-lg font-bold text-gray-800 mb-2"></h3>
-            <p id="message-body" class="text-gray-600 mb-4"></p>
-            <button id="close-message-modal" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-full transition-colors">OK</button>
-        </div>
+    <!-- Custom Message Box -->
+    <div id="message-box" class="fixed bottom-4 right-4 bg-gray-800 text-white p-4 rounded-lg shadow-lg z-50 transform translate-y-full opacity-0 transition-all duration-500 ease-in-out">
+        <p id="message-text"></p>
     </div>
 
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-compat.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, getDocs, collection, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // Set log level for debugging
+        setLogLevel('debug');
 
-    <script>
-        // Use global variables provided by the platform
+        // --- Global Variables ---
+        // These variables are provided by the Canvas environment
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-            apiKey: "AIzaSyAlGXpZSyQab7riDteV5ppS3DXDJQHywKw",
-            authDomain: "modmanagerpro-248f5.firebaseapp.com",
-            projectId: "modmanagerpro-248f5",
-            storageBucket: "modmanagerpro-248f5.firebasestorage.app",
-            messagingSenderId: "594650288669",
-            appId: "1:594650288669:web:3074c3f2f0249bc6f1ecf4",
-            measurementId: "G-VLWZDSRS3W"
-        };
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-        // --- GLOBAL VARIABLES AND FIREBASE SETUP ---
-        let db, auth;
-        let currentUser = null;
-        let isAdmin = false;
-        let maintenanceMode = false;
+        // --- Firebase Initialization ---
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
 
-        const adminEmail = 'rozaq@gmail.com';
+        let userId = null;
+        let isAuthReady = false;
+        let adPushed = false;
 
-        // Get DOM elements
-        const loadingScreen = document.getElementById('loading-screen');
-        const authControls = document.getElementById('auth-controls');
-        const userControls = document.getElementById('user-controls');
-        const mainContent = document.getElementById('main-content');
-        const authModal = document.getElementById('auth-modal');
-        const profileModal = document.getElementById('profile-modal');
-        const countdownModal = document.getElementById('countdown-modal');
-        const messageModal = document.getElementById('message-modal');
-        const adminSidebar = document.getElementById('admin-sidebar');
-        const adminIndicator = document.getElementById('admin-indicator');
+        const mainUI = document.getElementById('main-ui');
+        const redirectUI = document.getElementById('redirect-ui');
+        const longUrlInput = document.getElementById('long-url-input');
+        const shortenButton = document.getElementById('shorten-button');
+        const resultContainer = document.getElementById('result-container');
+        const shortUrlOutput = document.getElementById('short-url-output');
+        const copyButton = document.getElementById('copy-button');
+        const userIdSpan = document.getElementById('user-id');
+        const messageBox = document.getElementById('message-box');
+        const messageText = document.getElementById('message-text');
 
-        const messageTitleEl = document.getElementById('message-title');
-        const messageBodyEl = document.getElementById('message-body');
-        const closeMessageModalBtn = document.getElementById('close-message-modal');
-        const countdownTimerEl = document.getElementById('countdown-timer');
-
-        // --- UTILITY FUNCTIONS ---
-        
-        // Show a generic message/alert modal
-        function showMessage(title, body, callback = null) {
-            messageTitleEl.textContent = title;
-            messageBodyEl.textContent = body;
-            messageModal.classList.remove('hidden');
-            closeMessageModalBtn.onclick = () => {
-                messageModal.classList.add('hidden');
-                if (callback) callback();
-            };
+        // Function to show a temporary message
+        function showMessage(text) {
+            messageText.textContent = text;
+            messageBox.classList.remove('translate-y-full', 'opacity-0');
+            messageBox.classList.add('translate-y-0', 'opacity-100');
+            setTimeout(() => {
+                messageBox.classList.remove('translate-y-0', 'opacity-100');
+                messageBox.classList.add('translate-y-full', 'opacity-0');
+            }, 3000);
         }
 
-        // Show a modal by ID
-        function showModal(modalId) {
-            document.getElementById(modalId).classList.remove('hidden');
-        }
-
-        // Hide a modal by ID
-        function hideModal(modalId) {
-            document.getElementById(modalId).classList.add('hidden');
-        }
-
-        // Toggle visibility of admin sidebar
-        function toggleAdminSidebar(show) {
-            if (show) {
-                adminSidebar.classList.remove('hidden');
-                adminSidebar.classList.add('flex');
+        // --- Authentication and URL Logic ---
+        // Handle authentication
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                userId = user.uid;
             } else {
-                adminSidebar.classList.add('hidden');
-                adminSidebar.classList.remove('flex');
-            }
-        }
-
-        // Render the main page with a list of games
-        function renderHomePage(games) {
-            let html = `
-                <div class="pb-8">
-                    <h1 class="text-4xl font-bold text-center text-gray-900 mb-2">GameVerse</h1>
-                    <p class="text-center text-gray-600 mb-8">Jelajahi, Unduh, dan Nikmati Permainan Terbaik!</p>
-                </div>
-                <div id="game-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            `;
-            if (games.length === 0) {
-                html += `<div class="col-span-full text-center text-gray-500 text-lg">Tidak ada game yang tersedia saat ini.</div>`;
-            }
-            games.forEach(game => {
-                const discountedPrice = game.discountPercentage ? (game.price * (1 - game.discountPercentage / 100)).toFixed(2) : null;
-                html += `
-                    <div class="card p-4">
-                        <img src="${game.photoUrl}" onerror="this.onerror=null; this.src='https://placehold.co/600x400/E5E7EB/9CA3AF?text=No+Image';" alt="${game.name}" class="rounded-t-lg w-full h-48 object-cover mb-4">
-                        <div class="p-4">
-                            <h2 class="text-2xl font-bold text-gray-800">${game.name}</h2>
-                            <p class="text-sm text-gray-500 mt-1 mb-3">${game.description}</p>
-                            <div class="text-gray-700 mb-3">
-                                <span class="font-semibold">Spesifikasi:</span>
-                                <p class="text-sm mt-1">${game.specs}</p>
-                            </div>
-                            <div class="flex items-center space-x-2 font-bold mb-4">
-                                <span class="${discountedPrice ? 'line-through text-gray-500' : 'text-blue-600'}">Rp${game.price.toLocaleString('id-ID')}</span>
-                                ${discountedPrice ? `<span class="text-red-500">Rp${parseFloat(discountedPrice).toLocaleString('id-ID')}</span>` : ''}
-                                ${game.discountPercentage ? `<span class="text-xs bg-green-500 text-white px-2 py-1 rounded-full">${game.discountPercentage}% OFF</span>` : ''}
-                            </div>
-                            <button class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-full transition-colors duration-200 download-btn" data-link="${game.downloadLink}">Unduh Sekarang</button>
-                            <div class="mt-4 flex space-x-2">
-                                <button class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-3 rounded-full transition-colors duration-200 open-comments-btn" data-game-id="${game.id}">Komentar</button>
-                                <button class="flex-1 bg-red-200 hover:bg-red-300 text-red-800 font-semibold py-2 px-3 rounded-full transition-colors duration-200 report-product-btn" data-game-id="${game.id}">Lapor</button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-            html += `</div>`;
-            mainContent.innerHTML = html;
-            addDownloadListeners();
-            addCommentsListeners();
-            addReportListeners();
-        }
-
-        // Attach listeners for download buttons
-        function addDownloadListeners() {
-            document.querySelectorAll('.download-btn').forEach(button => {
-                button.addEventListener('click', () => {
-                    const downloadLink = button.dataset.link;
-                    showModal('countdown-modal');
-                    let countdown = 10;
-                    countdownTimerEl.textContent = countdown;
-                    const timer = setInterval(() => {
-                        countdown--;
-                        countdownTimerEl.textContent = countdown;
-                        if (countdown <= 0) {
-                            clearInterval(timer);
-                            hideModal('countdown-modal');
-                            window.location.href = downloadLink;
-                        }
-                    }, 1000);
-                });
-            });
-        }
-
-        // Attach listeners for comments buttons
-        function addCommentsListeners() {
-            document.querySelectorAll('.open-comments-btn').forEach(button => {
-                button.addEventListener('click', async () => {
-                    if (!currentUser) {
-                        showMessage('Login Dibutuhkan', 'Anda harus login untuk melihat atau menulis komentar.');
-                        return;
+                if (initialAuthToken) {
+                    try {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                        console.log("Successfully logged in with a custom token.");
+                    } catch (error) {
+                        console.error("Error logging in with custom token:", error);
+                        await signInAnonymously(auth);
+                        console.log("Logging in anonymously because token failed.");
                     }
-                    const gameId = button.dataset.gameId;
-                    renderCommentsModal(gameId);
-                });
-            });
-        }
-        
-        // Attach listeners for report buttons
-        function addReportListeners() {
-            document.querySelectorAll('.report-product-btn').forEach(button => {
-                button.addEventListener('click', () => {
-                    if (!currentUser) {
-                        showMessage('Login Dibutuhkan', 'Anda harus login untuk melaporkan produk.');
-                        return;
-                    }
-                    const gameId = button.dataset.gameId;
-                    renderReportModal(gameId);
-                });
-            });
-        }
-
-        // --- AUTH & USER MANAGEMENT ---
-
-        // Function to handle login
-        async function handleLogin(e) {
-            e.preventDefault();
-            const email = e.target.email.value;
-            const password = e.target.password.value;
-            try {
-                await firebase.auth().signInWithEmailAndPassword(email, password);
-                showMessage('Berhasil', 'Login berhasil! Selamat datang.');
-                hideModal('auth-modal');
-            } catch (error) {
-                showMessage('Login Gagal', `Error: ${error.message}`);
-            }
-        }
-
-        // Function to handle register
-        async function handleRegister(e) {
-            e.preventDefault();
-            const email = e.target.email.value;
-            const password = e.target.password.value;
-            const username = e.target.username.value;
-            try {
-                const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
-                const user = userCredential.user;
-                // Save user data to Firestore
-                await firebase.firestore().collection('users').doc(user.uid).set({
-                    username: username,
-                    email: email,
-                    friends: [],
-                    warnings: [],
-                    isBanned: false,
-                    isKicked: false,
-                    id: user.uid
-                });
-                showMessage('Berhasil', 'Pendaftaran berhasil! Silakan masuk.');
-                hideModal('auth-modal');
-                renderAuthForm('login');
-            } catch (error) {
-                showMessage('Pendaftaran Gagal', `Error: ${error.message}`);
-            }
-        }
-
-        // Function to handle password reset
-        async function handleForgotPassword(e) {
-            e.preventDefault();
-            const email = e.target.resetEmail.value;
-            try {
-                await firebase.auth().sendPasswordResetEmail(email);
-                showMessage('Berhasil', 'Link reset password telah dikirim ke email Anda.');
-                hideModal('auth-modal');
-            } catch (error) {
-                showMessage('Reset Password Gagal', `Error: ${error.message}`);
-            }
-        }
-
-        // Function to handle updating user profile
-        async function handleUpdateProfile(e) {
-            e.preventDefault();
-            const newUsername = e.target.newUsername.value;
-            const newEmail = e.target.newEmail.value;
-            const newPassword = e.target.newPassword.value;
-            try {
-                const userRef = db.collection('users').doc(currentUser.uid);
-                const updates = {};
-                if (newUsername) updates.username = newUsername;
-                if (newEmail && newEmail !== currentUser.email) {
-                    await firebase.auth().currentUser.updateEmail(newEmail);
-                    updates.email = newEmail;
-                }
-                if (newPassword) {
-                    await firebase.auth().currentUser.updatePassword(newPassword);
-                }
-                if (Object.keys(updates).length > 0) {
-                    await userRef.update(updates);
-                }
-                showMessage('Berhasil', 'Profil berhasil diperbarui!');
-                hideModal('profile-modal');
-            } catch (error) {
-                showMessage('Pembaruan Gagal', `Error: ${error.message}`);
-            }
-        }
-
-        // Function to handle adding a friend
-        async function handleAddFriend(e) {
-            e.preventDefault();
-            const friendEmail = e.target.friendEmail.value;
-            try {
-                const friendQuery = await db.collection('users').where('email', '==', friendEmail).get();
-                if (friendQuery.empty) {
-                    showMessage('Gagal', 'Email tidak ditemukan.');
-                    return;
-                }
-                const friendDoc = friendQuery.docs[0];
-                const friendId = friendDoc.id;
-                const userRef = db.collection('users').doc(currentUser.uid);
-                const userDoc = await userRef.get();
-                const currentFriends = userDoc.data().friends || [];
-                if (currentFriends.includes(friendId)) {
-                    showMessage('Gagal', 'Pengguna ini sudah ada di daftar teman Anda.');
-                    return;
-                }
-                await userRef.update({ friends: firebase.firestore.FieldValue.arrayUnion(friendId) });
-                showMessage('Berhasil', 'Teman berhasil ditambahkan!');
-                hideModal('profile-modal');
-            } catch (error) {
-                showMessage('Gagal', `Error: ${error.message}`);
-            }
-        }
-
-        // Function to handle comments
-        async function handleSubmitComment(e) {
-            e.preventDefault();
-            const gameId = e.target.gameId.value;
-            const commentText = e.target.commentText.value;
-            if (!commentText.trim()) {
-                showMessage('Gagal', 'Komentar tidak boleh kosong.');
-                return;
-            }
-            try {
-                await db.collection('comments').add({
-                    gameId: gameId,
-                    userId: currentUser.uid,
-                    username: currentUser.username,
-                    text: commentText,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                e.target.reset();
-            } catch (error) {
-                showMessage('Gagal', `Error: ${error.message}`);
-            }
-        }
-
-        // Function to handle product reports
-        async function handleSubmitReport(e) {
-            e.preventDefault();
-            const gameId = e.target.gameId.value;
-            const issue = e.target.issue.value;
-            try {
-                await db.collection('reports').add({
-                    gameId: gameId,
-                    userId: currentUser.uid,
-                    username: currentUser.username,
-                    issue: issue,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                showMessage('Laporan Terkirim', 'Laporan Anda telah berhasil dikirim ke admin. Terima kasih atas bantuannya!');
-                hideModal('auth-modal'); // Reusing auth modal for this
-            } catch (error) {
-                showMessage('Gagal', `Error: ${error.message}`);
-            }
-        }
-        
-        // Render auth form (login/register/forgot password)
-        function renderAuthForm(type) {
-            let html = '';
-            let title = '';
-            if (type === 'login') {
-                title = 'Masuk ke Akun Anda';
-                html = `
-                    <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">${title}</h2>
-                    <form id="login-form" class="space-y-4">
-                        <input type="email" name="email" placeholder="Email" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                        <input type="password" name="password" placeholder="Password" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                        <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-200">Masuk</button>
-                    </form>
-                    <p class="text-center text-sm text-gray-500 mt-4">Belum punya akun? <a href="#" id="link-register" class="text-blue-500 hover:underline">Daftar sekarang</a></p>
-                    <p class="text-center text-sm text-gray-500 mt-2"><a href="#" id="link-forgot-password" class="text-blue-500 hover:underline">Lupa Password?</a></p>
-                `;
-            } else if (type === 'register') {
-                title = 'Buat Akun Baru';
-                html = `
-                    <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">${title}</h2>
-                    <form id="register-form" class="space-y-4">
-                        <input type="text" name="username" placeholder="Nama Pengguna" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                        <input type="email" name="email" placeholder="Email" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                        <input type="password" name="password" placeholder="Password" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                        <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-200">Daftar</button>
-                    </form>
-                    <p class="text-center text-sm text-gray-500 mt-4">Sudah punya akun? <a href="#" id="link-login" class="text-blue-500 hover:underline">Masuk sekarang</a></p>
-                `;
-            } else if (type === 'forgotPassword') {
-                title = 'Reset Password';
-                html = `
-                    <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">${title}</h2>
-                    <form id="forgot-password-form" class="space-y-4">
-                        <p class="text-sm text-gray-600 text-center">Masukkan email Anda untuk menerima link reset password.</p>
-                        <input type="email" name="resetEmail" placeholder="Email" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                        <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-200">Kirim Link</button>
-                    </form>
-                    <p class="text-center text-sm text-gray-500 mt-4"><a href="#" id="link-back-to-login" class="text-blue-500 hover:underline">Kembali ke halaman masuk</a></p>
-                `;
-            }
-
-            document.getElementById('auth-container').innerHTML = html;
-            showModal('auth-modal');
-
-            // Attach listeners
-            if (type === 'login') {
-                document.getElementById('login-form').addEventListener('submit', handleLogin);
-                document.getElementById('link-register').addEventListener('click', (e) => { e.preventDefault(); renderAuthForm('register'); });
-                document.getElementById('link-forgot-password').addEventListener('click', (e) => { e.preventDefault(); renderAuthForm('forgotPassword'); });
-            } else if (type === 'register') {
-                document.getElementById('register-form').addEventListener('submit', handleRegister);
-                document.getElementById('link-login').addEventListener('click', (e) => { e.preventDefault(); renderAuthForm('login'); });
-            } else if (type === 'forgotPassword') {
-                document.getElementById('forgot-password-form').addEventListener('submit', handleForgotPassword);
-                document.getElementById('link-back-to-login').addEventListener('click', (e) => { e.preventDefault(); renderAuthForm('login'); });
-            }
-        }
-
-        // Render profile modal
-        async function renderProfileModal() {
-            if (!currentUser) return;
-            const userRef = db.collection('users').doc(currentUser.uid);
-            const userDoc = await userRef.get();
-            const userData = userDoc.data();
-            
-            const friendPromises = (userData.friends || []).map(friendId => db.collection('users').doc(friendId).get());
-            const friendDocs = await Promise.all(friendPromises);
-            const friendList = friendDocs.map(doc => doc.data().username).join(', ') || 'Tidak ada teman.';
-
-            let warningsHtml = userData.warnings && userData.warnings.length > 0 ?
-                `<ul class="list-disc list-inside space-y-1">` + userData.warnings.map(warn => `<li><span class="text-red-500 font-semibold">Peringatan Admin:</span> ${warn}</li>`).join('') + `</ul>` :
-                `<p class="text-gray-500">Tidak ada peringatan.</p>`;
-
-            const html = `
-                <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">Profil Pengguna</h2>
-                <div class="space-y-6">
-                    <div>
-                        <p class="text-lg font-semibold text-gray-700">Informasi Dasar</p>
-                        <p><strong>Nama:</strong> ${userData.username}</p>
-                        <p><strong>Email:</strong> ${userData.email}</p>
-                        <p><strong>ID Pengguna:</strong> <span id="user-id-display" class="text-xs text-gray-500">${userData.id}</span></p>
-                    </div>
-                    <div>
-                        <p class="text-lg font-semibold text-gray-700">Daftar Teman</p>
-                        <p>${friendList}</p>
-                        <form id="add-friend-form" class="mt-4 flex space-x-2">
-                            <input type="email" name="friendEmail" placeholder="Email Teman" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">Tambah</button>
-                        </form>
-                    </div>
-                    <div>
-                        <p class="text-lg font-semibold text-gray-700">Peringatan</p>
-                        ${warningsHtml}
-                    </div>
-                    <div>
-                        <p class="text-lg font-semibold text-gray-700">Kelola Akun</p>
-                        <form id="update-profile-form" class="space-y-4 mt-2">
-                            <input type="text" name="newUsername" placeholder="Nama Pengguna Baru" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <input type="email" name="newEmail" placeholder="Email Baru" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <input type="password" name="newPassword" placeholder="Password Baru" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">Perbarui Profil</button>
-                        </form>
-                    </div>
-                </div>
-            `;
-            document.getElementById('profile-container').innerHTML = html;
-            showModal('profile-modal');
-            document.getElementById('update-profile-form').addEventListener('submit', handleUpdateProfile);
-            document.getElementById('add-friend-form').addEventListener('submit', handleAddFriend);
-        }
-
-        // Render comments modal
-        function renderCommentsModal(gameId) {
-            let html = `
-                <div class="fixed inset-0 flex items-center justify-center p-4 bg-gray-900 bg-opacity-75 hidden modal-overlay" id="comments-modal">
-                    <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-xl flex flex-col h-[80vh] modal-content">
-                        <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-2xl font-bold text-gray-800">Komentar</h2>
-                            <button class="text-gray-500 hover:text-gray-800 text-xl" id="close-comments-modal">&times;</button>
-                        </div>
-                        <div id="comments-list" class="flex-grow overflow-y-auto scrollbar-hide space-y-4 pr-2">
-                            <p class="text-center text-gray-500">Memuat komentar...</p>
-                        </div>
-                        <form id="comment-form" class="mt-4 flex space-x-2">
-                            <input type="hidden" name="gameId" value="${gameId}">
-                            <textarea name="commentText" placeholder="Tulis komentar..." class="flex-grow p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
-                            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">Kirim</button>
-                        </form>
-                    </div>
-                </div>
-            `;
-            document.body.insertAdjacentHTML('beforeend', html);
-            const commentsModal = document.getElementById('comments-modal');
-            commentsModal.classList.remove('hidden');
-
-            document.getElementById('close-comments-modal').addEventListener('click', () => commentsModal.remove());
-            document.getElementById('comment-form').addEventListener('submit', handleSubmitComment);
-
-            // Listen for comments in real-time
-            db.collection('comments').where('gameId', '==', gameId).orderBy('timestamp', 'desc').onSnapshot(snapshot => {
-                const commentsList = document.getElementById('comments-list');
-                if (!commentsList) return;
-                let commentsHtml = '';
-                if (snapshot.empty) {
-                    commentsHtml = `<p class="text-center text-gray-500">Belum ada komentar.</p>`;
                 } else {
-                    snapshot.forEach(doc => {
-                        const comment = doc.data();
-                        const timestamp = comment.timestamp ? new Date(comment.timestamp.seconds * 1000).toLocaleString() : 'Baru saja';
-                        commentsHtml += `
-                            <div class="bg-gray-100 p-3 rounded-lg">
-                                <p class="text-sm font-semibold text-gray-800">${comment.username}</p>
-                                <p class="text-sm text-gray-600">${comment.text}</p>
-                                <p class="text-xs text-gray-400 mt-1">${timestamp}</p>
-                            </div>
-                        `;
-                    });
+                    await signInAnonymously(auth);
+                    console.log("Logging in anonymously.");
                 }
-                commentsList.innerHTML = commentsHtml;
-            });
-        }
-        
-        // Render report modal
-        function renderReportModal(gameId) {
-            let html = `
-                <div class="fixed inset-0 flex items-center justify-center p-4 bg-gray-900 bg-opacity-75 hidden modal-overlay" id="report-modal">
-                    <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm flex flex-col modal-content">
-                        <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-2xl font-bold text-gray-800">Laporkan Produk</h2>
-                            <button class="text-gray-500 hover:text-gray-800 text-xl" id="close-report-modal">&times;</button>
-                        </div>
-                        <form id="report-form" class="space-y-4">
-                            <input type="hidden" name="gameId" value="${gameId}">
-                            <textarea name="issue" placeholder="Jelaskan masalahnya..." class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" rows="4"></textarea>
-                            <button type="submit" class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">Kirim Laporan</button>
-                        </form>
-                    </div>
-                </div>
-            `;
-            document.body.insertAdjacentHTML('beforeend', html);
-            const reportModal = document.getElementById('report-modal');
-            reportModal.classList.remove('hidden');
-
-            document.getElementById('close-report-modal').addEventListener('click', () => reportModal.remove());
-            document.getElementById('report-form').addEventListener('submit', handleSubmitReport);
-        }
-
-        // --- ADMIN PANEL FUNCTIONS ---
-
-        // Render upload game form
-        function renderUploadGame() {
-            mainContent.innerHTML = `
-                <h2 class="text-3xl font-bold mb-6 text-gray-800">Upload Game Baru</h2>
-                <form id="upload-game-form" class="bg-white p-6 rounded-xl shadow-md space-y-4">
-                    <input type="text" name="gameName" placeholder="Nama Game" required class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2">
-                    <input type="url" name="photoUrl" placeholder="URL Foto Game" required class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2">
-                    <textarea name="description" placeholder="Deskripsi Game" required class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 resize-none"></textarea>
-                    <textarea name="specs" placeholder="Spesifikasi Game" required class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 resize-none"></textarea>
-                    <input type="url" name="downloadLink" placeholder="Link Download" required class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2">
-                    <input type="number" name="price" placeholder="Harga (Rp)" required class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2">
-                    <input type="number" name="discount" placeholder="Diskon (%) (opsional)" min="0" max="100" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2">
-                    <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-lg transition-colors">Upload Game</button>
-                </form>
-            `;
-            document.getElementById('upload-game-form').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const gameData = {
-                    name: e.target.gameName.value,
-                    photoUrl: e.target.photoUrl.value,
-                    description: e.target.description.value,
-                    specs: e.target.specs.value,
-                    downloadLink: e.target.downloadLink.value,
-                    price: parseFloat(e.target.price.value),
-                    discountPercentage: e.target.discount.value ? parseInt(e.target.discount.value) : null
-                };
-                try {
-                    await db.collection('games').add(gameData);
-                    showMessage('Berhasil', 'Game berhasil diupload!');
-                    e.target.reset();
-                } catch (error) {
-                    showMessage('Gagal', `Error: ${error.message}`);
-                }
-            });
-        }
-
-        // Render game management list
-        function renderManageGames() {
-            mainContent.innerHTML = `
-                <h2 class="text-3xl font-bold mb-6 text-gray-800">Kelola Game</h2>
-                <div id="games-management-list" class="space-y-4">
-                    <p class="text-center text-gray-500">Memuat data game...</p>
-                </div>
-            `;
-            db.collection('games').onSnapshot(snapshot => {
-                const gamesList = document.getElementById('games-management-list');
-                if (!gamesList) return;
-                let html = '';
-                if (snapshot.empty) {
-                    html = `<p class="text-center text-gray-500">Tidak ada game yang tersedia.</p>`;
-                } else {
-                    snapshot.forEach(doc => {
-                        const game = doc.data();
-                        html += `
-                            <div class="card p-4 flex items-center justify-between">
-                                <div class="flex-1">
-                                    <h3 class="font-bold text-lg">${game.name}</h3>
-                                    <p class="text-sm text-gray-500">${game.description.substring(0, 50)}...</p>
-                                </div>
-                                <div class="space-x-2">
-                                    <button class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg edit-game-btn" data-id="${doc.id}">Edit</button>
-                                    <button class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg delete-game-btn" data-id="${doc.id}">Hapus</button>
-                                </div>
-                            </div>
-                        `;
-                    });
-                }
-                gamesList.innerHTML = html;
-                document.querySelectorAll('.edit-game-btn').forEach(btn => btn.addEventListener('click', (e) => renderEditGameForm(e.target.dataset.id)));
-                document.querySelectorAll('.delete-game-btn').forEach(btn => btn.addEventListener('click', async (e) => {
-                    if (confirm('Apakah Anda yakin ingin menghapus game ini?')) {
-                        try {
-                            await db.collection('games').doc(e.target.dataset.id).delete();
-                            showMessage('Berhasil', 'Game berhasil dihapus.');
-                        } catch (error) {
-                            showMessage('Gagal', `Error: ${error.message}`);
-                        }
-                    }
-                }));
-            });
-        }
-        
-        // Render edit game form
-        async function renderEditGameForm(gameId) {
-            const gameDoc = await db.collection('games').doc(gameId).get();
-            if (!gameDoc.exists) {
-                showMessage('Error', 'Game tidak ditemukan.');
-                return;
             }
-            const game = gameDoc.data();
-            mainContent.innerHTML = `
-                <h2 class="text-3xl font-bold mb-6 text-gray-800">Edit Game: ${game.name}</h2>
-                <form id="edit-game-form" class="bg-white p-6 rounded-xl shadow-md space-y-4">
-                    <input type="text" name="gameName" value="${game.name}" placeholder="Nama Game" required class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2">
-                    <input type="url" name="photoUrl" value="${game.photoUrl}" placeholder="URL Foto Game" required class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2">
-                    <textarea name="description" placeholder="Deskripsi Game" required class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 resize-none">${game.description}</textarea>
-                    <textarea name="specs" placeholder="Spesifikasi Game" required class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 resize-none">${game.specs}</textarea>
-                    <input type="url" name="downloadLink" value="${game.downloadLink}" placeholder="Link Download" required class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2">
-                    <input type="number" name="price" value="${game.price}" placeholder="Harga (Rp)" required class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2">
-                    <input type="number" name="discount" value="${game.discountPercentage || ''}" placeholder="Diskon (%) (opsional)" min="0" max="100" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2">
-                    <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-lg transition-colors">Simpan Perubahan</button>
-                </form>
-            `;
-            document.getElementById('edit-game-form').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const updatedGameData = {
-                    name: e.target.gameName.value,
-                    photoUrl: e.target.photoUrl.value,
-                    description: e.target.description.value,
-                    specs: e.target.specs.value,
-                    downloadLink: e.target.downloadLink.value,
-                    price: parseFloat(e.target.price.value),
-                    discountPercentage: e.target.discount.value ? parseInt(e.target.discount.value) : null
-                };
+            userIdSpan.textContent = userId;
+            isAuthReady = true;
+
+            // Call the redirect logic after authentication is ready
+            handleUrlPath();
+        });
+
+        // Handle URL path for redirection
+        async function handleUrlPath() {
+            const path = window.location.pathname.substring(1); // Remove leading '/'
+            if (path && path.length > 0) {
+                // Hide main UI and show redirect UI
+                mainUI.classList.add('hidden');
+                redirectUI.classList.remove('hidden');
+                redirectUI.classList.add('flex');
+
                 try {
-                    await db.collection('games').doc(gameId).update(updatedGameData);
-                    showMessage('Berhasil', 'Game berhasil diperbarui!');
-                } catch (error) {
-                    showMessage('Gagal', `Error: ${error.message}`);
-                }
-            });
-        }
+                    // Query Firestore for the link
+                    const linksCollection = collection(db, `artifacts/${appId}/public/data/short_urls`);
+                    const q = query(linksCollection, where('shortCode', '==', path));
+                    const querySnapshot = await getDocs(q);
 
-        // Render maintenance mode toggle
-        function renderMaintenanceMode() {
-            mainContent.innerHTML = `
-                <h2 class="text-3xl font-bold mb-6 text-gray-800">Mode Maintenance</h2>
-                <div class="card p-6 flex items-center justify-between">
-                    <div>
-                        <h3 class="text-xl font-semibold">Status</h3>
-                        <p id="maintenance-status" class="text-sm font-bold mt-1"></p>
-                    </div>
-                    <button id="maintenance-toggle-btn" class="py-2 px-4 rounded-full font-semibold"></button>
-                </div>
-            `;
-            const statusEl = document.getElementById('maintenance-status');
-            const toggleBtn = document.getElementById('maintenance-toggle-btn');
-            db.collection('app_status').doc('maintenance').onSnapshot(doc => {
-                if (doc.exists) {
-                    maintenanceMode = doc.data().active;
-                    statusEl.textContent = maintenanceMode ? 'AKTIF' : 'TIDAK AKTIF';
-                    statusEl.classList.toggle('text-red-500', maintenanceMode);
-                    statusEl.classList.toggle('text-green-500', !maintenanceMode);
-                    toggleBtn.textContent = maintenanceMode ? 'Nonaktifkan' : 'Aktifkan';
-                    toggleBtn.classList.toggle('bg-red-500', maintenanceMode);
-                    toggleBtn.classList.toggle('hover:bg-red-600', maintenanceMode);
-                    toggleBtn.classList.toggle('bg-green-500', !maintenanceMode);
-                    toggleBtn.classList.toggle('hover:bg-green-600', !maintenanceMode);
-                    toggleBtn.classList.add('text-white');
-                }
-            });
-            toggleBtn.addEventListener('click', async () => {
-                try {
-                    await db.collection('app_status').doc('maintenance').set({ active: !maintenanceMode });
-                    showMessage('Berhasil', 'Status mode maintenance berhasil diperbarui.');
-                } catch (error) {
-                    showMessage('Gagal', `Error: ${error.message}`);
-                }
-            });
-        }
-        
-        // Render player management
-        function renderPlayerManagement() {
-            mainContent.innerHTML = `
-                <h2 class="text-3xl font-bold mb-6 text-gray-800">Kelola Pemain</h2>
-                <div class="card p-6 mb-6">
-                    <form id="search-player-form" class="flex space-x-2">
-                        <input type="text" name="playerQuery" placeholder="Cari email/username..." required class="flex-grow p-2 border rounded-lg">
-                        <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg"><i class="fas fa-search"></i></button>
-                    </form>
-                    <div id="player-search-results" class="mt-4 space-y-4"></div>
-                </div>
-            `;
-            const searchForm = document.getElementById('search-player-form');
-            const resultsDiv = document.getElementById('player-search-results');
-            searchForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const query = e.target.playerQuery.value.trim();
-                resultsDiv.innerHTML = '<p class="text-center text-gray-500">Mencari...</p>';
-                try {
-                    const emailQuery = await db.collection('users').where('email', '==', query).get();
-                    const usernameQuery = await db.collection('users').where('username', '==', query).get();
-                    
-                    const users = [];
-                    emailQuery.forEach(doc => users.push({ ...doc.data(), id: doc.id }));
-                    usernameQuery.forEach(doc => {
-                        if (!users.some(u => u.id === doc.id)) {
-                            users.push({ ...doc.data(), id: doc.id });
-                        }
-                    });
-
-                    if (users.length === 0) {
-                        resultsDiv.innerHTML = '<p class="text-center text-gray-500">Pemain tidak ditemukan.</p>';
-                        return;
-                    }
-
-                    resultsDiv.innerHTML = users.map(user => `
-                        <div class="card p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between">
-                            <div>
-                                <h4 class="font-bold">${user.username}</h4>
-                                <p class="text-sm text-gray-500">${user.email}</p>
-                                <p class="text-xs text-gray-400 mt-1">ID: ${user.id}</p>
-                                ${user.isBanned ? `<span class="bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded-full mt-1 inline-block">BANNED</span>` : ''}
-                            </div>
-                            <div class="mt-4 sm:mt-0 space-x-2 flex flex-wrap justify-end">
-                                <button class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-3 rounded-lg ban-user-btn" data-id="${user.id}">${user.isBanned ? 'Unban' : 'Ban'}</button>
-                                <button class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-3 rounded-lg kick-user-btn" data-id="${user.id}">Kick</button>
-                                <button class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-3 rounded-lg send-warning-btn" data-id="${user.id}">Peringatan</button>
-                            </div>
-                        </div>
-                    `).join('');
-
-                    document.querySelectorAll('.ban-user-btn').forEach(btn => btn.addEventListener('click', async (e) => {
-                        const userId = e.target.dataset.id;
-                        const userDoc = await db.collection('users').doc(userId).get();
-                        const isBanned = userDoc.data().isBanned;
-                        await db.collection('users').doc(userId).update({ isBanned: !isBanned });
-                        showMessage('Berhasil', `${isBanned ? 'Unban' : 'Ban'} pengguna berhasil.`);
-                    }));
-                    document.querySelectorAll('.kick-user-btn').forEach(btn => btn.addEventListener('click', async (e) => {
-                        await db.collection('users').doc(e.target.dataset.id).update({ isKicked: true });
-                        showMessage('Berhasil', 'Pengguna berhasil ditendang.');
-                    }));
-                    document.querySelectorAll('.send-warning-btn').forEach(btn => btn.addEventListener('click', async (e) => {
-                        const warning = prompt('Masukkan pesan peringatan:');
-                        if (warning) {
-                            await db.collection('users').doc(e.target.dataset.id).update({
-                                warnings: firebase.firestore.FieldValue.arrayUnion(warning)
-                            });
-                            showMessage('Berhasil', 'Peringatan berhasil dikirim.');
-                        }
-                    }));
-                } catch (error) {
-                    showMessage('Gagal', `Error: ${error.message}`);
-                }
-            });
-        }
-        
-        // Render comments and reports management
-        function renderCommentsReports() {
-            mainContent.innerHTML = `
-                <h2 class="text-3xl font-bold mb-6 text-gray-800">Komentar & Laporan</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Comments Section -->
-                    <div>
-                        <h3 class="text-2xl font-bold mb-4 text-gray-700">Komentar</h3>
-                        <div id="admin-comments-list" class="space-y-4">
-                            <p class="text-center text-gray-500">Memuat komentar...</p>
-                        </div>
-                    </div>
-                    <!-- Reports Section -->
-                    <div>
-                        <h3 class="text-2xl font-bold mb-4 text-gray-700">Laporan Produk</h3>
-                        <div id="admin-reports-list" class="space-y-4">
-                            <p class="text-center text-gray-500">Memuat laporan...</p>
-                        </div>
-                    </div>
-                </div>
-            `;
-            db.collection('comments').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
-                const commentsList = document.getElementById('admin-comments-list');
-                if (!commentsList) return;
-                let html = '';
-                if (snapshot.empty) {
-                    html = '<p class="text-center text-gray-500">Tidak ada komentar.</p>';
-                } else {
-                    snapshot.forEach(doc => {
-                        const comment = doc.data();
-                        const timestamp = comment.timestamp ? new Date(comment.timestamp.seconds * 1000).toLocaleString() : 'Baru saja';
-                        html += `
-                            <div class="card p-4 flex items-center justify-between">
-                                <div class="flex-1">
-                                    <p class="font-bold">${comment.username}</p>
-                                    <p class="text-sm text-gray-600 truncate">${comment.text}</p>
-                                    <p class="text-xs text-gray-400">${timestamp}</p>
-                                </div>
-                                <button class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-3 rounded-lg delete-comment-btn" data-id="${doc.id}">Hapus</button>
-                            </div>
-                        `;
-                    });
-                }
-                commentsList.innerHTML = html;
-                document.querySelectorAll('.delete-comment-btn').forEach(btn => btn.addEventListener('click', async (e) => {
-                    if (confirm('Apakah Anda yakin ingin menghapus komentar ini?')) {
-                        try {
-                            await db.collection('comments').doc(e.target.dataset.id).delete();
-                            showMessage('Berhasil', 'Komentar berhasil dihapus.');
-                        } catch (error) {
-                            showMessage('Gagal', `Error: ${error.message}`);
-                        }
-                    }
-                }));
-            });
-
-            db.collection('reports').onSnapshot(snapshot => {
-                const reportsList = document.getElementById('admin-reports-list');
-                if (!reportsList) return;
-                let html = '';
-                if (snapshot.empty) {
-                    html = '<p class="text-center text-gray-500">Tidak ada laporan.</p>';
-                } else {
-                    snapshot.forEach(doc => {
-                        const report = doc.data();
-                        const timestamp = report.timestamp ? new Date(report.timestamp.seconds * 1000).toLocaleString() : 'Baru saja';
-                        html += `
-                            <div class="card p-4">
-                                <p class="font-bold text-red-700">Laporan dari ${report.username}</p>
-                                <p class="text-sm text-gray-600 mt-1">${report.issue}</p>
-                                <p class="text-xs text-gray-400 mt-1">Game ID: ${report.gameId}</p>
-                                <p class="text-xs text-gray-400">${timestamp}</p>
-                            </div>
-                        `;
-                    });
-                }
-                reportsList.innerHTML = html;
-            });
-        }
-
-        // --- MAIN LOGIC AND EVENT LISTENERS ---
-        
-        // Main function to run when the page loads
-        window.onload = async () => {
-            try {
-                // Initialize Firebase
-                firebase.initializeApp(firebaseConfig);
-                auth = firebase.auth();
-                db = firebase.firestore();
-                
-                // Set up real-time listener for maintenance mode
-                db.collection('app_status').doc('maintenance').onSnapshot(doc => {
-                    if (doc.exists) {
-                        maintenanceMode = doc.data().active;
-                    }
-                });
-
-                // Set up auth state listener
-                auth.onAuthStateChanged(async (user) => {
-                    if (user) {
-                        // User is signed in.
-                        currentUser = user;
-                        // Fetch user data from Firestore
-                        const userDoc = await db.collection('users').doc(user.uid).get();
-                        if (userDoc.exists) {
-                            const userData = userDoc.data();
-                            currentUser = { ...user, ...userData };
-                            isAdmin = currentUser.email === adminEmail;
-
-                            // Check for ban/kick
-                            if (userData.isBanned) {
-                                await auth.signOut();
-                                showMessage('Akun Diblokir', 'Akun Anda telah diblokir oleh admin.');
-                                return;
-                            }
-                            if (userData.isKicked) {
-                                await db.collection('users').doc(user.uid).update({ isKicked: false });
-                                await auth.signOut();
-                                showMessage('Anda Ditendang', 'Anda telah ditendang dari sesi oleh admin. Silakan masuk kembali.');
-                                return;
-                            }
-                        }
-
-                        // Update UI for logged-in user
-                        authControls.classList.add('hidden');
-                        userControls.classList.remove('hidden');
-                        document.getElementById('username-display').textContent = `Halo, ${currentUser.username}`;
-                        toggleAdminSidebar(isAdmin);
-                        if (isAdmin) {
-                            adminIndicator.classList.remove('hidden');
-                            renderUploadGame(); // Default admin view
+                    if (!querySnapshot.empty) {
+                        const docData = querySnapshot.docs[0].data();
+                        const longUrl = docData.longUrl;
+                        if (longUrl) {
+                            // Redirect to the long URL
+                            window.location.href = longUrl;
                         } else {
-                            adminIndicator.classList.add('hidden');
-                            renderHomePageWithData(); // Default user view
+                            // Link found but no URL, redirect to home
+                            window.location.href = window.location.origin;
                         }
                     } else {
-                        // User is signed out.
-                        currentUser = null;
-                        isAdmin = false;
-                        authControls.classList.remove('hidden');
-                        userControls.classList.add('hidden');
-                        adminIndicator.classList.add('hidden');
-                        toggleAdminSidebar(false);
-                        renderHomePageWithData(); // Default user view
+                        // No matching link, redirect to home
+                        window.location.href = window.location.origin;
                     }
-                    loadingScreen.classList.add('hidden');
-                });
+                } catch (e) {
+                    console.error("Error fetching document: ", e);
+                    // On error, also redirect to home
+                    window.location.href = window.location.origin;
+                }
+            } else {
+                // Show the main UI for the home page
+                mainUI.classList.remove('hidden');
+                mainUI.classList.add('flex');
+                redirectUI.classList.add('hidden');
                 
-                // Sign in with custom token if available, otherwise anonymously
-                if (initialAuthToken) {
-                    await auth.signInWithCustomToken(initialAuthToken);
-                } else {
-                    await auth.signInAnonymously();
+                // Pushing the ad only after the main UI is visible
+                if (!adPushed) {
+                    try {
+                        (adsbygoogle = window.adsbygoogle || []).push({});
+                        adPushed = true;
+                    } catch (e) {
+                        console.error("AdSense push error: ", e);
+                    }
                 }
-
-            } catch (e) {
-                console.error("Initialization Error: ", e);
-                loadingScreen.classList.add('hidden');
-                showMessage('Error', `Gagal memuat aplikasi. Coba segarkan halaman. Error: ${e.message}`);
             }
-        };
-
-        // Render home page with real-time data from Firestore
-        function renderHomePageWithData() {
-            db.collection('games').onSnapshot(snapshot => {
-                if (maintenanceMode && !isAdmin) {
-                    mainContent.innerHTML = `
-                        <div class="flex flex-col items-center justify-center p-8 text-center text-gray-700">
-                            <i class="fas fa-tools text-6xl text-blue-500 mb-4 animate-pulse"></i>
-                            <h1 class="text-3xl font-bold mb-2">Situs Sedang Dalam Perbaikan</h1>
-                            <p class="text-lg">Mohon maaf, GameVerse sedang dalam mode maintenance. Kami akan segera kembali!</p>
-                        </div>
-                    `;
-                    return;
-                }
-
-                const games = [];
-                snapshot.forEach(doc => {
-                    games.push({ id: doc.id, ...doc.data() });
-                });
-                renderHomePage(games);
-            });
         }
 
-        // --- EVENT LISTENERS FOR UI ELEMENTS ---
-        
-        // Header buttons
-        document.getElementById('btn-login').addEventListener('click', () => renderAuthForm('login'));
-        document.getElementById('btn-register').addEventListener('click', () => renderAuthForm('register'));
-        document.getElementById('btn-profile').addEventListener('click', renderProfileModal);
-        document.getElementById('btn-logout').addEventListener('click', async () => {
+        // --- URL Shortening Logic ---
+        shortenButton.addEventListener('click', async () => {
+            const longUrl = longUrlInput.value.trim();
+            if (!longUrl) {
+                showMessage("Please enter a valid URL.");
+                return;
+            }
+
+            // Ensure URL has a protocol
+            const urlWithProtocol = longUrl.startsWith('http://') || longUrl.startsWith('https://') ? longUrl : `https://${longUrl}`;
+            
             try {
-                await firebase.auth().signOut();
-                showMessage('Berhasil', 'Anda telah berhasil keluar.');
-            } catch (error) {
-                showMessage('Gagal', `Error: ${error.message}`);
+                // Create a random short code
+                const shortCode = Math.random().toString(36).substring(2, 8); // 6 character random code
+                const linksCollection = collection(db, `artifacts/${appId}/public/data/short_urls`);
+
+                // Save URL in Firestore
+                await setDoc(doc(linksCollection, shortCode), {
+                    longUrl: urlWithProtocol,
+                    shortCode: shortCode,
+                    createdAt: new Date(),
+                    createdBy: userId
+                });
+                
+                const fullShortUrl = `https://${window.location.hostname}/${shortCode}`;
+                shortUrlOutput.textContent = fullShortUrl;
+                resultContainer.classList.remove('hidden');
+                showMessage("Link created successfully!");
+
+            } catch (e) {
+                console.error("Error adding document: ", e);
+                showMessage("Failed to create link. Please try again.");
             }
         });
-        document.getElementById('main-nav-home').addEventListener('click', () => {
-            renderHomePageWithData();
+
+        // --- Copy Link Logic ---
+        copyButton.addEventListener('click', () => {
+            const urlToCopy = shortUrlOutput.textContent;
+            navigator.clipboard.writeText(urlToCopy).then(() => {
+                showMessage("Link copied to clipboard!");
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                showMessage("Failed to copy link.");
+            });
         });
-        document.getElementById('logo').addEventListener('click', () => {
-            renderHomePageWithData();
-        });
-
-        // Modal close buttons
-        document.getElementById('close-auth-modal').addEventListener('click', () => hideModal('auth-modal'));
-        document.getElementById('close-profile-modal').addEventListener('click', () => hideModal('profile-modal'));
-
-        // Admin sidebar navigation
-        document.getElementById('nav-upload-game').addEventListener('click', (e) => { e.preventDefault(); renderUploadGame(); });
-        document.getElementById('nav-manage-games').addEventListener('click', (e) => { e.preventDefault(); renderManageGames(); });
-        document.getElementById('nav-maintenance').addEventListener('click', (e) => { e.preventDefault(); renderMaintenanceMode(); });
-        document.getElementById('nav-player-management').addEventListener('click', (e) => { e.preventDefault(); renderPlayerManagement(); });
-        document.getElementById('nav-comments-reports').addEventListener('click', (e) => { e.preventDefault(); renderCommentsReports(); });
-
     </script>
 </body>
 </html>
