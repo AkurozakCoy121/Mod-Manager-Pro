@@ -56,9 +56,6 @@
                     Copy
                 </button>
             </div>
-
-            <!-- User ID (for debugging and identification) -->
-            <p class="mt-8 text-xs text-gray-500">Your User ID: <span id="user-id">Loading...</span></p>
         </div>
 
         <!-- URL Redirect View with Countdown -->
@@ -79,25 +76,8 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDocs, collection, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        
-        // Set log level for debugging
-        setLogLevel('debug');
-
-        // --- Firebase Configuration ---
-        const firebaseConfig = JSON.parse(__firebase_config);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        
-        // --- Firebase Initialization ---
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-
-        let userId = null;
-        let authReady = false;
+        // --- In-memory storage for short URLs (will not persist on reload) ---
+        const urlMap = new Map();
 
         // --- UI Elements ---
         const mainUI = document.getElementById('main-ui');
@@ -107,7 +87,6 @@
         const resultContainer = document.getElementById('result-container');
         const shortUrlOutput = document.getElementById('short-url-output');
         const copyButton = document.getElementById('copy-button');
-        const userIdSpan = document.getElementById('user-id');
         const messageBox = document.getElementById('message-box');
         const messageText = document.getElementById('message-text');
 
@@ -141,60 +120,18 @@
             }, 1000);
         }
 
-        // --- Authentication and URL Logic ---
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                userId = user.uid;
-                userIdSpan.textContent = userId;
-                authReady = true;
-                handleUrlPath();
-            } else {
-                try {
-                    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-                    if (initialAuthToken) {
-                        await signInWithCustomToken(auth, initialAuthToken);
-                        console.log("Signed in with custom token.");
-                    } else {
-                        await signInAnonymously(auth);
-                        console.log("Signed in anonymously.");
-                    }
-                } catch (error) {
-                    console.error("Failed to sign in:", error);
-                    showMessage("Failed to sign in. Please try again later.");
-                }
-            }
-        });
-
-        async function handleUrlPath() {
-            if (!authReady) {
-                console.log("Authentication not ready, skipping handleUrlPath.");
-                return;
-            }
-
+        // --- URL Logic ---
+        function handleUrlPath() {
             const path = window.location.pathname.substring(1);
             if (path && path.length > 0) {
                 mainUI.classList.add('hidden');
                 redirectUI.classList.remove('hidden');
                 redirectUI.classList.add('flex');
 
-                try {
-                    const linksCollection = collection(db, `artifacts/${appId}/public/data/short_urls`);
-                    const q = query(linksCollection, where('shortCode', '==', path));
-                    const querySnapshot = await getDocs(q);
-
-                    if (!querySnapshot.empty) {
-                        const docData = querySnapshot.docs[0].data();
-                        const longUrl = docData.longUrl;
-                        if (longUrl) {
-                            startRedirectFlow(longUrl);
-                        } else {
-                            window.location.href = window.location.origin;
-                        }
-                    } else {
-                        window.location.href = window.location.origin;
-                    }
-                } catch (e) {
-                    console.error("Error fetching document: ", e);
+                const longUrl = urlMap.get(path);
+                if (longUrl) {
+                    startRedirectFlow(longUrl);
+                } else {
                     window.location.href = window.location.origin;
                 }
             } else {
@@ -228,10 +165,6 @@
 
         // --- URL Shortening Logic ---
         shortenButton.addEventListener('click', async () => {
-            if (!authReady) {
-                showMessage("App is loading, please wait a moment.");
-                return;
-            }
             const longUrl = longUrlInput.value.trim();
             if (!longUrl) {
                 showMessage("Please enter a valid URL.");
@@ -243,31 +176,17 @@
             
             const urlWithProtocol = longUrl.startsWith('http://') || longUrl.startsWith('https://') ? longUrl : `https://${longUrl}`;
             
-            try {
-                const shortCode = Math.random().toString(36).substring(2, 8);
-                const linksCollection = collection(db, `artifacts/${appId}/public/data/short_urls`);
-                
-                await setDoc(doc(linksCollection, shortCode), {
-                    longUrl: urlWithProtocol,
-                    shortCode: shortCode,
-                    createdAt: new Date(),
-                    createdBy: userId
-                });
-                
-                const fullShortUrl = `https://${window.location.hostname}/${shortCode}`;
-                shortUrlOutput.textContent = fullShortUrl;
-                resultContainer.classList.remove('hidden');
-                resultContainer.classList.add('flex');
-                
-                longUrlInput.value = ""; // Clear the input
-                shortenButton.disabled = false;
-                showMessage("Link successfully created!");
+            const shortCode = Math.random().toString(36).substring(2, 8);
+            urlMap.set(shortCode, urlWithProtocol);
 
-            } catch (e) {
-                console.error("Error adding document: ", e);
-                showMessage("Failed to create link. Please try again.");
-                shortenButton.disabled = false;
-            }
+            const fullShortUrl = `${window.location.origin}/${shortCode}`;
+            shortUrlOutput.textContent = fullShortUrl;
+            resultContainer.classList.remove('hidden');
+            resultContainer.classList.add('flex');
+            
+            longUrlInput.value = ""; // Clear the input
+            shortenButton.disabled = false;
+            showMessage("Link successfully created!");
         });
 
         // --- Copy Link Logic ---
@@ -281,6 +200,9 @@
             document.body.removeChild(tempInput);
             showMessage("Link copied successfully!");
         });
+
+        // --- Initial Call to handle URL Path ---
+        handleUrlPath();
     </script>
 </body>
 </html>
