@@ -34,86 +34,114 @@
 </head>
 <body class="flex flex-col min-h-screen">
 
-    <!-- Kontainer utama dengan iklan dan konten -->
-    <div class="container mx-auto p-4 flex-grow flex flex-col items-center justify-center">
+    <!-- Kontainer utama (UI Utama) -->
+    <div id="main-ui" class="container mx-auto p-4 flex-grow flex flex-col items-center justify-center">
 
-        <!-- Placeholder Iklan Google AdSense -->
-        <div class="w-full max-w-4xl text-center mb-8 bg-card p-4 rounded-xl shadow-xl border border-gray-600">
-            <p class="text-sm text-gray-400">Placeholder Iklan Otomatis Google AdSense</p>
-            <div class="h-24 bg-gray-700 rounded mt-2 flex items-center justify-center">
-                <span class="text-gray-500">Iklan di Sini</span>
+        <!-- Konten Utama (Pemendek Tautan) -->
+        <div class="bg-card p-8 md:p-12 rounded-2xl shadow-xl w-full max-w-2xl text-center transition-all duration-300 transform scale-100 opacity-100 flex flex-col items-center">
+            <h1 class="text-5xl font-extrabold mb-4 text-primary">The Ultimate Link Shortener</h1>
+            <p class="text-xl text-secondary mb-4 max-w-lg">ShareU helps you shorten your long links into easy-to-share links. It's fast, free, and secure.</p>
+            <p class="text-lg text-secondary mb-8 max-w-lg">Start joining us and enjoy the features we have provided just for you!</p>
+
+            <!-- URL Input and Button -->
+            <div class="flex flex-col md:flex-row gap-4 mb-6 w-full">
+                <input type="url" id="long-url-input" placeholder="Enter your long URL here..." class="flex-grow p-4 rounded-xl border border-input bg-card text-white focus:outline-none focus:ring-2 focus:focus-ring-blue transition-all duration-300">
+                <button id="shorten-button" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-8 rounded-xl transition-colors duration-300 whitespace-nowrap">
+                    Create Link
+                </button>
+            </div>
+
+            <!-- Short Link and Copy Button -->
+            <div id="result-container" class="hidden flex flex-col md:flex-row gap-4 items-center justify-center bg-gray-700 p-4 rounded-xl border border-gray-600 w-full">
+                <div id="short-url-output" class="flex-grow text-gray-200 p-2 break-all font-mono text-lg text-left"></div>
+                <button id="copy-button" class="bg-green-500 hover:bg-green-600 text-white py-2 px-6 rounded-lg transition-colors duration-300">
+                    Copy
+                </button>
             </div>
         </div>
 
-        <!-- Konten Utama dan Blog -->
-        <div class="flex flex-col lg:flex-row w-full max-w-4xl gap-8">
-            <!-- Konten Utama (Pemendek Tautan) -->
-            <div id="main-ui" class="bg-card p-8 md:p-12 rounded-2xl shadow-xl w-full text-center transition-all duration-300 transform scale-100 opacity-100 flex-grow flex flex-col items-center justify-center">
-                <h1 class="text-5xl font-extrabold mb-4 text-primary">The Ultimate Link Shortener</h1>
-                <p class="text-xl text-secondary mb-4 max-w-lg">ShareU helps you shorten your long links into easy-to-share links. It's fast, free, and secure.</p>
-                <p class="text-lg text-secondary mb-8 max-w-lg">Start joining us and enjoy the features we have provided just for you!</p>
-
-                <!-- URL Input and Button -->
-                <div class="flex flex-col md:flex-row gap-4 mb-6 w-full">
-                    <input type="url" id="long-url-input" placeholder="Enter your long URL here..." class="flex-grow p-4 rounded-xl border border-input bg-card text-white focus:outline-none focus:ring-2 focus:focus-ring-blue transition-all duration-300">
-                    <button id="shorten-button" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-8 rounded-xl transition-colors duration-300 whitespace-nowrap">
-                        Create Link
-                    </button>
-                </div>
-
-                <!-- Short Link and Copy Button -->
-                <div id="result-container" class="hidden flex flex-col md:flex-row gap-4 items-center justify-center bg-gray-700 p-4 rounded-xl border border-gray-600 w-full">
-                    <div id="short-url-output" class="flex-grow text-gray-200 p-2 break-all font-mono text-lg text-left"></div>
-                    <button id="copy-button" class="bg-green-500 hover:bg-green-600 text-white py-2 px-6 rounded-lg transition-colors duration-300">
-                        Copy
-                    </button>
-                </div>
-            </div>
-
-            <!-- Riwayat Link & Breaking News -->
-            <div class="w-full lg:w-1/3 flex flex-col gap-8">
-                <!-- Blog Breaking News -->
-                <div class="bg-card p-6 rounded-2xl shadow-xl">
-                    <h2 class="text-2xl font-bold mb-4 text-primary">Breaking News</h2>
-                    <div id="news-list" class="flex flex-col gap-4">
-                        <div class="p-3 bg-gray-700 rounded-lg">
-                            <h3 class="font-semibold text-lg text-white">Gemini Meluncurkan Versi Terbaru</h3>
-                            <p class="text-sm text-gray-400">Google mengumumkan versi terbaru model bahasa mereka, menjanjikan peningkatan performa dan efisiensi.</p>
-                            <a href="#" class="text-blue-400 text-sm mt-1 inline-block hover:underline">Baca Selengkapnya</a>
-                        </div>
-                        <div class="p-3 bg-gray-700 rounded-lg">
-                            <h3 class="font-semibold text-lg text-white">Peluncuran Smartphone Baru</h3>
-                            <p class="text-sm text-gray-400">Perusahaan teknologi terkemuka meluncurkan produk andalan terbarunya dengan fitur-fitur inovatif.</p>
-                            <a href="#" class="text-blue-400 text-sm mt-1 inline-block hover:underline">Baca Selengkapnya</a>
-                        </div>
-                        <div class="p-3 bg-gray-700 rounded-lg">
-                            <h3 class="font-semibold text-lg text-white">Tren AI dalam Kehidupan Sehari-hari</h3>
-                            <p class="text-sm text-gray-400">Analisis mendalam tentang bagaimana kecerdasan buatan mulai terintegrasi dalam berbagai aspek kehidupan kita.</p>
-                            <a href="#" class="text-blue-400 text-sm mt-1 inline-block hover:underline">Baca Selengkapnya</a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Riwayat Link -->
-                <div class="bg-card p-6 rounded-2xl shadow-xl">
-                    <h2 class="text-2xl font-bold mb-4 text-primary">Link History</h2>
-                    <ul id="history-list" class="flex flex-col gap-3">
-                        <!-- Link history will be populated here -->
-                    </ul>
-                </div>
-            </div>
-
+        <!-- About Section -->
+        <div class="bg-card p-8 md:p-12 rounded-2xl shadow-xl w-full max-w-2xl mt-8">
+            <h2 class="text-3xl font-bold mb-4 text-primary text-center">About This Web</h2>
+            <p class="text-secondary text-center mb-4">This website is designed for educational purposes to demonstrate link shortening technology and its core functionalities, including user authentication and data storage using Firebase. It also showcases how to implement dynamic content and a basic security warning system for URLs.</p>
+            <p class="text-secondary text-center">Created by: Rozak</p>
         </div>
+
     </div>
     
-    <!-- URL Redirect View with Countdown -->
-    <div id="redirect-ui" class="hidden fixed inset-0 flex-col items-center justify-center text-center bg-gray-900 bg-opacity-90 z-50">
-        <h1 class="text-4xl font-bold mb-4 text-primary" id="redirect-title">Creating Download Link</h1>
-        <p class="text-lg text-secondary mb-4" id="redirect-message">Please wait for 15 seconds...</p>
-        <div id="redirect-countdown" class="text-6xl font-bold text-blue-600 my-4">15</div>
-        <button id="go-link-button" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-4 px-8 rounded-xl transition-colors duration-300 hidden mt-4">
-            Go Link
-        </button>
+    <!-- UI Pengalihan dan Peringatan -->
+    <div id="redirect-ui" class="hidden fixed inset-0 flex flex-col lg:flex-row items-center justify-center text-center bg-gray-900 bg-opacity-90 z-50 p-4 gap-8">
+        
+        <!-- Konten Pengalihan (Sisi Kiri) -->
+        <div class="w-full lg:w-2/3 flex flex-col items-center justify-center bg-card p-8 rounded-2xl shadow-xl">
+            <h1 class="text-4xl font-bold mb-4 text-primary" id="redirect-title">Creating Download Link</h1>
+            <p class="text-lg text-secondary mb-4" id="redirect-message">Please wait 15 seconds...</p>
+            <div id="redirect-countdown" class="text-6xl font-bold text-blue-600 my-4">15</div>
+            <button id="go-link-button" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-4 px-8 rounded-xl transition-colors duration-300 hidden mt-4">
+                Go Link
+            </button>
+        </div>
+
+        <!-- Blog Breaking News & Iklan (Sisi Kanan) -->
+        <div class="w-full lg:w-1/3 flex flex-col gap-8">
+            <!-- Placeholder Iklan Google AdSense -->
+            <div class="w-full text-center bg-card p-4 rounded-xl shadow-xl border border-gray-600">
+                <p class="text-sm text-gray-400">Google AdSense Automatic Ad Placeholder</p>
+                <div class="h-24 bg-gray-700 rounded mt-2 flex items-center justify-center">
+                    <span class="text-gray-500">Ad Space</span>
+                </div>
+            </div>
+
+            <!-- Blog Breaking News -->
+            <div class="bg-card p-6 rounded-2xl shadow-xl">
+                <h2 class="text-2xl font-bold mb-4 text-primary">Breaking News</h2>
+                <div id="news-list" class="flex flex-col gap-4">
+                    <div class="p-3 bg-gray-700 rounded-lg">
+                        <h3 class="font-semibold text-lg text-white">Gemini Launches New Version</h3>
+                        <p class="text-sm text-gray-400">Google announced the latest version of their language model, promising improved performance and efficiency.</p>
+                        <a href="#" class="text-blue-400 text-sm mt-1 inline-block hover:underline">Read More</a>
+                    </div>
+                    <div class="p-3 bg-gray-700 rounded-lg">
+                        <h3 class="font-semibold text-lg text-white">New Smartphone Launched</h3>
+                        <p class="text-sm text-gray-400">A leading tech company has launched its latest flagship product with innovative features.</p>
+                        <a href="#" class="text-blue-400 text-sm mt-1 inline-block hover:underline">Read More</a>
+                    </div>
+                    <div class="p-3 bg-gray-700 rounded-lg">
+                        <h3 class="font-semibold text-lg text-white">AI Trends in Daily Life</h3>
+                        <p class="text-sm text-gray-400">An in-depth analysis of how artificial intelligence is becoming integrated into various aspects of our lives.</p>
+                        <a href="#" class="text-blue-400 text-sm mt-1 inline-block hover:underline">Read More</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- UI Peringatan Keamanan -->
+    <div id="warning-ui" class="hidden fixed inset-0 flex items-center justify-center text-center bg-gray-900 bg-opacity-90 z-50 p-4">
+        <div class="bg-red-800 p-8 md:p-12 rounded-2xl shadow-xl w-full max-w-2xl text-white">
+            <h1 class="text-4xl font-bold mb-4">This Website Might Be Dangerous</h1>
+            <p class="text-lg text-red-200 mb-4">Chrome might have blocked this site because it contains potentially harmful content, such as phishing scams, malware, or spam.</p>
+            <div id="warning-details" class="bg-red-700 p-4 rounded-lg text-left text-sm hidden">
+                <h3 class="font-semibold mb-2">Details:</h3>
+                <ul class="list-disc list-inside space-y-1">
+                    <li>This URL has been flagged as suspicious by our security database.</li>
+                    <li>It may try to steal your personal information or install unwanted software.</li>
+                    <li>We recommend you do not proceed.</li>
+                </ul>
+            </div>
+            <button id="show-details-button" class="mt-6 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors duration-300">
+                Show Details
+            </button>
+            <div class="flex flex-col sm:flex-row justify-center gap-4 mt-4">
+                <button id="go-back-button" class="bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-6 rounded-lg transition-colors duration-300">
+                    Go Back
+                </button>
+                <button id="proceed-button" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-lg transition-colors duration-300">
+                    Proceed Anyway
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- Custom Message Box -->
@@ -128,7 +156,6 @@
         import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
         
-        // Atur level log untuk debugging
         setLogLevel('debug');
 
         let app;
@@ -137,7 +164,7 @@
         let userId = null;
         let authReady = false;
         
-        // --- Konfigurasi Firebase ---
+        // --- Firebase Configuration ---
         const firebaseConfig = {
             apiKey: "AIzaSyAlGXpZSyQab7riDteV5ppS3DXDJQHywKw",
             authDomain: "modmanagerpro-248f5.firebaseapp.com",
@@ -150,9 +177,10 @@
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
-        // --- Elemen UI ---
+        // --- UI Elements ---
         const mainUI = document.getElementById('main-ui');
         const redirectUI = document.getElementById('redirect-ui');
+        const warningUI = document.getElementById('warning-ui');
         const longUrlInput = document.getElementById('long-url-input');
         const shortenButton = document.getElementById('shorten-button');
         const resultContainer = document.getElementById('result-container');
@@ -160,15 +188,13 @@
         const copyButton = document.getElementById('copy-button');
         const messageBox = document.getElementById('message-box');
         const messageText = document.getElementById('message-text');
-        const historyList = document.getElementById('history-list');
-
-        // Elemen UI baru untuk alur pengalihan
-        const redirectTitle = document.getElementById('redirect-title');
-        const redirectMessage = document.getElementById('redirect-message');
-        const redirectCountdown = document.getElementById('redirect-countdown');
         const goLinkButton = document.getElementById('go-link-button');
+        const showDetailsButton = document.getElementById('show-details-button');
+        const warningDetails = document.getElementById('warning-details');
+        const goBackButton = document.getElementById('go-back-button');
+        const proceedButton = document.getElementById('proceed-button');
 
-        // --- Fungsi Utilitas ---
+        // --- Utility Functions ---
         function showMessage(text) {
             messageText.textContent = text;
             messageBox.classList.remove('translate-y-full', 'opacity-0');
@@ -181,10 +207,10 @@
 
         function startCountdown(duration, onTick, onComplete) {
             let timer = duration;
-            redirectCountdown.textContent = timer;
+            document.getElementById('redirect-countdown').textContent = timer;
             const interval = setInterval(() => {
                 timer--;
-                redirectCountdown.textContent = timer;
+                document.getElementById('redirect-countdown').textContent = timer;
                 if (timer <= 0) {
                     clearInterval(interval);
                     onComplete();
@@ -192,115 +218,50 @@
             }, 1000);
         }
 
-        // --- Inisialisasi Firebase ---
+        // --- Firebase Initialization ---
         try {
             app = initializeApp(firebaseConfig);
             db = getFirestore(app);
             auth = getAuth(app);
             const analytics = getAnalytics(app);
 
-            // Perbaiki alur otentikasi
-            if (initialAuthToken) {
-                signInWithCustomToken(auth, initialAuthToken)
-                    .then(() => {
-                        console.log("Signed in with custom token.");
-                        onAuthStateChanged(auth, (user) => {
-                            if (user) {
-                                userId = user.uid;
-                                authReady = true;
-                                console.log("Signed in. User ID:", userId);
-                                handleUrlPath();
-                                setupRealtimeHistory();
-                            }
-                        });
-                    })
-                    .catch(error => {
-                        console.error("Failed to sign in with custom token:", error);
-                        signInAnonymously(auth)
-                            .then(() => {
-                                console.log("Signed in anonymously instead.");
-                                onAuthStateChanged(auth, (user) => {
-                                    if (user) {
-                                        userId = user.uid;
-                                        authReady = true;
-                                        console.log("Signed in. User ID:", userId);
-                                        handleUrlPath();
-                                        setupRealtimeHistory();
-                                    }
-                                });
-                            })
-                            .catch(anonError => {
-                                console.error("Failed to sign in anonymously:", anonError);
-                                showMessage("Failed to sign in. Please try again later.");
-                            });
-                    });
-            } else {
-                signInAnonymously(auth)
-                    .then(() => {
-                        console.log("Signed in anonymously.");
-                        onAuthStateChanged(auth, (user) => {
-                            if (user) {
-                                userId = user.uid;
-                                authReady = true;
-                                console.log("Signed in. User ID:", userId);
-                                handleUrlPath();
-                                setupRealtimeHistory();
-                            }
-                        });
-                    })
-                    .catch(anonError => {
-                        console.error("Failed to sign in anonymously:", anonError);
+            // Handle authentication
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    userId = user.uid;
+                    authReady = true;
+                    console.log("Signed in. User ID:", userId);
+                    handleUrlPath();
+                } else {
+                    try {
+                        await signInAnonymously(auth);
+                    } catch (error) {
+                        console.error("Failed to sign in anonymously:", error);
                         showMessage("Failed to sign in. Please try again later.");
-                    });
-            }
+                    }
+                }
+            });
         } catch (e) {
             console.error("Firebase initialization failed:", e);
-            showMessage("Maaf, aplikasi tidak dapat terhubung. Silakan coba lagi nanti.");
+            showMessage("Sorry, the application could not connect. Please try again later.");
         }
 
-        // --- Fungsi Riwayat Tautan ---
-        function setupRealtimeHistory() {
-            const linksCollection = collection(db, `artifacts/${appId}/public/data/short_urls`);
-            const q = query(linksCollection);
+        // --- Demo Blacklist for Warning System ---
+        const blockedSites = [
+            'phishing-demo.com',
+            'malware-example.org'
+        ];
 
-            onSnapshot(q, (snapshot) => {
-                historyList.innerHTML = ''; // Clear existing list
-                snapshot.forEach((doc) => {
-                    const data = doc.data();
-                    const fullShortUrl = `https://${window.location.hostname}/${data.shortCode}`;
-                    const listItem = document.createElement('li');
-                    listItem.className = "bg-gray-700 p-3 rounded-lg flex flex-col sm:flex-row justify-between items-center break-all";
-                    listItem.innerHTML = `
-                        <div class="flex flex-col text-left">
-                            <span class="text-sm text-gray-400">Tautan Asli:</span>
-                            <a href="${data.longUrl}" target="_blank" class="text-white text-sm hover:underline">${data.longUrl}</a>
-                        </div>
-                        <div class="flex flex-col text-right mt-2 sm:mt-0">
-                            <span class="text-sm text-gray-400">Tautan Pendek:</span>
-                            <a href="${fullShortUrl}" target="_blank" class="text-blue-400 font-mono hover:underline">${fullShortUrl}</a>
-                        </div>
-                    `;
-                    historyList.appendChild(listItem);
-                });
-            }, (error) => {
-                console.error("Error fetching link history: ", error);
-                showMessage("Gagal memuat riwayat tautan.");
-            });
-        }
-
-
+        // --- URL Handling and Redirect Flow ---
         async function handleUrlPath() {
             if (!authReady) {
-                console.log("Autentikasi belum siap, lewati handleUrlPath.");
                 return;
             }
 
             const path = window.location.pathname.substring(1);
             if (path && path.length > 0) {
                 mainUI.classList.add('hidden');
-                redirectUI.classList.remove('hidden');
-                redirectUI.classList.add('flex');
-
+                
                 try {
                     const linksCollection = collection(db, `artifacts/${appId}/public/data/short_urls`);
                     const q = query(linksCollection, where('shortCode', '==', path));
@@ -310,7 +271,14 @@
                         const docData = querySnapshot.docs[0].data();
                         const longUrl = docData.longUrl;
                         if (longUrl) {
-                            startRedirectFlow(longUrl);
+                            const urlHost = new URL(longUrl).hostname;
+                            const isBlocked = blockedSites.some(site => urlHost.includes(site));
+
+                            if (isBlocked) {
+                                showWarningPage(longUrl);
+                            } else {
+                                startRedirectFlow(longUrl);
+                            }
                         } else {
                             window.location.href = window.location.origin;
                         }
@@ -323,47 +291,65 @@
                 }
             } else {
                 mainUI.classList.remove('hidden');
-                mainUI.classList.add('flex');
                 redirectUI.classList.add('hidden');
+                warningUI.classList.add('hidden');
             }
         }
 
         function startRedirectFlow(longUrl) {
-            redirectTitle.textContent = "Sedang Membuat Tautan";
-            redirectMessage.textContent = "Mohon tunggu 15 detik...";
+            redirectUI.classList.remove('hidden');
+            redirectUI.classList.add('flex');
+            document.getElementById('redirect-title').textContent = "Creating Download Link";
+            document.getElementById('redirect-message').textContent = "Please wait 15 seconds...";
             goLinkButton.classList.add('hidden');
 
             startCountdown(15, () => {}, () => {
-                redirectTitle.textContent = "Tautan Siap!";
-                redirectMessage.textContent = "Silakan klik tombol di bawah untuk melanjutkan.";
+                document.getElementById('redirect-title').textContent = "Link Ready!";
+                document.getElementById('redirect-message').textContent = "Please click the button below to proceed.";
                 goLinkButton.classList.remove('hidden');
             });
 
             goLinkButton.onclick = () => {
-                redirectTitle.textContent = "Mengkonfirmasi Tautan";
-                redirectMessage.textContent = "Mohon tunggu 15 detik...";
-                goLinkButton.classList.add('hidden');
-
-                startCountdown(15, () => {}, () => {
-                    window.location.href = longUrl;
-                });
+                window.location.href = longUrl;
             };
         }
 
-        // --- Logika Pemendek Tautan ---
+        function showWarningPage(longUrl) {
+            warningUI.classList.remove('hidden');
+            warningUI.classList.add('flex');
+            
+            showDetailsButton.onclick = () => {
+                warningDetails.classList.toggle('hidden');
+                if (warningDetails.classList.contains('hidden')) {
+                    showDetailsButton.textContent = "Show Details";
+                } else {
+                    showDetailsButton.textContent = "Hide Details";
+                }
+            };
+            
+            goBackButton.onclick = () => {
+                window.location.href = window.location.origin;
+            };
+
+            proceedButton.onclick = () => {
+                window.location.href = longUrl;
+            };
+        }
+
+        // --- Link Shortener Logic ---
         shortenButton.addEventListener('click', async () => {
             if (!authReady) {
-                showMessage("Aplikasi sedang memuat, mohon tunggu sebentar.");
+                showMessage("App is loading, please wait a moment.");
                 return;
             }
             const longUrl = longUrlInput.value.trim();
             if (!longUrl) {
-                showMessage("Silakan masukkan URL yang valid.");
+                showMessage("Please enter a valid URL.");
                 return;
             }
             
             shortenButton.disabled = true;
-            showMessage("Membuat tautan, mohon tunggu...");
+            showMessage("Creating link, please wait...");
             
             const urlWithProtocol = longUrl.startsWith('http://') || longUrl.startsWith('https://') ? longUrl : `https://${longUrl}`;
             
@@ -383,18 +369,18 @@
                 resultContainer.classList.remove('hidden');
                 resultContainer.classList.add('flex');
                 
-                longUrlInput.value = ""; // Bersihkan input
+                longUrlInput.value = "";
                 shortenButton.disabled = false;
-                showMessage("Tautan berhasil dibuat!");
+                showMessage("Link successfully created!");
 
             } catch (e) {
                 console.error("Error adding document: ", e);
-                showMessage("Gagal membuat tautan. Silakan coba lagi.");
+                showMessage("Failed to create link. Please try again.");
                 shortenButton.disabled = false;
             }
         });
 
-        // --- Logika Salin Tautan ---
+        // --- Copy Link Logic ---
         copyButton.addEventListener('click', () => {
             const urlToCopy = shortUrlOutput.textContent;
             const tempInput = document.createElement('textarea');
@@ -403,11 +389,9 @@
             tempInput.select();
             document.execCommand('copy');
             document.body.removeChild(tempInput);
-            showMessage("Tautan berhasil disalin!");
+            showMessage("Link copied!");
         });
 
-        // --- Panggilan Awal untuk menangani Jalur URL ---
-        // handleUrlPath() akan dipanggil setelah autentikasi siap
     </script>
 </body>
 </html>
