@@ -44,21 +44,20 @@
         <!-- Main Content (Link Shortener) -->
         <div class="bg-card p-8 md:p-12 rounded-2xl shadow-xl w-full max-w-2xl text-center transition-all duration-300 transform scale-100 opacity-100 flex flex-col items-center">
             <h1 class="text-5xl font-extrabold mb-4 text-primary">The Ultimate Link Shortener</h1>
-            <p class="text-xl text-secondary mb-4 max-w-lg">ShareU membantu Anda memperpendek tautan panjang Anda menjadi tautan yang mudah dibagikan. Ini cepat, gratis, dan aman.</p>
-            <p class="text-lg text-secondary mb-8 max-w-lg">Bergabunglah dengan kami dan nikmati fitur-fitur yang telah kami sediakan khusus untuk Anda!</p>
+            <p class="text-xl text-secondary mb-4 max-w-lg">ShareU helps you shorten your long links into easy-to-share links. It's fast, free, and secure.</p>
+            <p class="text-lg text-secondary mb-8 max-w-lg">Start joining us and enjoy the features we have provided just for you!</p>
 
             <!-- URL Input and Button -->
             <div class="flex flex-col md:flex-row gap-4 mb-4 w-full">
-                <input type="url" id="long-url-input" placeholder="Masukkan URL panjang Anda di sini..." class="flex-grow p-4 rounded-xl border border-input bg-card text-white focus:outline-none focus:ring-2 focus:focus-ring-blue transition-all duration-300">
+                <input type="url" id="long-url-input" placeholder="Enter your long URL here..." class="flex-grow p-4 rounded-xl border border-input bg-card text-white focus:outline-none focus:ring-2 focus:focus-ring-blue transition-all duration-300">
                 <button id="shorten-button" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-8 rounded-xl transition-colors duration-300 whitespace-nowrap">
-                    Buat Tautan
+                    Create Link
                 </button>
             </div>
             
             <!-- New Features Inputs -->
-            <div class="flex flex-col md:flex-row gap-4 mb-4 w-full">
-                <input type="text" id="custom-alias-input" placeholder="Masukkan alias kustom (opsional)..." class="flex-grow p-4 rounded-xl border border-input bg-card text-white focus:outline-none focus:ring-2 focus:focus-ring-blue transition-all duration-300">
-                <input type="password" id="password-input" placeholder="Tautan dilindungi kata sandi (opsional)..." class="flex-grow p-4 rounded-xl border border-input bg-card text-white focus:outline-none focus:ring-2 focus:focus-ring-blue transition-all duration-300">
+            <div class="flex flex-col md:flex-row gap-4 mb-6 w-full">
+                <input type="text" id="custom-alias-input" placeholder="Enter a custom alias (optional)..." class="flex-grow p-4 rounded-xl border border-input bg-card text-white focus:outline-none focus:ring-2 focus:focus-ring-blue transition-all duration-300">
                 <select id="expiry-select" class="p-4 rounded-xl border border-input bg-card text-white focus:outline-none focus:ring-2 focus:focus-ring-blue transition-all duration-300">
                     <option value="forever">Selamanya</option>
                     <option value="1h">1 Jam</option>
@@ -72,34 +71,26 @@
             <div id="result-container" class="hidden flex flex-col md:flex-row gap-4 items-center justify-center bg-gray-700 p-4 rounded-xl border border-gray-600 w-full">
                 <div id="short-url-output" class="flex-grow text-gray-200 p-2 break-all font-mono text-lg text-left"></div>
                 <button id="copy-button" class="bg-green-500 hover:bg-green-600 text-white py-2 px-6 rounded-lg transition-colors duration-300">
-                    Salin
+                    Copy
                 </button>
             </div>
-
-            <!-- Bulk Shorten Button -->
-            <button id="bulk-shorten-button" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-4 px-8 rounded-xl transition-colors duration-300 mt-4">
-                Buat Tautan Massal
-            </button>
         </div>
 
         <!-- About Section -->
         <div class="bg-card p-8 md:p-12 rounded-2xl shadow-xl w-full max-w-2xl mt-8">
-            <h2 class="text-3xl font-bold mb-4 text-primary text-center">Tentang Situs Ini</h2>
-            <p class="text-secondary text-center mb-4">Situs web ini dirancang untuk tujuan pendidikan guna mendemonstrasikan teknologi pemendek tautan dan fungsionalitas intinya, termasuk otentikasi pengguna dan penyimpanan data menggunakan Firebase. Ini juga menunjukkan cara menerapkan konten dinamis dan sistem peringatan keamanan dasar untuk URL.</p>
-            <p class="text-secondary text-center">Dibuat oleh: Gemini AI</p>
+            <h2 class="text-3xl font-bold mb-4 text-primary text-center">About This Web</h2>
+            <p class="text-secondary text-center mb-4">This website is designed for educational purposes to demonstrate link shortening technology and its core functionalities, including user authentication and data storage using Firebase. It also showcases how to implement dynamic content and a basic security warning system for URLs.</p>
+            <p class="text-secondary text-center">Created by: Gemini AI</p>
         </div>
 
         <!-- Link History Section -->
         <div class="bg-card p-8 md:p-12 rounded-2xl shadow-xl w-full max-w-2xl mt-8">
-            <h2 class="text-3xl font-bold mb-4 text-primary text-center">Riwayat Tautan</h2>
-            <div id="loading-history" class="text-center text-secondary">Memuat riwayat...</div>
+            <h2 class="text-3xl font-bold mb-4 text-primary text-center">Link History</h2>
             <ul id="history-list" class="flex flex-col gap-3">
                 <!-- Link history will be populated here by JavaScript -->
             </ul>
         </div>
-        <div id="user-id-display" class="bg-card p-4 rounded-xl shadow-lg mt-4 w-full max-w-2xl text-center text-sm text-gray-400">
-            ID Pengguna: <span id="user-id-span" class="font-mono">...</span>
-        </div>
+
     </div>
     
     <!-- Redirect and Warning UI -->
@@ -107,11 +98,11 @@
         
         <!-- Redirect Content (Left Side) -->
         <div class="w-full lg:w-2/3 flex flex-col items-center justify-center bg-card p-8 rounded-2xl shadow-xl">
-            <h1 class="text-4xl font-bold mb-4 text-primary" id="redirect-title">Membuat Tautan Unduhan</h1>
-            <p class="text-lg text-secondary mb-4" id="redirect-message">Harap tunggu 15 detik...</p>
+            <h1 class="text-4xl font-bold mb-4 text-primary" id="redirect-title">Creating Download Link</h1>
+            <p class="text-lg text-secondary mb-4" id="redirect-message">Please wait 15 seconds...</p>
             <div id="redirect-countdown" class="text-6xl font-bold text-blue-600 my-4">15</div>
             <button id="go-link-button" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-4 px-8 rounded-xl transition-colors duration-300 hidden mt-4">
-                Lanjut
+                Go Link
             </button>
         </div>
 
@@ -119,30 +110,30 @@
         <div class="w-full lg:w-1/3 flex flex-col gap-8">
             <!-- Google AdSense Automatic Ad Placeholder -->
             <div class="w-full text-center bg-card p-4 rounded-xl shadow-xl border border-gray-600">
-                <p class="text-sm text-gray-400">Placeholder Iklan Otomatis Google AdSense</p>
+                <p class="text-sm text-gray-400">Google AdSense Automatic Ad Placeholder</p>
                 <div class="h-24 bg-gray-700 rounded mt-2 flex items-center justify-center">
-                    <span class="text-gray-500">Ruang Iklan</span>
+                    <span class="text-gray-500">Ad Space</span>
                 </div>
             </div>
 
             <!-- Blog Breaking News -->
             <div class="bg-card p-6 rounded-2xl shadow-xl">
-                <h2 class="text-2xl font-bold mb-4 text-primary">Berita Terkini</h2>
+                <h2 class="text-2xl font-bold mb-4 text-primary">Breaking News</h2>
                 <div id="news-list" class="flex flex-col gap-4">
                     <div class="p-3 bg-gray-700 rounded-lg">
-                        <h3 class="font-semibold text-lg text-white">Gemini Meluncurkan Versi Baru</h3>
-                        <p class="text-sm text-gray-400">Google mengumumkan versi terbaru dari model bahasanya, menjanjikan peningkatan kinerja dan efisiensi.</p>
-                        <a href="#" class="text-blue-400 text-sm mt-1 inline-block hover:underline">Baca Selengkapnya</a>
+                        <h3 class="font-semibold text-lg text-white">Gemini Launches New Version</h3>
+                        <p class="text-sm text-gray-400">Google announced the latest version of their language model, promising improved performance and efficiency.</p>
+                        <a href="#" class="text-blue-400 text-sm mt-1 inline-block hover:underline">Read More</a>
                     </div>
                     <div class="p-3 bg-gray-700 rounded-lg">
-                        <h3 class="font-semibold text-lg text-white">Ponsel Pintar Baru Diluncurkan</h3>
-                        <p class="text-sm text-gray-400">Perusahaan teknologi terkemuka telah meluncurkan produk andalan terbarunya dengan fitur-fitur inovatif.</p>
-                        <a href="#" class="text-blue-400 text-sm mt-1 inline-block hover:underline">Baca Selengkapnya</a>
+                        <h3 class="font-semibold text-lg text-white">New Smartphone Launched</h3>
+                        <p class="text-sm text-gray-400">A leading tech company has launched its latest flagship product with innovative features.</p>
+                        <a href="#" class="text-blue-400 text-sm mt-1 inline-block hover:underline">Read More</a>
                     </div>
                     <div class="p-3 bg-gray-700 rounded-lg">
-                        <h3 class="font-semibold text-lg text-white">Tren AI dalam Kehidupan Sehari-hari</h3>
-                        <p class="text-sm text-gray-400">Analisis mendalam tentang bagaimana kecerdasan buatan terintegrasi ke dalam berbagai aspek kehidupan kita.</p>
-                        <a href="#" class="text-blue-400 text-sm mt-1 inline-block hover:underline">Baca Selengkapnya</a>
+                        <h3 class="font-semibold text-lg text-white">AI Trends in Daily Life</h3>
+                        <p class="text-sm text-gray-400">An in-depth analysis of how artificial intelligence is becoming integrated into various aspects of our lives.</p>
+                        <a href="#" class="text-blue-400 text-sm mt-1 inline-block hover:underline">Read More</a>
                     </div>
                 </div>
             </div>
@@ -153,42 +144,27 @@
     <!-- Security Warning UI -->
     <div id="warning-ui" class="hidden fixed inset-0 flex items-center justify-center text-center bg-gray-900 bg-opacity-90 z-50 p-4">
         <div class="bg-red-800 p-8 md:p-12 rounded-2xl shadow-xl w-full max-w-2xl text-white">
-            <h1 class="text-4xl font-bold mb-4">Situs Web Ini Mungkin Berbahaya</h1>
-            <p class="text-lg text-red-200 mb-4">Chrome mungkin telah memblokir situs ini karena mengandung konten yang berpotensi berbahaya, seperti penipuan phishing, malware, atau spam.</p>
+            <h1 class="text-4xl font-bold mb-4">This Website Might Be Dangerous</h1>
+            <p class="text-lg text-red-200 mb-4">Chrome might have blocked this site because it contains potentially harmful content, such as phishing scams, malware, or spam.</p>
             <div id="warning-details" class="bg-red-700 p-4 rounded-lg text-left text-sm hidden">
-                <h3 class="font-semibold mb-2">Detail:</h3>
+                <h3 class="font-semibold mb-2">Details:</h3>
                 <ul class="list-disc list-inside space-y-1">
-                    <li>URL ini telah ditandai sebagai mencurigakan oleh database keamanan kami.</li>
-                    <li>Mungkin mencoba mencuri informasi pribadi Anda atau menginstal perangkat lunak yang tidak diinginkan.</li>
-                    <li>Kami menyarankan Anda untuk tidak melanjutkan.</li>
+                    <li>This URL has been flagged as suspicious by our security database.</li>
+                    <li>It may try to steal your personal information or install unwanted software.</li>
+                    <li>We recommend you do not proceed.</li>
                 </ul>
             </div>
             <button id="show-details-button" class="mt-6 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors duration-300">
-                Tampilkan Detail
+                Show Details
             </button>
             <div class="flex flex-col sm:flex-row justify-center gap-4 mt-4">
                 <button id="go-back-button" class="bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-6 rounded-lg transition-colors duration-300">
-                    Kembali
+                    Go Back
                 </button>
                 <button id="proceed-button" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-lg transition-colors duration-300">
-                    Lanjutkan
+                    Proceed Anyway
                 </button>
             </div>
-        </div>
-    </div>
-
-    <!-- Password Input Modal -->
-    <div id="password-modal" class="modal hidden fixed inset-0 flex items-center justify-center z-50 p-4">
-        <div class="bg-card p-6 rounded-2xl shadow-xl text-center">
-            <h2 class="text-2xl font-bold mb-4 text-white">Masukkan Kata Sandi</h2>
-            <p class="text-sm text-secondary mt-2">Tautan ini dilindungi kata sandi. Masukkan kata sandi di bawah ini untuk melanjutkan.</p>
-            <input type="password" id="modal-password-input" class="p-3 mt-4 w-full rounded-lg border border-input bg-card text-white text-center focus:outline-none focus:ring-2 focus:focus-ring-blue">
-            <button id="submit-password-button" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors duration-300">
-                Lanjutkan
-            </button>
-            <button id="close-password-button" class="mt-4 bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors duration-300">
-                Batal
-            </button>
         </div>
     </div>
 
@@ -200,9 +176,9 @@
     <!-- QR Code Modal -->
     <div id="qr-modal" class="modal hidden fixed inset-0 flex items-center justify-center z-50 p-4">
         <div class="bg-card p-6 rounded-2xl shadow-xl text-center flex flex-col items-center">
-            <h2 class="text-2xl font-bold mb-4 text-primary">Kode QR</h2>
+            <h2 class="text-2xl font-bold mb-4 text-primary">QR Code</h2>
             <div id="qrcode-container" class="p-4 bg-white rounded-lg"></div>
-            <p class="text-sm text-secondary mt-2">Pindai kode QR ini untuk membuka tautan.</p>
+            <p class="text-sm text-secondary mt-2">Scan this QR code to open the link.</p>
             <button id="close-qr-button" class="mt-6 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors duration-300">Tutup</button>
         </div>
     </div>
@@ -219,8 +195,9 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, query, where, onSnapshot, runTransaction, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, query, where, onSnapshot, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
         
         setLogLevel('debug');
 
@@ -231,7 +208,15 @@
         let authReady = false;
         
         // --- Firebase Configuration ---
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const firebaseConfig = {
+            apiKey: "AIzaSyAlGXpZSyQab7riDteV5ppS3DXDJQHywKw",
+            authDomain: "modmanagerpro-248f5.firebaseapp.com",
+            projectId: "modmanagerpro-248f5",
+            storageBucket: "modmanagerpro-248f5.firebasestorage.app",
+            messagingSenderId: "594650288669",
+            appId: "1:594650288669:web:3308b084911e2ef7f1ecf4",
+            measurementId: "G-TE9234E3LP"
+        };
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
@@ -242,9 +227,7 @@
         const longUrlInput = document.getElementById('long-url-input');
         const shortenButton = document.getElementById('shorten-button');
         const customAliasInput = document.getElementById('custom-alias-input');
-        const passwordInput = document.getElementById('password-input');
         const expirySelect = document.getElementById('expiry-select');
-        const bulkShortenButton = document.getElementById('bulk-shorten-button');
         const resultContainer = document.getElementById('result-container');
         const shortUrlOutput = document.getElementById('short-url-output');
         const copyButton = document.getElementById('copy-button');
@@ -261,12 +244,6 @@
         const closeQrButton = document.getElementById('close-qr-button');
         const expiredModal = document.getElementById('expired-modal');
         const closeExpiredButton = document.getElementById('close-expired-button');
-        const passwordModal = document.getElementById('password-modal');
-        const modalPasswordInput = document.getElementById('modal-password-input');
-        const submitPasswordButton = document.getElementById('submit-password-button');
-        const closePasswordButton = document.getElementById('close-password-button');
-        const userIdSpan = document.getElementById('user-id-span');
-        const loadingHistory = document.getElementById('loading-history');
 
 
         // --- Utility Functions ---
@@ -293,33 +270,13 @@
             }, 1000);
         }
 
-        function getDeviceInfo() {
-            return {
-                device: /Mobi/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop',
-                os: navigator.platform
-            };
-        }
-
-        async function getGeoLocation() {
-            try {
-                const response = await fetch('https://ipapi.co/json/');
-                const data = await response.json();
-                return data.country_name || 'Tidak Diketahui';
-            } catch (error) {
-                console.error("Gagal mendapatkan lokasi:", error);
-                return 'Tidak Diketahui';
-            }
-        }
-
         // --- Firebase Initialization ---
         async function initializeFirebase() {
             try {
-                if (!app) {
-                    app = initializeApp(firebaseConfig);
-                    db = getFirestore(app);
-                    auth = getAuth(app);
-                }
-
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                
                 if (initialAuthToken) {
                     await signInWithCustomToken(auth, initialAuthToken);
                 } else {
@@ -327,9 +284,8 @@
                 }
 
                 userId = auth.currentUser.uid;
-                userIdSpan.textContent = userId;
                 authReady = true;
-                console.log("Berhasil masuk. ID Pengguna:", userId);
+                console.log("Berhasil masuk. User ID:", userId);
                 
                 handleUrlPath();
                 setupRealtimeHistory();
@@ -355,48 +311,31 @@
             }
             const linksCollection = collection(db, `artifacts/${appId}/public/data/short_urls`);
             const q = query(linksCollection, where('createdBy', '==', userId));
-            
-            loadingHistory.classList.remove('hidden');
 
             onSnapshot(q, (snapshot) => {
                 historyList.innerHTML = '';
-                loadingHistory.classList.add('hidden');
-                
-                if (snapshot.empty) {
-                    historyList.innerHTML = '<li class="text-center text-secondary">Belum ada tautan yang dibuat.</li>';
-                    return;
-                }
-                
                 snapshot.forEach((doc) => {
                     const data = doc.data();
                     const fullShortUrl = `https://${window.location.hostname}/${data.shortCode}`;
                     const listItem = document.createElement('li');
                     
-                    const expiresText = data.expiresAt ? `Kedaluwarsa: ${new Date(data.expiresAt.toDate()).toLocaleString()}` : 'Kedaluwarsa: Selamanya';
+                    const expiresText = data.expiresAt ? new Date(data.expiresAt.toDate()).toLocaleString() : 'Selamanya';
                     const clicksText = data.clicks !== undefined ? `${data.clicks} Klik` : '0 Klik';
-                    const passwordProtected = data.password ? `<span class="text-yellow-400"> (Dilindungi Kata Sandi)</span>` : '';
-                    
-                    const countryClicks = data.countryClicks ? Object.entries(data.countryClicks).map(([country, count]) => `${country}: ${count}`).join(', ') : '';
-                    const deviceClicks = data.deviceClicks ? Object.entries(data.deviceClicks).map(([device, count]) => `${device}: ${count}`).join(', ') : '';
 
                     listItem.className = "bg-gray-700 p-3 rounded-lg flex flex-col sm:flex-row justify-between items-center break-all";
                     listItem.innerHTML = `
                         <div class="flex-1 flex flex-col text-left">
-                            <span class="text-sm text-gray-400">Asli:</span>
+                            <span class="text-sm text-gray-400">Original:</span>
                             <a href="${data.longUrl}" target="_blank" class="text-white text-sm hover:underline">${data.longUrl}</a>
-                            <span class="text-sm text-gray-400 mt-2">Tautan Pendek:</span>
-                            <a href="${fullShortUrl}" target="_blank" class="text-blue-400 font-mono hover:underline">${fullShortUrl}</a>
-                            <span class="text-sm font-semibold text-white mt-1">${clicksText}${passwordProtected}</span>
-                            <span class="text-xs text-gray-400">${expiresText}</span>
-                            <span class="text-xs text-gray-400">Negara: ${countryClicks}</span>
-                            <span class="text-xs text-gray-400">Perangkat: ${deviceClicks}</span>
+                            <span class="text-sm text-gray-400 mt-2">Kedaluwarsa:</span>
+                            <span class="text-white text-sm">${expiresText}</span>
                         </div>
-                        <div class="flex flex-row mt-2 sm:mt-0 items-end gap-2">
+                        <div class="flex flex-col text-right mt-2 sm:mt-0 items-end gap-2">
+                            <span class="text-sm text-gray-400">Tautan Pendek:</span>
+                            <a href="${fullShortUrl}" target="_blank" class="text-blue-400 font-mono hover:underline">${fullShortUrl}</a>
+                            <span class="text-sm font-semibold text-white mt-1">${clicksText}</span>
                             <button class="bg-gray-600 hover:bg-gray-500 text-white font-semibold py-1 px-3 rounded-lg text-xs transition-colors duration-300 create-qr-button" data-link="${fullShortUrl}">
                                 Buat QR
-                            </button>
-                            <button class="bg-red-600 hover:bg-red-700 text-white font-semibold py-1 px-3 rounded-lg text-xs transition-colors duration-300 delete-button" data-short-code="${data.shortCode}">
-                                Hapus
                             </button>
                         </div>
                     `;
@@ -406,13 +345,6 @@
                     button.addEventListener('click', (e) => {
                         const link = e.target.dataset.link;
                         showQrModal(link);
-                    });
-                });
-                document.querySelectorAll('.delete-button').forEach(button => {
-                    button.addEventListener('click', async (e) => {
-                        const shortCode = e.target.dataset.shortCode;
-                        await deleteDoc(doc(db, `artifacts/${appId}/public/data/short_urls`, shortCode));
-                        showMessage("Tautan berhasil dihapus.");
                     });
                 });
             }, (error) => {
@@ -465,25 +397,34 @@
                             return; // Stop execution
                         }
 
-                        // Check for password protection
-                        if (docData.password) {
-                            passwordModal.classList.remove('hidden');
-                            submitPasswordButton.onclick = () => {
-                                if (modalPasswordInput.value === docData.password) {
-                                    passwordModal.classList.add('hidden');
-                                    incrementClickCountAndRedirect(docRef, docData.longUrl);
-                                } else {
-                                    showMessage("Kata sandi salah.");
+                        // Increment click count using a transaction for safety
+                        try {
+                            await runTransaction(db, async (transaction) => {
+                                const sfDoc = await transaction.get(docRef);
+                                if (!sfDoc.exists()) {
+                                    throw "Document does not exist!";
                                 }
-                            };
-                            closePasswordButton.onclick = () => {
-                                window.location.href = window.location.origin;
-                            };
-                            return;
+                                const newClicks = (sfDoc.data().clicks || 0) + 1;
+                                transaction.update(docRef, { clicks: newClicks });
+                            });
+                            console.log("Click count successfully updated!");
+                        } catch (e) {
+                            console.error("Transaction failed: ", e);
                         }
 
-                        incrementClickCountAndRedirect(docRef, docData.longUrl);
+                        const longUrl = docData.longUrl;
+                        if (longUrl) {
+                            const urlHost = new URL(longUrl).hostname;
+                            const isBlocked = blockedSites.some(site => urlHost.includes(site));
 
+                            if (isBlocked) {
+                                showWarningPage(longUrl);
+                            } else {
+                                startRedirectFlow(longUrl);
+                            }
+                        } else {
+                            window.location.href = window.location.origin;
+                        }
                     } else {
                         window.location.href = window.location.origin;
                     }
@@ -498,54 +439,16 @@
             }
         }
 
-        async function incrementClickCountAndRedirect(docRef, longUrl) {
-            // Increment click count using a transaction for safety
-            try {
-                const deviceInfo = getDeviceInfo();
-                const country = await getGeoLocation();
-
-                await runTransaction(db, async (transaction) => {
-                    const sfDoc = await transaction.get(docRef);
-                    if (!sfDoc.exists()) {
-                        throw "Document does not exist!";
-                    }
-                    const newClicks = (sfDoc.data().clicks || 0) + 1;
-                    const newCountryClicks = sfDoc.data().countryClicks || {};
-                    newCountryClicks[country] = (newCountryClicks[country] || 0) + 1;
-                    const newDeviceClicks = sfDoc.data().deviceClicks || {};
-                    newDeviceClicks[deviceInfo.device] = (newDeviceClicks[deviceInfo.device] || 0) + 1;
-
-                    transaction.update(docRef, { 
-                        clicks: newClicks,
-                        countryClicks: newCountryClicks,
-                        deviceClicks: newDeviceClicks
-                    });
-                });
-                console.log("Jumlah klik berhasil diperbarui!");
-            } catch (e) {
-                console.error("Transaksi gagal: ", e);
-            }
-
-            const urlHost = new URL(longUrl).hostname;
-            const isBlocked = blockedSites.some(site => urlHost.includes(site));
-
-            if (isBlocked) {
-                showWarningPage(longUrl);
-            } else {
-                startRedirectFlow(longUrl);
-            }
-        }
-
         function startRedirectFlow(longUrl) {
             redirectUI.classList.remove('hidden');
             redirectUI.classList.add('flex');
-            document.getElementById('redirect-title').textContent = "Membuat Tautan Unduhan";
-            document.getElementById('redirect-message').textContent = "Harap tunggu 15 detik...";
+            document.getElementById('redirect-title').textContent = "Creating Download Link";
+            document.getElementById('redirect-message').textContent = "Please wait 15 seconds...";
             goLinkButton.classList.add('hidden');
 
             startCountdown(15, () => {}, () => {
-                document.getElementById('redirect-title').textContent = "Tautan Siap!";
-                document.getElementById('redirect-message').textContent = "Silakan klik tombol di bawah untuk melanjutkan.";
+                document.getElementById('redirect-title').textContent = "Link Ready!";
+                document.getElementById('redirect-message').textContent = "Please click the button below to proceed.";
                 goLinkButton.classList.remove('hidden');
             });
 
@@ -561,9 +464,9 @@
             showDetailsButton.onclick = () => {
                 warningDetails.classList.toggle('hidden');
                 if (warningDetails.classList.contains('hidden')) {
-                    showDetailsButton.textContent = "Tampilkan Detail";
+                    showDetailsButton.textContent = "Show Details";
                 } else {
-                    showDetailsButton.textContent = "Sembunyikan Detail";
+                    showDetailsButton.textContent = "Hide Details";
                 }
             };
             
@@ -584,7 +487,6 @@
             }
             const longUrl = longUrlInput.value.trim();
             const customAlias = customAliasInput.value.trim();
-            const password = passwordInput.value.trim() || null;
             const expiryValue = expirySelect.value;
 
             if (!longUrl) {
@@ -592,34 +494,11 @@
                 return;
             }
             
-            await createShortLink(longUrl, customAlias, password, expiryValue);
-        });
-
-        bulkShortenButton.addEventListener('click', async () => {
-            if (!authReady) {
-                showMessage("Aplikasi sedang memuat, harap tunggu sebentar.");
-                return;
-            }
-            
-            const longUrls = prompt("Masukkan daftar URL yang dipisahkan baris baru:").split('\n').filter(url => url.trim() !== '');
-            if (longUrls.length === 0) {
-                showMessage("Tidak ada URL yang dimasukkan.");
-                return;
-            }
-
-            showMessage(`Membuat ${longUrls.length} tautan...`);
-
-            for (const longUrl of longUrls) {
-                await createShortLink(longUrl.trim());
-            }
-
-            showMessage("Semua tautan massal berhasil dibuat!");
-        });
-
-        async function createShortLink(longUrl, customAlias = null, password = null, expiryValue = 'forever') {
-             const shortCode = customAlias || Math.random().toString(36).substring(2, 8);
+            // Determine short code based on custom alias or generate random one
+            const shortCode = customAlias || Math.random().toString(36).substring(2, 8);
             
             shortenButton.disabled = true;
+            showMessage("Membuat tautan, harap tunggu...");
             
             const urlWithProtocol = longUrl.startsWith('http://') || longUrl.startsWith('https://') ? longUrl : `https://${longUrl}`;
             
@@ -630,7 +509,7 @@
 
                 // Check if custom alias already exists
                 if (docSnap.exists() && customAlias) {
-                    showMessage(`Alias kustom "${customAlias}" sudah ada. Silakan pilih yang lain.`);
+                    showMessage("Alias kustom sudah ada. Silakan pilih yang lain.");
                     shortenButton.disabled = false;
                     return;
                 }
@@ -661,11 +540,8 @@
                     shortCode: shortCode,
                     createdAt: new Date(),
                     createdBy: userId,
-                    clicks: 0,
+                    clicks: 0, // Initial click count
                     expiresAt: expiresAt,
-                    password: password,
-                    countryClicks: {},
-                    deviceClicks: {}
                 });
                 
                 const fullShortUrl = `https://${window.location.hostname}/${shortCode}`;
@@ -675,7 +551,6 @@
                 
                 longUrlInput.value = "";
                 customAliasInput.value = "";
-                passwordInput.value = "";
                 shortenButton.disabled = false;
                 showMessage("Tautan berhasil dibuat!");
 
@@ -684,7 +559,7 @@
                 showMessage("Gagal membuat tautan. Silakan coba lagi.");
                 shortenButton.disabled = false;
             }
-        }
+        });
 
         // --- Copy Link Logic ---
         copyButton.addEventListener('click', () => {
