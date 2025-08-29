@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="https://iili.io/KFlsOAX.png" type="image/png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
@@ -118,7 +119,9 @@
             <!-- Hasil dan QR Code -->
             <div id="result-container" class="hidden mt-6 bg-gray-100 p-4 rounded-lg border border-gray-200">
                 <div class="flex flex-col md:flex-row items-center gap-4">
-                    <div id="short-url-output" class="flex-grow text-gray-600 p-2 break-all font-mono text-lg"></div>
+                    <div class="flex-grow">
+                        <a id="short-url-output" class="text-gray-600 p-2 break-all font-mono text-lg hover:underline" href="#" target="_blank"></a>
+                    </div>
                     <div class="flex flex-col sm:flex-row gap-2 mt-4 sm:mt-0">
                         <button id="copy-button" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2">
                             <i class="fa-solid fa-copy"></i> Salin Link
@@ -490,7 +493,9 @@
                 
                 const fullShortUrl = getShortenedUrl(shortCode);
                 shortUrlOutput.textContent = fullShortUrl;
+                shortUrlOutput.href = fullShortUrl;
                 resultContainer.classList.remove('hidden');
+                generateQRCode(fullShortUrl);
                 
                 longUrlInput.value = "";
                 customDomainInput.value = "";
@@ -670,25 +675,32 @@
                     listItem.innerHTML = `
                         <div class="flex-grow">
                             <p class="text-xs text-gray-500">Tautan Asli:</p>
-                            <a href="${data.longUrl}" target="_blank" class="text-sm font-medium text-blue-600 hover:underline break-all">${longUrl}</a>
+                            <a href="${data.longUrl}" target="_blank" rel="noopener noreferrer" class="text-sm font-medium text-blue-600 hover:underline break-all">${longUrl}</a>
                             <p class="text-sm font-mono mt-2">${fullShortUrl}</p>
                             <p class="text-xs text-gray-500 mt-1">Klik: ${data.clicks || 0} | Kedaluwarsa: ${expiry}</p>
                         </div>
                         <div class="mt-4 sm:mt-0 flex flex-col gap-2 items-center justify-center">
                             <div class="w-24 h-24 p-2 rounded-lg bg-white custom-shadow">
-                                <div id="qrcode-${data.shortCode}"></div>
+                                <canvas id="qrcode-canvas-${docId}" class="w-full h-full"></canvas>
                             </div>
                             <div class="flex gap-2">
+                                <button class="copy-history-btn bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1 rounded-md" data-link="${fullShortUrl}">Salin</button>
+                                <button class="download-qr-history-btn bg-purple-500 hover:bg-purple-600 text-white text-xs px-3 py-1 rounded-md" data-id="${docId}">Unduh QR</button>
                                 <button class="edit-btn bg-yellow-500 hover:bg-yellow-600 text-white text-xs px-3 py-1 rounded-md" data-id="${docId}">Edit</button>
                                 <button class="delete-btn bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1 rounded-md" data-id="${docId}">Hapus</button>
                             </div>
                         </div>
                     `;
                     historyList.appendChild(listItem);
-                    new QRCode(document.getElementById(`qrcode-${data.shortCode}`), {
+
+                    // Generate QR Code on a canvas and make it available for download
+                    const qrCanvas = document.getElementById(`qrcode-canvas-${docId}`);
+                    new QRCode(qrCanvas, {
                         text: fullShortUrl,
                         width: 80,
-                        height: 80
+                        height: 80,
+                        colorDark: "#000000",
+                        colorLight: "#ffffff"
                     });
                 });
             }, (error) => {
@@ -723,6 +735,28 @@
                         console.error("Error removing document: ", e);
                         showMessage("Gagal menghapus tautan.");
                     }
+                }
+            }
+            if (e.target.classList.contains('copy-history-btn')) {
+                const linkToCopy = e.target.dataset.link;
+                navigator.clipboard.writeText(linkToCopy).then(() => {
+                    showMessage("Tautan berhasil disalin ke clipboard!");
+                }).catch(err => {
+                    console.error('Failed to copy text: ', err);
+                    showMessage("Gagal menyalin tautan.");
+                });
+            }
+            if (e.target.classList.contains('download-qr-history-btn')) {
+                const docId = e.target.dataset.id;
+                const qrCanvas = document.getElementById(`qrcode-canvas-${docId}`);
+                if (qrCanvas) {
+                    const link = document.createElement('a');
+                    link.href = qrCanvas.toDataURL('image/png');
+                    link.download = `shareu-qr-${docId}.png`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    showMessage("Kode QR berhasil diunduh!");
                 }
             }
         });
