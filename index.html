@@ -158,7 +158,7 @@
         setLogLevel('debug');
 
         // --- Firebase Configuration & Initialization ---
-        // Penanganan error saat variabel Canvas tidak terdefinisi
+        // Menangani error saat variabel Canvas tidak terdefinisi
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
             apiKey: "dummy-api-key",
@@ -255,10 +255,12 @@
         const initializeFirebase = async () => {
             loadingSpinner.classList.remove('hidden');
             try {
+                // Initialize Firebase app
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
 
+                // Sign in with custom token or anonymously
                 if (initialAuthToken) {
                     await signInWithCustomToken(auth, initialAuthToken);
                 } else {
@@ -282,12 +284,29 @@
         // --- Page Handling ---
         const handleUrlPath = async () => {
             const path = window.location.pathname.substring(1);
-            if (path) {
-                showPage('shortener'); // Start on shortener page if a path is present
+            console.log("Full path:", window.location.pathname);
+            console.log("Extracted path:", path);
+
+            // Cek apakah jalurnya adalah halaman beranda atau beranda dengan subdirektori.
+            // Gunakan pathSegments untuk mengatasi masalah jalur ganda
+            const pathSegments = path.split('/');
+            // Ambil bagian path yang relevan (misalnya, setelah domain dan subdirektori)
+            const shortCode = pathSegments[pathSegments.length - 1]; 
+            
+            console.log("Extracted short code:", shortCode);
+
+            // Cek apakah shortCode valid sebelum mencoba mengakses Firestore
+            if (!shortCode || shortCode.includes('.') || shortCode.includes('#')) {
+                showPage('shortener');
+                return;
+            }
+
+            if (shortCode) {
+                showPage('shortener'); // Tampilkan halaman shortener jika ada jalur
                 loadingSpinner.classList.remove('hidden');
                 
                 try {
-                    const docRef = doc(db, `artifacts/${appId}/public/data/short_urls`, path);
+                    const docRef = doc(db, `artifacts/${appId}/public/data/short_urls`, shortCode);
                     const docSnap = await getDoc(docRef);
 
                     if (docSnap.exists()) {
@@ -305,6 +324,7 @@
                             incrementClickCountAndRedirect(docRef, docData.longUrl);
                         }
                     } else {
+                        // Jika tidak ada dokumen, kembali ke beranda
                         window.location.href = window.location.origin;
                     }
                 } catch (e) {
@@ -417,6 +437,33 @@
                 window.location.href = longUrl;
             }
         }
+        
+        const startRedirectFlow = (longUrl) => {
+            redirectUI.classList.remove('hidden');
+            document.getElementById('redirect-title').textContent = 'Your Download Link Is Ready';
+            document.getElementById('redirect-message').textContent = 'Please wait 15 seconds...';
+            document.getElementById('redirect-countdown').classList.remove('hidden');
+            goLinkButton.classList.add('hidden');
+            startCountdown(15, () => {
+                document.getElementById('redirect-title').textContent = 'Your Link is Ready!';
+                document.getElementById('redirect-message').textContent = 'Click below to proceed.';
+                document.getElementById('redirect-countdown').classList.add('hidden');
+                goLinkButton.classList.remove('hidden');
+                goLinkButton.onclick = () => window.location.href = longUrl;
+            });
+        };
+
+        const showWarningPage = (longUrl) => {
+            warningUI.classList.remove('hidden');
+            goBackButton.onclick = () => {
+                warningUI.classList.add('hidden');
+                window.location.href = window.location.origin;
+            };
+            proceedButton.onclick = () => {
+                warningUI.classList.add('hidden');
+                window.location.href = longUrl;
+            };
+        };
         
         // --- History Page ---
         const setupRealtimeHistory = () => {
