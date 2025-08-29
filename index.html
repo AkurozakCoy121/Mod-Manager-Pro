@@ -26,6 +26,37 @@
             background-size: cover;
             background-position: center;
         }
+        .slider-container {
+            width: 100%;
+            height: 50px;
+            background-color: #e2e8f0;
+            border-radius: 9999px;
+            position: relative;
+            cursor: pointer;
+            user-select: none;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .slider-thumb {
+            width: 50px;
+            height: 50px;
+            background-color: #3b82f6;
+            border-radius: 9999px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            transition: transform 0.2s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        .slider-text {
+            color: #4a5568;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body class="flex flex-col min-h-screen">
@@ -70,8 +101,9 @@
                         <input type="text" id="custom-domain-input" placeholder="my-custom-link" class="flex-grow p-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
                         <span id="domain-status" class="ml-2 text-xl"></span>
                     </div>
-                    <div id="suggestion-container" class="mt-2 text-sm text-gray-600 hidden">
-                        <p>Suggestion: <a href="#" id="suggestion-link" class="text-blue-500 hover:underline"></a></p>
+                    <div id="suggestion-container" class="mt-2 text-sm text-gray-600 hidden flex flex-col gap-2">
+                        <p>Suggestion:</p>
+                        <div id="suggestion-list" class="flex flex-wrap gap-2"></div>
                     </div>
                 </div>
                 <div class="form-group">
@@ -87,9 +119,14 @@
             <div id="result-container" class="hidden mt-6 bg-gray-100 p-4 rounded-lg border border-gray-200">
                 <div class="flex flex-col md:flex-row items-center gap-4">
                     <div id="short-url-output" class="flex-grow text-gray-600 p-2 break-all font-mono text-lg"></div>
-                    <button id="copy-button" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg transition-colors duration-200">
-                        Copy
-                    </button>
+                    <div class="flex flex-col sm:flex-row gap-2 mt-4 sm:mt-0">
+                        <button id="copy-button" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-copy"></i> Salin Link
+                        </button>
+                        <button id="download-qr-button" class="bg-purple-500 hover:bg-purple-600 text-white py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-qrcode"></i> Unduh QR
+                        </button>
+                    </div>
                 </div>
                 <div id="qrcode-container" class="mt-4 flex justify-center"></div>
             </div>
@@ -128,27 +165,63 @@
             </div>
         </div>
 
+        <!-- Modal Edit -->
+        <div id="edit-modal" class="hidden fixed inset-0 flex items-center justify-center text-center bg-gray-900 bg-opacity-90 z-[101] p-4">
+            <div class="container-bg p-8 md:p-12 rounded-2xl custom-shadow w-full max-w-lg">
+                <h2 class="text-2xl font-bold mb-4">Edit Link</h2>
+                <input type="hidden" id="edit-doc-id">
+                <div class="space-y-4">
+                    <div>
+                        <label for="edit-long-url" class="block text-sm font-medium text-gray-700 text-left">Original URL</label>
+                        <input type="url" id="edit-long-url" class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="edit-custom-domain" class="block text-sm font-medium text-gray-700 text-left">Custom Domain</label>
+                        <input type="text" id="edit-custom-domain" class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="edit-expiry-date" class="block text-sm font-medium text-gray-700 text-left">Expiry Date</label>
+                        <input type="date" id="edit-expiry-date" class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+                <div class="flex justify-end gap-4 mt-6">
+                    <button id="cancel-edit-button" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-6 rounded-md transition-colors duration-200">
+                        Cancel
+                    </button>
+                    <button id="save-edit-button" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-md transition-colors duration-200">
+                        Save
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- UI Pengalihan dan Peringatan (Seperti sebelumnya) -->
-        <div id="redirect-ui" class="hidden fixed inset-0 flex items-center justify-center text-center bg-gray-900 bg-opacity-90 z-[100] p-4 bg-cover-random">
+        <div id="redirect-ui" class="hidden fixed inset-0 flex flex-col items-center justify-center text-center bg-gray-900 bg-opacity-90 z-[100] p-4 bg-cover-random">
             <div class="container-bg p-8 md:p-12 rounded-2xl custom-shadow w-full max-w-2xl">
-                <h1 class="text-4xl font-bold mb-4 text-blue-600" id="redirect-title">Your Download Link Is Ready</h1>
-                <p class="text-lg text-gray-600 mb-4" id="redirect-message">Please wait 15 seconds...</p>
-                <div id="redirect-countdown" class="text-6xl font-bold text-blue-600 my-4">15</div>
+                <h1 class="text-4xl font-bold mb-4 text-blue-600" id="redirect-title">Tautan Siap</h1>
+                <p class="text-lg text-gray-600 mb-4" id="redirect-message">Silahkan selesaikan verifikasi berikut</p>
+                <div id="drag-container" class="slider-container my-4">
+                    <div class="slider-thumb" id="drag-thumb"><i class="fa-solid fa-arrow-right"></i></div>
+                    <span class="slider-text">Drag to Unlock</span>
+                </div>
+                <div id="redirect-countdown-container" class="hidden">
+                    <div id="redirect-countdown" class="text-6xl font-bold text-blue-600 my-4">15</div>
+                </div>
                 <button id="go-link-button" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-4 px-8 rounded-xl transition-colors duration-300 hidden mt-4">
-                    Continue
+                    Lanjutkan
                 </button>
             </div>
         </div>
         <div id="warning-ui" class="hidden fixed inset-0 flex items-center justify-center text-center bg-gray-900 bg-opacity-90 z-[100] p-4">
             <div class="bg-red-800 p-8 md:p-12 rounded-2xl custom-shadow w-full max-w-2xl text-white">
-                <h1 class="text-4xl font-bold mb-4">This Website May Be Dangerous</h1>
-                <p class="text-lg text-red-200 mb-4">This site has been flagged as potentially harmful by our security database.</p>
+                <h1 class="text-4xl font-bold mb-4">Situs Web Ini Mungkin Berbahaya</h1>
+                <p class="text-lg text-red-200 mb-4">Situs ini telah ditandai sebagai berpotensi berbahaya oleh database keamanan kami.</p>
                 <div class="flex flex-col sm:flex-row justify-center gap-4 mt-4">
                     <button id="go-back-button" class="bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-6 rounded-lg transition-colors duration-300">
-                        Go Back
+                        Kembali
                     </button>
                     <button id="proceed-button" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-lg transition-colors duration-300">
-                        Proceed Anyway
+                        Lanjutkan
                     </button>
                 </div>
             </div>
@@ -163,7 +236,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, query, where, onSnapshot, runTransaction, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, query, where, onSnapshot, runTransaction, addDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
         setLogLevel('debug');
@@ -184,6 +257,9 @@
 
         let db, auth;
         let userId = null;
+        let isDragging = false;
+        let dragContainerWidth;
+        const DRAG_THRESHOLD = 0.9; // 90% of container width
 
         // --- UI Elements ---
         const navButtons = document.querySelectorAll('.nav-btn');
@@ -197,6 +273,7 @@
         const resultContainer = document.getElementById('result-container');
         const shortUrlOutput = document.getElementById('short-url-output');
         const copyButton = document.getElementById('copy-button');
+        const downloadQrButton = document.getElementById('download-qr-button');
         const qrcodeContainer = document.getElementById('qrcode-container');
         const historyList = document.getElementById('history-list');
         const forumPosts = document.getElementById('forum-posts');
@@ -211,7 +288,19 @@
         const proceedButton = document.getElementById('proceed-button');
         const userIdSpan = document.getElementById('user-id-span');
         const suggestionContainer = document.getElementById('suggestion-container');
-        const suggestionLink = document.getElementById('suggestion-link');
+        const suggestionList = document.getElementById('suggestion-list');
+
+        const dragContainer = document.getElementById('drag-container');
+        const dragThumb = document.getElementById('drag-thumb');
+        const sliderText = document.querySelector('.slider-text');
+
+        const editModal = document.getElementById('edit-modal');
+        const editDocIdInput = document.getElementById('edit-doc-id');
+        const editLongUrlInput = document.getElementById('edit-long-url');
+        const editCustomDomainInput = document.getElementById('edit-custom-domain');
+        const editExpiryDateInput = document.getElementById('edit-expiry-date');
+        const saveEditButton = document.getElementById('save-edit-button');
+        const cancelEditButton = document.getElementById('cancel-edit-button');
 
         let currentPage = 'shortener';
 
@@ -233,13 +322,14 @@
         };
         
         const setRandomBackground = () => {
-            const randomNumber = Math.floor(Math.random() * 1000) + 1; // Unsplash random photo
+            const randomNumber = Math.floor(Math.random() * 1000) + 1;
             redirectUI.style.backgroundImage = `url('https://picsum.photos/1920/1080?random=${randomNumber}')`;
         };
 
         const startCountdown = (duration, onComplete) => {
             let timer = duration;
             document.getElementById('redirect-countdown').textContent = timer;
+            document.getElementById('redirect-countdown-container').classList.remove('hidden');
             const interval = setInterval(() => {
                 timer--;
                 document.getElementById('redirect-countdown').textContent = timer;
@@ -271,25 +361,34 @@
         };
 
         const normalizeSlug = (input) => {
-            return input.replace(/ /g, '-').toLowerCase();
+            return input.replace(/[^a-zA-Z0-9-]/g, '').replace(/ +/g, '-').toLowerCase();
         };
 
-        // --- Firebase Initialization and Auth ---
+        const generateUniqueSuggestions = (input, count) => {
+            const normalized = normalizeSlug(input);
+            const suggestions = new Set();
+            suggestions.add(normalized);
+            
+            while (suggestions.size < count) {
+                const random = Math.random().toString(36).substring(2, 6);
+                const newSuggestion = `${normalized}-${random}`;
+                suggestions.add(newSuggestion);
+            }
+            return Array.from(suggestions);
+        };
+
+        // --- Firebase Configuration and Initialization ---
         const initializeFirebase = async () => {
             loadingSpinner.classList.remove('hidden');
             try {
-                // Initialize Firebase app
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
-
-                // Sign in with custom token or anonymously
                 if (initialAuthToken) {
                     await signInWithCustomToken(auth, initialAuthToken);
                 } else {
                     await signInAnonymously(auth);
                 }
-
                 userId = auth.currentUser.uid;
                 userIdSpan.textContent = userId;
                 
@@ -307,24 +406,14 @@
         // --- Page Handling ---
         const handleUrlPath = async () => {
             const path = window.location.pathname.substring(1);
-            console.log("Full path:", window.location.pathname);
-            console.log("Extracted path:", path);
-
-            // Cek apakah jalurnya adalah halaman beranda atau beranda dengan subdirektori.
-            // Gunakan pathSegments untuk mengatasi masalah jalur ganda
             const pathSegments = path.split('/');
-            // Ambil bagian path yang relevan (misalnya, setelah domain dan subdirektori)
             const shortCode = pathSegments[pathSegments.length - 1]; 
             
-            console.log("Extracted short code:", shortCode);
-
-            // Cek apakah shortCode valid sebelum mencoba mengakses Firestore
             if (!shortCode || shortCode.includes('.') || shortCode.includes('#') || shortCode.includes(' ')) {
                 showPage('shortener');
                 return;
             }
-
-            // Langsung tampilkan UI pengalihan saat ada shortCode, bukan halaman shortener
+            
             redirectUI.classList.remove('hidden');
             setRandomBackground();
             loadingSpinner.classList.remove('hidden');
@@ -337,18 +426,17 @@
                     const docData = docSnap.data();
                     const now = new Date();
                     const expiryDate = docData.expiryDate ? new Date(docData.expiryDate) : null;
-
                     if (expiryDate && now > expiryDate) {
                         redirectUI.classList.remove('hidden');
-                        document.getElementById('redirect-title').textContent = 'Link Expired';
-                        document.getElementById('redirect-message').textContent = 'This link has expired and is no longer active.';
-                        document.getElementById('redirect-countdown').classList.add('hidden');
+                        document.getElementById('redirect-title').textContent = 'Link Kedaluwarsa';
+                        document.getElementById('redirect-message').textContent = 'Tautan ini telah kedaluwarsa dan tidak lagi aktif.';
+                        dragContainer.classList.add('hidden');
+                        document.getElementById('redirect-countdown-container').classList.add('hidden');
                         goLinkButton.classList.add('hidden');
                     } else {
-                        incrementClickCountAndRedirect(docRef, docData.longUrl);
+                        startRedirectFlow(docRef, docData.longUrl);
                     }
                 } else {
-                    // Jika tidak ada dokumen, kembali ke beranda
                     window.location.href = window.location.origin;
                 }
             } catch (e) {
@@ -362,20 +450,19 @@
         // --- Link Shortening Logic ---
         shortenButton.addEventListener('click', async () => {
             const longUrl = longUrlInput.value.trim();
-            const customSlug = customDomainInput.value.trim();
+            const customSlug = normalizeSlug(customDomainInput.value.trim());
             const expiryDate = expiryDateInput.value;
 
             if (!longUrl) {
-                showMessage("Please enter a valid URL.");
+                showMessage("Mohon masukkan URL yang valid.");
                 return;
             }
 
             const shortCode = customSlug || Math.random().toString(36).substring(2, 8);
             const urlWithProtocol = longUrl.startsWith('http://') || longUrl.startsWith('https://') ? longUrl : `https://${longUrl}`;
             
-            // Validasi custom slug
-            if (customSlug && !/^[a-zA-Z0-9_-]+$/.test(customSlug)) {
-                showMessage("Custom domain only accepts letters, numbers, dashes, and underscores.");
+            if (customSlug && !/^[a-zA-Z0-9-]+$/.test(customSlug)) {
+                showMessage("Custom domain hanya menerima huruf, angka, dan tanda hubung.");
                 return;
             }
 
@@ -387,7 +474,7 @@
 
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists() && customSlug) {
-                    showMessage("This custom domain is already in use. Please choose another.");
+                    showMessage("Custom domain ini sudah digunakan. Mohon pilih yang lain.");
                     shortenButton.disabled = false;
                     return;
                 }
@@ -404,42 +491,48 @@
                 const fullShortUrl = getShortenedUrl(shortCode);
                 shortUrlOutput.textContent = fullShortUrl;
                 resultContainer.classList.remove('hidden');
-                generateQRCode(fullShortUrl);
                 
                 longUrlInput.value = "";
                 customDomainInput.value = "";
                 expiryDateInput.value = "";
                 shortenButton.disabled = false;
-                showMessage("Link created successfully!");
+                showMessage("Tautan berhasil dibuat!");
 
             } catch (e) {
                 console.error("Error creating document: ", e);
-                showMessage("Failed to create link. Please try again.");
+                showMessage("Gagal membuat tautan. Mohon coba lagi.");
                 shortenButton.disabled = false;
             }
         });
 
-        // --- Custom Domain Check and Suggestion ---
+        // --- Custom Domain Check and Suggestions ---
         let debounceTimer;
-        customDomainInput.addEventListener('input', () => {
+        customDomainInput.addEventListener('input', async () => {
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(async () => {
                 const slug = customDomainInput.value.trim();
                 const normalizedSlug = normalizeSlug(slug);
 
+                suggestionList.innerHTML = '';
+                suggestionContainer.classList.add('hidden');
+
                 if (slug.length > 0) {
                     if (slug !== normalizedSlug) {
+                        const suggestions = generateUniqueSuggestions(slug, 3);
+                        suggestions.forEach(suggestion => {
+                            const suggestionButton = document.createElement('button');
+                            suggestionButton.textContent = suggestion;
+                            suggestionButton.className = "px-3 py-1 bg-blue-100 text-blue-800 rounded-full hover:bg-blue-200 transition-colors duration-200";
+                            suggestionButton.addEventListener('click', () => {
+                                customDomainInput.value = suggestion;
+                                suggestionContainer.classList.add('hidden');
+                            });
+                            suggestionList.appendChild(suggestionButton);
+                        });
                         suggestionContainer.classList.remove('hidden');
-                        suggestionLink.textContent = normalizedSlug;
-                    } else {
-                        suggestionContainer.classList.add('hidden');
                     }
-
-                    if (!/^[a-zA-Z0-9_-]+$/.test(slug)) {
-                        domainStatus.innerHTML = '<i class="fa-solid fa-times text-red-500"></i>';
-                        return;
-                    }
-                    const docRef = doc(db, `artifacts/${appId}/public/data/short_urls`, slug);
+                    
+                    const docRef = doc(db, `artifacts/${appId}/public/data/short_urls`, normalizedSlug);
                     const docSnap = await getDoc(docRef);
                     if (docSnap.exists()) {
                         domainStatus.innerHTML = '<i class="fa-solid fa-times text-red-500"></i>';
@@ -448,15 +541,8 @@
                     }
                 } else {
                     domainStatus.innerHTML = '';
-                    suggestionContainer.classList.add('hidden');
                 }
-            }, 300); // Debounce for 300ms
-        });
-
-        suggestionLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            customDomainInput.value = suggestionLink.textContent;
-            suggestionContainer.classList.add('hidden');
+            }, 300);
         });
 
         // --- Link Redirection and Click Count ---
@@ -465,40 +551,80 @@
                 await runTransaction(db, async (transaction) => {
                     const sfDoc = await transaction.get(docRef);
                     if (!sfDoc.exists()) {
-                        throw "Document does not exist!";
+                        throw "Dokumen tidak ada!";
                     }
                     const newClicks = (sfDoc.data().clicks || 0) + 1;
                     transaction.update(docRef, { clicks: newClicks });
                 });
-                console.log("Click count updated successfully!");
+                console.log("Jumlah klik berhasil diperbarui!");
                 const urlHost = new URL(longUrl).hostname;
                 const isBlocked = ['phishing-demo.com', 'malware-example.org'].some(site => urlHost.includes(site));
 
                 if (isBlocked) {
                     showWarningPage(longUrl);
                 } else {
-                    startRedirectFlow(longUrl);
+                    goLinkButton.onclick = () => window.location.href = longUrl;
                 }
             } catch (e) {
-                console.error("Transaction failed: ", e);
+                console.error("Transaksi gagal: ", e);
                 window.location.href = longUrl;
             }
         }
         
-        const startRedirectFlow = (longUrl) => {
+        const startRedirectFlow = (docRef, longUrl) => {
             redirectUI.classList.remove('hidden');
-            document.getElementById('redirect-title').textContent = 'Your Download Link Is Ready';
-            document.getElementById('redirect-message').textContent = 'Please wait 15 seconds...';
-            document.getElementById('redirect-countdown').classList.remove('hidden');
-            goLinkButton.classList.add('hidden');
-            startCountdown(15, () => {
-                document.getElementById('redirect-title').textContent = 'Your Link is Ready!';
-                document.getElementById('redirect-message').textContent = 'Click below to proceed.';
-                document.getElementById('redirect-countdown').classList.add('hidden');
-                goLinkButton.textContent = 'Continue'; // Mengubah teks tombol
-                goLinkButton.classList.remove('hidden');
-                goLinkButton.onclick = () => window.location.href = longUrl;
-            });
+            document.getElementById('redirect-title').textContent = 'Tautan Siap';
+            document.getElementById('redirect-message').textContent = 'Silahkan selesaikan verifikasi berikut';
+            dragContainer.classList.remove('hidden');
+            dragThumb.style.transform = `translateX(0px)`;
+            
+            let hasVerified = false;
+
+            const startDrag = (e) => {
+                isDragging = true;
+                e.preventDefault();
+                dragContainerWidth = dragContainer.offsetWidth;
+            };
+
+            const doDrag = (e) => {
+                if (!isDragging) return;
+                let clientX = e.clientX || e.touches[0].clientX;
+                let newX = clientX - dragContainer.getBoundingClientRect().left - dragThumb.offsetWidth / 2;
+                newX = Math.max(0, Math.min(newX, dragContainerWidth - dragThumb.offsetWidth));
+                dragThumb.style.transform = `translateX(${newX}px)`;
+
+                if (newX >= dragContainerWidth * DRAG_THRESHOLD && !hasVerified) {
+                    hasVerified = true;
+                    dragThumb.style.transform = `translateX(${dragContainerWidth - dragThumb.offsetWidth}px)`;
+                    dragContainer.classList.add('bg-green-500');
+                    sliderText.textContent = "Berhasil!";
+                    
+                    setTimeout(() => {
+                        dragContainer.classList.add('hidden');
+                        document.getElementById('redirect-title').textContent = 'Tautan Anda Siap!';
+                        document.getElementById('redirect-message').textContent = 'Tunggu 15 detik untuk melanjutkan...';
+                        startCountdown(15, () => {
+                            document.getElementById('redirect-message').textContent = 'Klik tombol di bawah untuk melanjutkan.';
+                            goLinkButton.classList.remove('hidden');
+                            incrementClickCountAndRedirect(docRef, longUrl);
+                        });
+                    }, 500);
+                }
+            };
+
+            const stopDrag = () => {
+                isDragging = false;
+                if (!hasVerified) {
+                    dragThumb.style.transform = `translateX(0px)`;
+                }
+            };
+
+            dragContainer.addEventListener('mousedown', startDrag);
+            document.addEventListener('mousemove', doDrag);
+            document.addEventListener('mouseup', stopDrag);
+            dragContainer.addEventListener('touchstart', startDrag);
+            document.addEventListener('touchmove', doDrag);
+            document.addEventListener('touchend', stopDrag);
         };
 
         const showWarningPage = (longUrl) => {
@@ -515,7 +641,7 @@
         
         // --- History Page ---
         const setupRealtimeHistory = () => {
-            if (!db) return; // Tambahkan cek untuk memastikan db sudah diinisialisasi
+            if (!db) return;
             const linksCollection = collection(db, `artifacts/${appId}/public/data/short_urls`);
             const q = query(linksCollection, where('createdBy', '==', userId));
             
@@ -527,53 +653,120 @@
                 loadingHistory.classList.add('hidden');
                 
                 if (snapshot.empty) {
-                    historyList.innerHTML = '<p class="text-center text-gray-500">No links created yet.</p>';
+                    historyList.innerHTML = '<p class="text-center text-gray-500">Belum ada tautan yang dibuat.</p>';
                     return;
                 }
 
                 snapshot.forEach((doc) => {
                     const data = doc.data();
+                    const docId = doc.id;
                     const listItem = document.createElement('div');
                     listItem.className = "bg-gray-50 p-4 rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between";
                     
                     const longUrl = data.longUrl.length > 50 ? `${data.longUrl.substring(0, 50)}...` : data.longUrl;
                     const fullShortUrl = getShortenedUrl(data.shortCode);
-                    const expiry = data.expiryDate ? new Date(data.expiryDate).toLocaleDateString() : 'Never';
+                    const expiry = data.expiryDate ? new Date(data.expiryDate).toLocaleDateString() : 'Tidak Ada';
                     
                     listItem.innerHTML = `
                         <div class="flex-grow">
-                            <p class="text-xs text-gray-500">Original Link:</p>
+                            <p class="text-xs text-gray-500">Tautan Asli:</p>
                             <a href="${data.longUrl}" target="_blank" class="text-sm font-medium text-blue-600 hover:underline break-all">${longUrl}</a>
                             <p class="text-sm font-mono mt-2">${fullShortUrl}</p>
-                            <p class="text-xs text-gray-500 mt-1">Clicks: ${data.clicks || 0} | Expires: ${expiry}</p>
+                            <p class="text-xs text-gray-500 mt-1">Klik: ${data.clicks || 0} | Kedaluwarsa: ${expiry}</p>
                         </div>
-                        <div class="mt-4 sm:mt-0 flex items-center justify-center w-32 h-32 p-2 rounded-lg bg-white custom-shadow">
-                            <div id="qrcode-${data.shortCode}"></div>
+                        <div class="mt-4 sm:mt-0 flex flex-col gap-2 items-center justify-center">
+                            <div class="w-24 h-24 p-2 rounded-lg bg-white custom-shadow">
+                                <div id="qrcode-${data.shortCode}"></div>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="edit-btn bg-yellow-500 hover:bg-yellow-600 text-white text-xs px-3 py-1 rounded-md" data-id="${docId}">Edit</button>
+                                <button class="delete-btn bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1 rounded-md" data-id="${docId}">Hapus</button>
+                            </div>
                         </div>
                     `;
                     historyList.appendChild(listItem);
                     new QRCode(document.getElementById(`qrcode-${data.shortCode}`), {
                         text: fullShortUrl,
-                        width: 100,
-                        height: 100
+                        width: 80,
+                        height: 80
                     });
                 });
             }, (error) => {
                 console.error("Error fetching history: ", error);
-                showMessage("Failed to load link history.");
+                showMessage("Gagal memuat riwayat tautan.");
             });
         };
 
+        // --- Edit and Delete Logic ---
+        document.addEventListener('click', async (e) => {
+            if (e.target.classList.contains('edit-btn')) {
+                const docId = e.target.dataset.id;
+                const docRef = doc(db, `artifacts/${appId}/public/data/short_urls`, docId);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    editDocIdInput.value = docId;
+                    editLongUrlInput.value = data.longUrl;
+                    editCustomDomainInput.value = data.shortCode;
+                    editExpiryDateInput.value = data.expiryDate || '';
+                    editModal.classList.remove('hidden');
+                }
+            }
+            if (e.target.classList.contains('delete-btn')) {
+                const docId = e.target.dataset.id;
+                if (confirm('Apakah Anda yakin ingin menghapus tautan ini?')) {
+                    try {
+                        const docRef = doc(db, `artifacts/${appId}/public/data/short_urls`, docId);
+                        await deleteDoc(docRef);
+                        showMessage("Tautan berhasil dihapus!");
+                    } catch (e) {
+                        console.error("Error removing document: ", e);
+                        showMessage("Gagal menghapus tautan.");
+                    }
+                }
+            }
+        });
+
+        saveEditButton.addEventListener('click', async () => {
+            const docId = editDocIdInput.value;
+            const newLongUrl = editLongUrlInput.value.trim();
+            const newCustomDomain = normalizeSlug(editCustomDomainInput.value.trim());
+            const newExpiryDate = editExpiryDateInput.value;
+
+            if (!newLongUrl) {
+                showMessage("URL asli tidak boleh kosong.");
+                return;
+            }
+
+            try {
+                const docRef = doc(db, `artifacts/${appId}/public/data/short_urls`, docId);
+                await updateDoc(docRef, {
+                    longUrl: newLongUrl,
+                    shortCode: newCustomDomain,
+                    expiryDate: newExpiryDate || null,
+                });
+                editModal.classList.add('hidden');
+                showMessage("Tautan berhasil diperbarui!");
+            } catch (e) {
+                console.error("Error updating document: ", e);
+                showMessage("Gagal memperbarui tautan.");
+            }
+        });
+
+        cancelEditButton.addEventListener('click', () => {
+            editModal.classList.add('hidden');
+        });
+
         // --- Forum Page ---
         const setupForumListener = () => {
-            if (!db) return; // Tambahkan cek untuk memastikan db sudah diinisialisasi
+            if (!db) return;
             const forumCollection = collection(db, `artifacts/${appId}/public/data/forum`);
             const q = query(forumCollection);
             
             onSnapshot(q, (snapshot) => {
                 forumPosts.innerHTML = '';
                 if (snapshot.empty) {
-                    forumPosts.innerHTML = '<p class="text-center text-gray-500">No posts yet. Be the first to start a discussion!</p>';
+                    forumPosts.innerHTML = '<p class="text-center text-gray-500">Belum ada postingan. Jadilah yang pertama memulai diskusi!</p>';
                 } else {
                     snapshot.forEach(doc => {
                         const postData = doc.data();
@@ -595,7 +788,7 @@
         postButton.addEventListener('click', async () => {
             const content = forumInput.value.trim();
             if (!content) {
-                showMessage("Please write something to post.");
+                showMessage("Mohon tulis sesuatu untuk diposting.");
                 return;
             }
 
@@ -606,10 +799,10 @@
                     createdAt: new Date(),
                 });
                 forumInput.value = '';
-                showMessage("Post created successfully!");
+                showMessage("Postingan berhasil dibuat!");
             } catch (e) {
                 console.error("Error adding forum post:", e);
-                showMessage("Failed to create post. Please try again.");
+                showMessage("Gagal membuat postingan. Mohon coba lagi.");
             }
         });
 
@@ -623,11 +816,24 @@
         copyButton.addEventListener('click', () => {
             const urlToCopy = shortUrlOutput.textContent;
             navigator.clipboard.writeText(urlToCopy).then(() => {
-                showMessage("Link copied to clipboard!");
+                showMessage("Tautan berhasil disalin ke clipboard!");
             }).catch(err => {
                 console.error('Failed to copy text: ', err);
-                showMessage("Failed to copy link.");
+                showMessage("Gagal menyalin tautan.");
             });
+        });
+
+        downloadQrButton.addEventListener('click', () => {
+            const qrCanvas = qrcodeContainer.querySelector('canvas');
+            if (qrCanvas) {
+                const link = document.createElement('a');
+                link.href = qrCanvas.toDataURL('image/png');
+                link.download = `shareu-qr-${shortUrlOutput.textContent.split('/').pop()}.png`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                showMessage("Kode QR berhasil diunduh!");
+            }
         });
 
         // Initial App Load
