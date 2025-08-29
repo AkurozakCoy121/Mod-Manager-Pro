@@ -91,7 +91,6 @@
         let authReady = false;
         
         // --- Konfigurasi Firebase ---
-        // Variabel ini disediakan oleh lingkungan Canvas dan mungkin tidak selalu ada
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
@@ -137,38 +136,39 @@
             }, 1000);
         }
 
-        // --- Logika Autentikasi dan URL ---
-        // Inisialisasi Firebase dan autentikasi
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                userId = user.uid;
-                authReady = true;
-                handleUrlPath();
-            } else {
-                try {
-                    // Coba masuk dengan token kustom terlebih dahulu
-                    if (initialAuthToken) {
-                        await signInWithCustomToken(auth, initialAuthToken);
-                        console.log("Signed in with custom token.");
-                    } else {
-                        // Jika tidak ada token kustom, masuk secara anonim
-                        await signInAnonymously(auth);
-                        console.log("Signed in anonymously.");
-                    }
-                } catch (error) {
-                    console.error("Failed to sign in:", error);
-                    showMessage("Failed to sign in. Please try again later.");
-                }
-            }
-        });
-
-        // Inisialisasi Firebase setelah otentikasi siap
-        if (firebaseConfig) {
+        // --- Inisialisasi Firebase ---
+        // Pindahkan inisialisasi ke bagian atas skrip agar variabel-variabelnya tersedia
+        if (firebaseConfig && firebaseConfig.projectId) {
             app = initializeApp(firebaseConfig);
             db = getFirestore(app);
             auth = getAuth(app);
+            
+            // Pasang listener autentikasi hanya jika Firebase berhasil diinisialisasi
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    userId = user.uid;
+                    authReady = true;
+                    handleUrlPath();
+                } else {
+                    try {
+                        // Coba masuk dengan token kustom terlebih dahulu
+                        if (initialAuthToken) {
+                            await signInWithCustomToken(auth, initialAuthToken);
+                            console.log("Signed in with custom token.");
+                        } else {
+                            // Jika tidak ada token kustom, masuk secara anonim
+                            await signInAnonymously(auth);
+                            console.log("Signed in anonymously.");
+                        }
+                    } catch (error) {
+                        console.error("Failed to sign in:", error);
+                        showMessage("Failed to sign in. Please try again later.");
+                    }
+                }
+            });
+
         } else {
-            console.error("Firebase configuration not found. Cannot initialize Firebase.");
+            console.error("Firebase configuration is invalid. Cannot initialize Firebase.");
             showMessage("Maaf, aplikasi tidak dapat terhubung. Silakan coba lagi nanti.");
         }
 
