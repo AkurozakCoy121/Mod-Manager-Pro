@@ -76,10 +76,27 @@
     </div>
 
     <script type="module">
-        // --- In-memory storage for short URLs (will not persist on reload) ---
-        const urlMap = new Map();
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDocs, collection, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // Atur level log untuk debugging
+        setLogLevel('debug');
 
-        // --- UI Elements ---
+        // --- Konfigurasi Firebase ---
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        
+        // --- Inisialisasi Firebase ---
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        let userId = null;
+        let authReady = false;
+
+        // --- Elemen UI ---
         const mainUI = document.getElementById('main-ui');
         const redirectUI = document.getElementById('redirect-ui');
         const longUrlInput = document.getElementById('long-url-input');
@@ -90,13 +107,13 @@
         const messageBox = document.getElementById('message-box');
         const messageText = document.getElementById('message-text');
 
-        // New UI Elements for the redirect flow
+        // Elemen UI baru untuk alur pengalihan
         const redirectTitle = document.getElementById('redirect-title');
         const redirectMessage = document.getElementById('redirect-message');
         const redirectCountdown = document.getElementById('redirect-countdown');
         const downloadButton = document.getElementById('download-button');
 
-        // --- Utility Functions ---
+        // --- Fungsi Utilitas ---
         function showMessage(text) {
             messageText.textContent = text;
             messageBox.classList.remove('translate-y-full', 'opacity-0');
@@ -120,18 +137,61 @@
             }, 1000);
         }
 
-        // --- URL Logic ---
-        function handleUrlPath() {
+        // --- Logika Autentikasi dan URL ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                userId = user.uid;
+                authReady = true;
+                handleUrlPath();
+            } else {
+                try {
+                    // Masuk dengan token khusus yang disediakan oleh lingkungan Canvas
+                    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                        console.log("Signed in with custom token.");
+                    } else {
+                        // Masuk secara anonim sebagai cadangan
+                        await signInAnonymously(auth);
+                        console.log("Signed in anonymously.");
+                    }
+                } catch (error) {
+                    console.error("Failed to sign in:", error);
+                    showMessage("Failed to sign in. Please try again later.");
+                }
+            }
+        });
+
+        async function handleUrlPath() {
+            if (!authReady) {
+                console.log("Autentikasi belum siap, lewati handleUrlPath.");
+                return;
+            }
+
             const path = window.location.pathname.substring(1);
             if (path && path.length > 0) {
                 mainUI.classList.add('hidden');
                 redirectUI.classList.remove('hidden');
                 redirectUI.classList.add('flex');
 
-                const longUrl = urlMap.get(path);
-                if (longUrl) {
-                    startRedirectFlow(longUrl);
-                } else {
+                try {
+                    const linksCollection = collection(db, `artifacts/${appId}/public/data/short_urls`);
+                    const q = query(linksCollection, where('shortCode', '==', path));
+                    const querySnapshot = await getDocs(q);
+
+                    if (!querySnapshot.empty) {
+                        const docData = querySnapshot.docs[0].data();
+                        const longUrl = docData.longUrl;
+                        if (longUrl) {
+                            startRedirectFlow(longUrl);
+                        } else {
+                            window.location.href = window.location.origin;
+                        }
+                    } else {
+                        window.location.href = window.location.origin;
+                    }
+                } catch (e) {
+                    console.error("Error fetching document: ", e);
                     window.location.href = window.location.origin;
                 }
             } else {
@@ -163,33 +223,51 @@
             };
         }
 
-        // --- URL Shortening Logic ---
+        // --- Logika Pemendek Tautan ---
         shortenButton.addEventListener('click', async () => {
+            if (!authReady) {
+                showMessage("Aplikasi sedang memuat, mohon tunggu sebentar.");
+                return;
+            }
             const longUrl = longUrlInput.value.trim();
             if (!longUrl) {
-                showMessage("Please enter a valid URL.");
+                showMessage("Silakan masukkan URL yang valid.");
                 return;
             }
             
             shortenButton.disabled = true;
-            showMessage("Creating link, please wait...");
+            showMessage("Membuat tautan, mohon tunggu...");
             
             const urlWithProtocol = longUrl.startsWith('http://') || longUrl.startsWith('https://') ? longUrl : `https://${longUrl}`;
             
-            const shortCode = Math.random().toString(36).substring(2, 8);
-            urlMap.set(shortCode, urlWithProtocol);
+            try {
+                const shortCode = Math.random().toString(36).substring(2, 8);
+                const linksCollection = collection(db, `artifacts/${appId}/public/data/short_urls`);
+                
+                await setDoc(doc(linksCollection, shortCode), {
+                    longUrl: urlWithProtocol,
+                    shortCode: shortCode,
+                    createdAt: new Date(),
+                    createdBy: userId
+                });
+                
+                const fullShortUrl = `https://${window.location.hostname}/${shortCode}`;
+                shortUrlOutput.textContent = fullShortUrl;
+                resultContainer.classList.remove('hidden');
+                resultContainer.classList.add('flex');
+                
+                longUrlInput.value = ""; // Bersihkan input
+                shortenButton.disabled = false;
+                showMessage("Tautan berhasil dibuat!");
 
-            const fullShortUrl = `${window.location.origin}/${shortCode}`;
-            shortUrlOutput.textContent = fullShortUrl;
-            resultContainer.classList.remove('hidden');
-            resultContainer.classList.add('flex');
-            
-            longUrlInput.value = ""; // Clear the input
-            shortenButton.disabled = false;
-            showMessage("Link successfully created!");
+            } catch (e) {
+                console.error("Error adding document: ", e);
+                showMessage("Gagal membuat tautan. Silakan coba lagi.");
+                shortenButton.disabled = false;
+            }
         });
 
-        // --- Copy Link Logic ---
+        // --- Logika Salin Tautan ---
         copyButton.addEventListener('click', () => {
             const urlToCopy = shortUrlOutput.textContent;
             const tempInput = document.createElement('textarea');
@@ -198,11 +276,11 @@
             tempInput.select();
             document.execCommand('copy');
             document.body.removeChild(tempInput);
-            showMessage("Link copied successfully!");
+            showMessage("Tautan berhasil disalin!");
         });
 
-        // --- Initial Call to handle URL Path ---
-        handleUrlPath();
+        // --- Panggilan Awal untuk menangani Jalur URL ---
+        // handleUrlPath() akan dipanggil setelah autentikasi siap
     </script>
 </body>
 </html>
