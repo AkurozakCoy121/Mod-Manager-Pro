@@ -137,7 +137,6 @@
         }
 
         // --- Inisialisasi Firebase ---
-        // Pindahkan inisialisasi ke bagian atas skrip agar variabel-variabelnya tersedia
         if (firebaseConfig && firebaseConfig.projectId) {
             app = initializeApp(firebaseConfig);
             db = getFirestore(app);
