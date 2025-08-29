@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔗</text></svg>">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -29,6 +30,9 @@
         }
         .focus-ring-blue {
             --tw-ring-color: #3b82f6;
+        }
+        .modal {
+            background-color: rgba(0, 0, 0, 0.7);
         }
     </style>
 </head>
@@ -157,6 +161,16 @@
         <p id="message-text"></p>
     </div>
 
+    <!-- QR Code Modal -->
+    <div id="qr-modal" class="modal hidden fixed inset-0 flex items-center justify-center z-50 p-4">
+        <div class="bg-card p-6 rounded-2xl shadow-xl text-center flex flex-col items-center">
+            <h2 class="text-2xl font-bold mb-4 text-primary">QR Code</h2>
+            <div id="qrcode-container" class="p-4 bg-white rounded-lg"></div>
+            <p class="text-sm text-secondary mt-2">Scan this QR code to open the link.</p>
+            <button id="close-qr-button" class="mt-6 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors duration-300">Tutup</button>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -202,6 +216,9 @@
         const goBackButton = document.getElementById('go-back-button');
         const proceedButton = document.getElementById('proceed-button');
         const historyList = document.getElementById('history-list');
+        const qrModal = document.getElementById('qr-modal');
+        const qrcodeContainer = document.getElementById('qrcode-container');
+        const closeQrButton = document.getElementById('close-qr-button');
 
         // --- Utility Functions ---
         function showMessage(text) {
@@ -265,7 +282,7 @@
         // --- Link History Functionality ---
         function setupRealtimeHistory() {
             const linksCollection = collection(db, `artifacts/${appId}/public/data/short_urls`);
-            const q = query(linksCollection);
+            const q = query(linksCollection, where('createdBy', '==', userId));
 
             onSnapshot(q, (snapshot) => {
                 historyList.innerHTML = ''; // Clear existing list
@@ -279,18 +296,46 @@
                             <span class="text-sm text-gray-400">Original Link:</span>
                             <a href="${data.longUrl}" target="_blank" class="text-white text-sm hover:underline">${data.longUrl}</a>
                         </div>
-                        <div class="flex flex-col text-right mt-2 sm:mt-0">
+                        <div class="flex flex-col text-right mt-2 sm:mt-0 items-end gap-2">
                             <span class="text-sm text-gray-400">Short Link:</span>
                             <a href="${fullShortUrl}" target="_blank" class="text-blue-400 font-mono hover:underline">${fullShortUrl}</a>
+                            <button class="bg-gray-600 hover:bg-gray-500 text-white font-semibold py-1 px-3 rounded-lg text-xs transition-colors duration-300 create-qr-button" data-link="${fullShortUrl}">
+                                Buat QR
+                            </button>
                         </div>
                     `;
                     historyList.appendChild(listItem);
+                });
+                // Add event listeners for QR buttons
+                document.querySelectorAll('.create-qr-button').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const link = e.target.dataset.link;
+                        showQrModal(link);
+                    });
                 });
             }, (error) => {
                 console.error("Error fetching link history: ", error);
                 showMessage("Failed to load link history.");
             });
         }
+        
+        // --- QR Code Modal Logic ---
+        function showQrModal(url) {
+            qrcodeContainer.innerHTML = ''; // Clear previous QR code
+            new QRCode(qrcodeContainer, {
+                text: url,
+                width: 200,
+                height: 200,
+                colorDark : "#1a1a1a",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+            qrModal.classList.remove('hidden');
+        }
+
+        closeQrButton.addEventListener('click', () => {
+            qrModal.classList.add('hidden');
+        });
 
         // --- URL Handling and Redirect Flow ---
         async function handleUrlPath() {
