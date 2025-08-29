@@ -157,12 +157,21 @@
         // --- Authentication and URL Logic ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
+                // Pengguna sudah masuk, atur userId
                 userId = user.uid;
-            } else {
-                await signInAnonymously(auth);
+                userIdSpan.textContent = userId;
+                handleUrlPath();
+            } else if (auth.currentUser === null) {
+                // Tidak ada pengguna, coba masuk secara anonim hanya sekali
+                try {
+                    await signInAnonymously(auth);
+                    console.log("Successfully signed in anonymously.");
+                } catch (error) {
+                    console.error("Failed to sign in anonymously:", error);
+                    // Menangani error seperti 'too-many-requests'
+                    showMessage("Gagal masuk. Silakan coba lagi nanti.");
+                }
             }
-            userIdSpan.textContent = userId;
-            handleUrlPath();
         });
 
         async function handleUrlPath() {
@@ -181,6 +190,7 @@
                         const docData = querySnapshot.docs[0].data();
                         const longUrl = docData.longUrl;
                         if (longUrl) {
+                            // Langsung redirect tanpa countdown
                             window.location.href = longUrl;
                         } else {
                             window.location.href = window.location.origin;
