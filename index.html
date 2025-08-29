@@ -34,10 +34,10 @@
 </head>
 <body class="flex flex-col min-h-screen">
 
-    <!-- Kontainer utama (UI Utama) -->
+    <!-- Main container (Main UI) -->
     <div id="main-ui" class="container mx-auto p-4 flex-grow flex flex-col items-center justify-center">
 
-        <!-- Konten Utama (Pemendek Tautan) -->
+        <!-- Main Content (Link Shortener) -->
         <div class="bg-card p-8 md:p-12 rounded-2xl shadow-xl w-full max-w-2xl text-center transition-all duration-300 transform scale-100 opacity-100 flex flex-col items-center">
             <h1 class="text-5xl font-extrabold mb-4 text-primary">The Ultimate Link Shortener</h1>
             <p class="text-xl text-secondary mb-4 max-w-lg">ShareU helps you shorten your long links into easy-to-share links. It's fast, free, and secure.</p>
@@ -64,15 +64,23 @@
         <div class="bg-card p-8 md:p-12 rounded-2xl shadow-xl w-full max-w-2xl mt-8">
             <h2 class="text-3xl font-bold mb-4 text-primary text-center">About This Web</h2>
             <p class="text-secondary text-center mb-4">This website is designed for educational purposes to demonstrate link shortening technology and its core functionalities, including user authentication and data storage using Firebase. It also showcases how to implement dynamic content and a basic security warning system for URLs.</p>
-            <p class="text-secondary text-center">Created by: Rozak</p>
+            <p class="text-secondary text-center">Created by: Gemini AI</p>
+        </div>
+
+        <!-- Link History Section -->
+        <div class="bg-card p-8 md:p-12 rounded-2xl shadow-xl w-full max-w-2xl mt-8">
+            <h2 class="text-3xl font-bold mb-4 text-primary text-center">Link History</h2>
+            <ul id="history-list" class="flex flex-col gap-3">
+                <!-- Link history will be populated here by JavaScript -->
+            </ul>
         </div>
 
     </div>
     
-    <!-- UI Pengalihan dan Peringatan -->
+    <!-- Redirect and Warning UI -->
     <div id="redirect-ui" class="hidden fixed inset-0 flex flex-col lg:flex-row items-center justify-center text-center bg-gray-900 bg-opacity-90 z-50 p-4 gap-8">
         
-        <!-- Konten Pengalihan (Sisi Kiri) -->
+        <!-- Redirect Content (Left Side) -->
         <div class="w-full lg:w-2/3 flex flex-col items-center justify-center bg-card p-8 rounded-2xl shadow-xl">
             <h1 class="text-4xl font-bold mb-4 text-primary" id="redirect-title">Creating Download Link</h1>
             <p class="text-lg text-secondary mb-4" id="redirect-message">Please wait 15 seconds...</p>
@@ -82,9 +90,9 @@
             </button>
         </div>
 
-        <!-- Blog Breaking News & Iklan (Sisi Kanan) -->
+        <!-- Blog Breaking News & Ads (Right Side) -->
         <div class="w-full lg:w-1/3 flex flex-col gap-8">
-            <!-- Placeholder Iklan Google AdSense -->
+            <!-- Google AdSense Automatic Ad Placeholder -->
             <div class="w-full text-center bg-card p-4 rounded-xl shadow-xl border border-gray-600">
                 <p class="text-sm text-gray-400">Google AdSense Automatic Ad Placeholder</p>
                 <div class="h-24 bg-gray-700 rounded mt-2 flex items-center justify-center">
@@ -117,7 +125,7 @@
 
     </div>
 
-    <!-- UI Peringatan Keamanan -->
+    <!-- Security Warning UI -->
     <div id="warning-ui" class="hidden fixed inset-0 flex items-center justify-center text-center bg-gray-900 bg-opacity-90 z-50 p-4">
         <div class="bg-red-800 p-8 md:p-12 rounded-2xl shadow-xl w-full max-w-2xl text-white">
             <h1 class="text-4xl font-bold mb-4">This Website Might Be Dangerous</h1>
@@ -193,6 +201,7 @@
         const warningDetails = document.getElementById('warning-details');
         const goBackButton = document.getElementById('go-back-button');
         const proceedButton = document.getElementById('proceed-button');
+        const historyList = document.getElementById('history-list');
 
         // --- Utility Functions ---
         function showMessage(text) {
@@ -232,6 +241,7 @@
                     authReady = true;
                     console.log("Signed in. User ID:", userId);
                     handleUrlPath();
+                    setupRealtimeHistory();
                 } else {
                     try {
                         await signInAnonymously(auth);
@@ -251,6 +261,36 @@
             'phishing-demo.com',
             'malware-example.org'
         ];
+        
+        // --- Link History Functionality ---
+        function setupRealtimeHistory() {
+            const linksCollection = collection(db, `artifacts/${appId}/public/data/short_urls`);
+            const q = query(linksCollection);
+
+            onSnapshot(q, (snapshot) => {
+                historyList.innerHTML = ''; // Clear existing list
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const fullShortUrl = `https://${window.location.hostname}/${data.shortCode}`;
+                    const listItem = document.createElement('li');
+                    listItem.className = "bg-gray-700 p-3 rounded-lg flex flex-col sm:flex-row justify-between items-center break-all";
+                    listItem.innerHTML = `
+                        <div class="flex flex-col text-left">
+                            <span class="text-sm text-gray-400">Original Link:</span>
+                            <a href="${data.longUrl}" target="_blank" class="text-white text-sm hover:underline">${data.longUrl}</a>
+                        </div>
+                        <div class="flex flex-col text-right mt-2 sm:mt-0">
+                            <span class="text-sm text-gray-400">Short Link:</span>
+                            <a href="${fullShortUrl}" target="_blank" class="text-blue-400 font-mono hover:underline">${fullShortUrl}</a>
+                        </div>
+                    `;
+                    historyList.appendChild(listItem);
+                });
+            }, (error) => {
+                console.error("Error fetching link history: ", error);
+                showMessage("Failed to load link history.");
+            });
+        }
 
         // --- URL Handling and Redirect Flow ---
         async function handleUrlPath() {
@@ -386,7 +426,6 @@
             const tempInput = document.createElement('textarea');
             tempInput.value = urlToCopy;
             document.body.appendChild(tempInput);
-            tempInput.select();
             document.execCommand('copy');
             document.body.removeChild(tempInput);
             showMessage("Link copied!");
