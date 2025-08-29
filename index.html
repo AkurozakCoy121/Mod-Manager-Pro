@@ -84,7 +84,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDocs, collection, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
@@ -92,16 +92,9 @@
         setLogLevel('debug');
 
         // --- Firebase Configuration ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyAlGXpZSyQab7riDteV5ppS3DXDJQHywKw",
-            authDomain: "modmanagerpro-248f5.firebaseapp.com",
-            projectId: "modmanagerpro-248f5",
-            storageBucket: "modmanagerpro-248f5.firebasestorage.app",
-            messagingSenderId: "594650288669",
-            appId: "1:594650288669:web:3308b084911e2ef7f1ecf4",
-            measurementId: "G-TE9234E3LP"
-        };
-        const customAppId = "modmanagerpro-248f5";
+        // Menggunakan variabel global yang disediakan untuk konfigurasi Firebase
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         
         // --- Firebase Initialization ---
         const app = initializeApp(firebaseConfig);
@@ -109,6 +102,7 @@
         const auth = getAuth(app);
 
         let userId = null;
+        let authReady = false;
 
         // --- UI Elements ---
         const mainUI = document.getElementById('main-ui');
@@ -160,21 +154,32 @@
                 // Pengguna sudah masuk, atur userId
                 userId = user.uid;
                 userIdSpan.textContent = userId;
+                authReady = true;
                 handleUrlPath();
-            } else if (auth.currentUser === null) {
-                // Tidak ada pengguna, coba masuk secara anonim hanya sekali
+            } else {
+                // Belum ada pengguna, coba masuk
                 try {
-                    await signInAnonymously(auth);
-                    console.log("Successfully signed in anonymously.");
+                    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                        console.log("Signed in with custom token.");
+                    } else {
+                        await signInAnonymously(auth);
+                        console.log("Signed in anonymously.");
+                    }
                 } catch (error) {
-                    console.error("Failed to sign in anonymously:", error);
-                    // Menangani error seperti 'too-many-requests'
+                    console.error("Failed to sign in:", error);
                     showMessage("Gagal masuk. Silakan coba lagi nanti.");
                 }
             }
         });
 
         async function handleUrlPath() {
+            if (!authReady) {
+                console.log("Authentication not ready, skipping handleUrlPath.");
+                return;
+            }
+
             const path = window.location.pathname.substring(1);
             if (path && path.length > 0) {
                 mainUI.classList.add('hidden');
@@ -182,7 +187,7 @@
                 redirectUI.classList.add('flex');
 
                 try {
-                    const linksCollection = collection(db, `artifacts/${customAppId}/public/data/short_urls`);
+                    const linksCollection = collection(db, `artifacts/${appId}/public/data/short_urls`);
                     const q = query(linksCollection, where('shortCode', '==', path));
                     const querySnapshot = await getDocs(q);
 
@@ -211,6 +216,10 @@
 
         // --- URL Shortening Logic ---
         shortenButton.addEventListener('click', async () => {
+            if (!authReady) {
+                showMessage("Aplikasi sedang memuat, mohon tunggu sebentar.");
+                return;
+            }
             const longUrl = longUrlInput.value.trim();
             if (!longUrl) {
                 showMessage("Mohon masukkan URL yang valid.");
@@ -224,7 +233,7 @@
             
             try {
                 const shortCode = Math.random().toString(36).substring(2, 8);
-                const linksCollection = collection(db, `artifacts/${customAppId}/public/data/short_urls`);
+                const linksCollection = collection(db, `artifacts/${appId}/public/data/short_urls`);
                 
                 await setDoc(doc(linksCollection, shortCode), {
                     longUrl: urlWithProtocol,
