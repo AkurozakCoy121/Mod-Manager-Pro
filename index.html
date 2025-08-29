@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔗</text></svg>">
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -15,9 +16,6 @@
             color: #1f2937;
         }
     </style>
-    <!-- Google AdSense script -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4572281277105896"
-     crossorigin="anonymous"></script>
 </head>
 <body class="flex flex-col min-h-screen">
 
@@ -41,16 +39,6 @@
                 <button id="copy-button" class="bg-green-500 hover:bg-green-600 text-white py-2 px-6 rounded-lg transition-colors duration-300">
                     Copy
                 </button>
-            </div>
-            
-            <!-- Google AdSense Ad Unit -->
-            <div id="ad-container" class="mt-8 w-full">
-                <ins class="adsbygoogle"
-                     style="display:block"
-                     data-ad-client="ca-pub-4572281277105896"
-                     data-ad-slot="YOUR_AD_SLOT_ID"
-                     data-ad-format="auto"
-                     data-full-width-responsive="true"></ins>
             </div>
 
             <!-- User ID (for debugging and identification) -->
@@ -92,7 +80,6 @@
 
         let userId = null;
         let isAuthReady = false;
-        let adPushed = false;
 
         const mainUI = document.getElementById('main-ui');
         const redirectUI = document.getElementById('redirect-ui');
@@ -182,16 +169,6 @@
                 mainUI.classList.remove('hidden');
                 mainUI.classList.add('flex');
                 redirectUI.classList.add('hidden');
-                
-                // Pushing the ad only after the main UI is visible
-                if (!adPushed) {
-                    try {
-                        (adsbygoogle = window.adsbygoogle || []).push({});
-                        adPushed = true;
-                    } catch (e) {
-                        console.error("AdSense push error: ", e);
-                    }
-                }
             }
         }
 
