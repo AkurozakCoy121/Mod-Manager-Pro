@@ -70,6 +70,9 @@
                         <input type="text" id="custom-domain-input" placeholder="my-custom-link" class="flex-grow p-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
                         <span id="domain-status" class="ml-2 text-xl"></span>
                     </div>
+                    <div id="suggestion-container" class="mt-2 text-sm text-gray-600 hidden">
+                        <p>Suggestion: <a href="#" id="suggestion-link" class="text-blue-500 hover:underline"></a></p>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="expiry-date-input" class="block text-sm font-medium text-gray-700">Expiry Date (Optional)</label>
@@ -207,6 +210,8 @@
         const goBackButton = document.getElementById('go-back-button');
         const proceedButton = document.getElementById('proceed-button');
         const userIdSpan = document.getElementById('user-id-span');
+        const suggestionContainer = document.getElementById('suggestion-container');
+        const suggestionLink = document.getElementById('suggestion-link');
 
         let currentPage = 'shortener';
 
@@ -231,7 +236,6 @@
             const randomNumber = Math.floor(Math.random() * 1000) + 1; // Unsplash random photo
             redirectUI.style.backgroundImage = `url('https://picsum.photos/1920/1080?random=${randomNumber}')`;
         };
-
 
         const startCountdown = (duration, onComplete) => {
             let timer = duration;
@@ -264,6 +268,10 @@
 
         const getShortenedUrl = (shortCode) => {
             return `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}/${shortCode}`;
+        };
+
+        const normalizeSlug = (input) => {
+            return input.replace(/ /g, '-').toLowerCase();
         };
 
         // --- Firebase Initialization and Auth ---
@@ -411,13 +419,22 @@
             }
         });
 
-        // --- Custom Domain Check ---
+        // --- Custom Domain Check and Suggestion ---
         let debounceTimer;
         customDomainInput.addEventListener('input', () => {
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(async () => {
                 const slug = customDomainInput.value.trim();
+                const normalizedSlug = normalizeSlug(slug);
+
                 if (slug.length > 0) {
+                    if (slug !== normalizedSlug) {
+                        suggestionContainer.classList.remove('hidden');
+                        suggestionLink.textContent = normalizedSlug;
+                    } else {
+                        suggestionContainer.classList.add('hidden');
+                    }
+
                     if (!/^[a-zA-Z0-9_-]+$/.test(slug)) {
                         domainStatus.innerHTML = '<i class="fa-solid fa-times text-red-500"></i>';
                         return;
@@ -431,8 +448,15 @@
                     }
                 } else {
                     domainStatus.innerHTML = '';
+                    suggestionContainer.classList.add('hidden');
                 }
             }, 300); // Debounce for 300ms
+        });
+
+        suggestionLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            customDomainInput.value = suggestionLink.textContent;
+            suggestionContainer.classList.add('hidden');
         });
 
         // --- Link Redirection and Click Count ---
