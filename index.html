@@ -67,12 +67,18 @@
         // Set log level for debugging
         setLogLevel('debug');
 
-        // --- Global Variables ---
-        // These variables are provided by the Canvas environment
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
+        // --- Firebase Configuration ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyAlGXpZSyQab7riDteV5ppS3DXDJQHywKw",
+            authDomain: "modmanagerpro-248f5.firebaseapp.com",
+            projectId: "modmanagerpro-248f5",
+            storageBucket: "modmanagerpro-248f5.firebasestorage.app",
+            messagingSenderId: "594650288669",
+            appId: "1:594650288669:web:3308b084911e2ef7f1ecf4",
+            measurementId: "G-TE9234E3LP"
+        };
+        const customAppId = "modmanagerpro-248f5"; // Using your project ID as a custom app ID
+        
         // --- Firebase Initialization ---
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
@@ -109,19 +115,8 @@
             if (user) {
                 userId = user.uid;
             } else {
-                if (initialAuthToken) {
-                    try {
-                        await signInWithCustomToken(auth, initialAuthToken);
-                        console.log("Successfully logged in with a custom token.");
-                    } catch (error) {
-                        console.error("Error logging in with custom token:", error);
-                        await signInAnonymously(auth);
-                        console.log("Logging in anonymously because token failed.");
-                    }
-                } else {
-                    await signInAnonymously(auth);
-                    console.log("Logging in anonymously.");
-                }
+                await signInAnonymously(auth);
+                console.log("Logging in anonymously.");
             }
             userIdSpan.textContent = userId;
             isAuthReady = true;
@@ -141,7 +136,7 @@
 
                 try {
                     // Query Firestore for the link
-                    const linksCollection = collection(db, `artifacts/${appId}/public/data/short_urls`);
+                    const linksCollection = collection(db, `artifacts/${customAppId}/public/data/short_urls`);
                     const q = query(linksCollection, where('shortCode', '==', path));
                     const querySnapshot = await getDocs(q);
 
@@ -186,7 +181,7 @@
             try {
                 // Create a random short code
                 const shortCode = Math.random().toString(36).substring(2, 8); // 6 character random code
-                const linksCollection = collection(db, `artifacts/${appId}/public/data/short_urls`);
+                const linksCollection = collection(db, `artifacts/${customAppId}/public/data/short_urls`);
 
                 // Save URL in Firestore
                 await setDoc(doc(linksCollection, shortCode), {
@@ -210,12 +205,14 @@
         // --- Copy Link Logic ---
         copyButton.addEventListener('click', () => {
             const urlToCopy = shortUrlOutput.textContent;
-            navigator.clipboard.writeText(urlToCopy).then(() => {
-                showMessage("Link copied to clipboard!");
-            }).catch(err => {
-                console.error('Failed to copy: ', err);
-                showMessage("Failed to copy link.");
-            });
+            // Use document.execCommand for better browser support in iframes
+            const tempInput = document.createElement('textarea');
+            tempInput.value = urlToCopy;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            showMessage("Link copied to clipboard!");
         });
     </script>
 </body>
