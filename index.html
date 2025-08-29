@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ShareU - URL Shortener</title>
+    <title>ShareU - The Shortener</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
@@ -12,51 +12,64 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
-            color: #1f2937;
+            background-color: #1a1a1a;
+            color: #f3f4f6;
         }
-        .modal {
-            background-color: rgba(0, 0, 0, 0.5);
+        .bg-card {
+            background-color: #2c2c2c;
+        }
+        .text-primary {
+            color: #ffffff;
+        }
+        .text-secondary {
+            color: #d1d5db;
+        }
+        .border-input {
+            border-color: #4a4a4a;
+        }
+        .focus-ring-blue {
+            --tw-ring-color: #3b82f6;
         }
     </style>
 </head>
 <body class="flex flex-col min-h-screen">
 
     <div id="app-container" class="container mx-auto p-4 flex-grow flex items-center justify-center">
-        <!-- Main Container -->
-        <div id="main-ui" class="bg-white p-8 md:p-12 rounded-2xl shadow-xl w-full max-w-2xl text-center transition-all duration-300 transform scale-100 opacity-100 flex flex-col items-center justify-center">
-            <h1 class="text-4xl font-bold mb-4 text-gray-800">ShareU</h1>
-            <p class="text-lg text-gray-600 mb-8 max-w-lg">ShareU helps you shorten your links in a flash. Simply paste your long URL below, get a new short link, and share it with the world! It's fast, free, and secure.</p>
+        <!-- Main Container (Home Page) -->
+        <div id="main-ui" class="bg-card p-8 md:p-12 rounded-2xl shadow-xl w-full max-w-2xl text-center transition-all duration-300 transform scale-100 opacity-100 flex flex-col items-center justify-center">
+            <h1 class="text-5xl font-extrabold mb-4 text-primary">The Ultimate Link Shortener</h1>
+            <p class="text-xl text-secondary mb-4 max-w-lg">ShareU helps you shorten your long links into easy-to-share links. It's fast, free, and secure.</p>
+            <p class="text-lg text-secondary mb-8 max-w-lg">Start joining us and enjoy the features we have provided just for you!</p>
 
             <!-- URL Input and Button -->
             <div class="flex flex-col md:flex-row gap-4 mb-6 w-full">
-                <input type="url" id="long-url-input" placeholder="Enter your long URL here..." class="flex-grow p-4 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300">
+                <input type="url" id="long-url-input" placeholder="Enter your long URL here..." class="flex-grow p-4 rounded-xl border border-input bg-card text-white focus:outline-none focus:ring-2 focus:focus-ring-blue transition-all duration-300">
                 <button id="shorten-button" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-8 rounded-xl transition-colors duration-300 whitespace-nowrap">
                     Create Link
                 </button>
             </div>
 
             <!-- Short Link and Copy Button -->
-            <div id="result-container" class="hidden flex flex-col md:flex-row gap-4 items-center justify-center bg-gray-100 p-4 rounded-xl border border-gray-200 w-full">
-                <div id="short-url-output" class="flex-grow text-gray-700 p-2 break-all font-mono text-lg text-left"></div>
+            <div id="result-container" class="hidden flex flex-col md:flex-row gap-4 items-center justify-center bg-gray-700 p-4 rounded-xl border border-gray-600 w-full">
+                <div id="short-url-output" class="flex-grow text-gray-200 p-2 break-all font-mono text-lg text-left"></div>
                 <button id="copy-button" class="bg-green-500 hover:bg-green-600 text-white py-2 px-6 rounded-lg transition-colors duration-300">
                     Copy
                 </button>
             </div>
 
             <!-- User ID (for debugging and identification) -->
-            <p class="mt-8 text-xs text-gray-400">Your User ID: <span id="user-id">Loading...</span></p>
+            <p class="mt-8 text-xs text-gray-500">Your User ID: <span id="user-id">Loading...</span></p>
         </div>
 
-        <!-- URL Redirect View -->
-        <div id="redirect-ui" class="hidden flex-col items-center justify-center">
-            <h1 class="text-4xl font-bold mb-4 text-gray-800">Redirecting...</h1>
-            <p class="text-lg text-gray-600 mb-8">Please wait, you will be redirected to the destination.</p>
-            <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
+        <!-- URL Redirect View with Countdown -->
+        <div id="redirect-ui" class="hidden flex-col items-center justify-center text-center">
+            <h1 class="text-4xl font-bold mb-4 text-primary" id="redirect-title">Creating Download Link</h1>
+            <p class="text-lg text-secondary mb-4" id="redirect-message">Please wait for 15 seconds...</p>
+            <div id="redirect-countdown" class="text-6xl font-bold text-blue-600 my-4">15</div>
+            <button id="download-button" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-4 px-8 rounded-xl transition-colors duration-300 hidden mt-4">
+                Download Now
+            </button>
         </div>
-
-        <!-- Pop-up Download -->
-        <!-- Pop-up and countdown elements are no longer needed for this simplified flow -->
 
     </div>
     
@@ -64,9 +77,6 @@
     <div id="message-box" class="fixed bottom-4 right-4 bg-gray-800 text-white p-4 rounded-lg shadow-lg z-50 transform translate-y-full opacity-0 transition-all duration-500 ease-in-out">
         <p id="message-text"></p>
     </div>
-
-    <!-- Countdown Modal -->
-    <!-- Modal element is no longer needed for this simplified flow -->
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -101,6 +111,12 @@
         const messageBox = document.getElementById('message-box');
         const messageText = document.getElementById('message-text');
 
+        // New UI Elements for the redirect flow
+        const redirectTitle = document.getElementById('redirect-title');
+        const redirectMessage = document.getElementById('redirect-message');
+        const redirectCountdown = document.getElementById('redirect-countdown');
+        const downloadButton = document.getElementById('download-button');
+
         // --- Utility Functions ---
         function showMessage(text) {
             messageText.textContent = text;
@@ -110,6 +126,19 @@
                 messageBox.classList.remove('translate-y-0', 'opacity-100');
                 messageBox.classList.add('translate-y-full', 'opacity-0');
             }, 3000);
+        }
+
+        function startCountdown(duration, onTick, onComplete) {
+            let timer = duration;
+            redirectCountdown.textContent = timer;
+            const interval = setInterval(() => {
+                timer--;
+                redirectCountdown.textContent = timer;
+                if (timer <= 0) {
+                    clearInterval(interval);
+                    onComplete();
+                }
+            }, 1000);
         }
 
         // --- Authentication and URL Logic ---
@@ -131,7 +160,7 @@
                     }
                 } catch (error) {
                     console.error("Failed to sign in:", error);
-                    showMessage("Gagal masuk. Silakan coba lagi nanti.");
+                    showMessage("Failed to sign in. Please try again later.");
                 }
             }
         });
@@ -157,7 +186,7 @@
                         const docData = querySnapshot.docs[0].data();
                         const longUrl = docData.longUrl;
                         if (longUrl) {
-                            window.location.href = longUrl;
+                            startRedirectFlow(longUrl);
                         } else {
                             window.location.href = window.location.origin;
                         }
@@ -175,20 +204,42 @@
             }
         }
 
+        function startRedirectFlow(longUrl) {
+            redirectTitle.textContent = "Creating Download Link";
+            redirectMessage.textContent = "Please wait for 15 seconds...";
+            downloadButton.classList.add('hidden');
+
+            startCountdown(15, () => {}, () => {
+                redirectTitle.textContent = "Download Link Ready!";
+                redirectMessage.textContent = "Please click the button below to continue.";
+                downloadButton.classList.remove('hidden');
+            });
+
+            downloadButton.onclick = () => {
+                redirectTitle.textContent = "Confirming Download Link";
+                redirectMessage.textContent = "Please wait for 15 seconds...";
+                downloadButton.classList.add('hidden');
+
+                startCountdown(15, () => {}, () => {
+                    window.location.href = longUrl;
+                });
+            };
+        }
+
         // --- URL Shortening Logic ---
         shortenButton.addEventListener('click', async () => {
             if (!authReady) {
-                showMessage("Aplikasi sedang memuat, mohon tunggu sebentar.");
+                showMessage("App is loading, please wait a moment.");
                 return;
             }
             const longUrl = longUrlInput.value.trim();
             if (!longUrl) {
-                showMessage("Mohon masukkan URL yang valid.");
+                showMessage("Please enter a valid URL.");
                 return;
             }
             
             shortenButton.disabled = true;
-            showMessage("Membuat tautan, mohon tunggu...");
+            showMessage("Creating link, please wait...");
             
             const urlWithProtocol = longUrl.startsWith('http://') || longUrl.startsWith('https://') ? longUrl : `https://${longUrl}`;
             
@@ -203,7 +254,6 @@
                     createdBy: userId
                 });
                 
-                // --- Updated Logic to display the link ---
                 const fullShortUrl = `https://${window.location.hostname}/${shortCode}`;
                 shortUrlOutput.textContent = fullShortUrl;
                 resultContainer.classList.remove('hidden');
@@ -211,11 +261,11 @@
                 
                 longUrlInput.value = ""; // Clear the input
                 shortenButton.disabled = false;
-                showMessage("Tautan berhasil dibuat!");
+                showMessage("Link successfully created!");
 
             } catch (e) {
                 console.error("Error adding document: ", e);
-                showMessage("Gagal membuat tautan. Silakan coba lagi.");
+                showMessage("Failed to create link. Please try again.");
                 shortenButton.disabled = false;
             }
         });
@@ -229,7 +279,7 @@
             tempInput.select();
             document.execCommand('copy');
             document.body.removeChild(tempInput);
-            showMessage("Tautan berhasil disalin!");
+            showMessage("Link copied successfully!");
         });
     </script>
 </body>
