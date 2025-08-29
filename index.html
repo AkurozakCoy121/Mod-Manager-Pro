@@ -84,17 +84,17 @@
         // Atur level log untuk debugging
         setLogLevel('debug');
 
-        // --- Konfigurasi Firebase ---
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        
-        // --- Inisialisasi Firebase ---
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-
+        let app;
+        let db;
+        let auth;
         let userId = null;
         let authReady = false;
+        
+        // --- Konfigurasi Firebase ---
+        // Variabel ini disediakan oleh lingkungan Canvas dan mungkin tidak selalu ada
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
         // --- Elemen UI ---
         const mainUI = document.getElementById('main-ui');
@@ -138,6 +138,7 @@
         }
 
         // --- Logika Autentikasi dan URL ---
+        // Inisialisasi Firebase dan autentikasi
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 userId = user.uid;
@@ -145,13 +146,12 @@
                 handleUrlPath();
             } else {
                 try {
-                    // Masuk dengan token khusus yang disediakan oleh lingkungan Canvas
-                    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+                    // Coba masuk dengan token kustom terlebih dahulu
                     if (initialAuthToken) {
                         await signInWithCustomToken(auth, initialAuthToken);
                         console.log("Signed in with custom token.");
                     } else {
-                        // Masuk secara anonim sebagai cadangan
+                        // Jika tidak ada token kustom, masuk secara anonim
                         await signInAnonymously(auth);
                         console.log("Signed in anonymously.");
                     }
@@ -161,6 +161,16 @@
                 }
             }
         });
+
+        // Inisialisasi Firebase setelah otentikasi siap
+        if (firebaseConfig) {
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+        } else {
+            console.error("Firebase configuration not found. Cannot initialize Firebase.");
+            showMessage("Maaf, aplikasi tidak dapat terhubung. Silakan coba lagi nanti.");
+        }
 
         async function handleUrlPath() {
             if (!authReady) {
