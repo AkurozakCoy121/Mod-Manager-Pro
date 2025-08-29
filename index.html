@@ -92,7 +92,15 @@
         
         // --- Konfigurasi Firebase ---
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const firebaseDefaultConfig = {
+            apiKey: "default-api-key",
+            authDomain: "default-auth-domain",
+            projectId: "default-project-id",
+            storageBucket: "default-storage-bucket",
+            messagingSenderId: "default-messaging-sender-id",
+            appId: "default-app-id",
+        };
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : firebaseDefaultConfig;
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
         // --- Elemen UI ---
