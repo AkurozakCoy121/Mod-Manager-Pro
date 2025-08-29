@@ -3,251 +3,198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ShareU - The Shortener</title>
+    <title>ShareU - Advanced Link Shortener</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔗</text></svg>">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #1a1a1a;
-            color: #f3f4f6;
+            background-color: #f0f2f5;
+            color: #333;
         }
-        .bg-card {
-            background-color: #2c2c2c;
+        .container-bg {
+            background-color: #ffffff;
         }
-        .text-primary {
-            color: #ffffff;
-        }
-        .text-secondary {
-            color: #d1d5db;
-        }
-        .border-input {
-            border-color: #4a4a4a;
-        }
-        .focus-ring-blue {
-            --tw-ring-color: #3b82f6;
-        }
-        .modal {
-            background-color: rgba(0, 0, 0, 0.7);
+        .custom-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
     </style>
 </head>
 <body class="flex flex-col min-h-screen">
+    
+    <!-- Header dan Navigasi -->
+    <header class="container-bg custom-shadow sticky top-0 z-50">
+        <nav class="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between p-4">
+            <h1 class="text-2xl font-bold">ShareU</h1>
+            <div class="flex gap-4 mt-4 md:mt-0">
+                <button class="nav-btn font-semibold text-gray-600 hover:text-blue-600 transition-colors duration-200" data-page="shortener">Shortener</button>
+                <button class="nav-btn font-semibold text-gray-600 hover:text-blue-600 transition-colors duration-200" data-page="history">History</button>
+                <button class="nav-btn font-semibold text-gray-600 hover:text-blue-600 transition-colors duration-200" data-page="forum">Forum</button>
+                <button class="nav-btn font-semibold text-gray-600 hover:text-blue-600 transition-colors duration-200" data-page="about">About</button>
+            </div>
+        </nav>
+    </header>
 
-    <!-- Main container (Main UI) -->
-    <div id="main-ui" class="container mx-auto p-4 flex-grow flex flex-col items-center justify-center">
+    <!-- Kontainer Utama -->
+    <main class="flex-grow flex flex-col items-center justify-center p-4">
+        <div id="loading-spinner" class="hidden flex flex-col items-center justify-center text-gray-500">
+            <i class="fa-solid fa-spinner fa-spin-pulse text-4xl mb-2"></i>
+            <p>Loading...</p>
+        </div>
 
-        <!-- Main Content (Link Shortener) -->
-        <div class="bg-card p-8 md:p-12 rounded-2xl shadow-xl w-full max-w-2xl text-center transition-all duration-300 transform scale-100 opacity-100 flex flex-col items-center">
-            <h1 class="text-5xl font-extrabold mb-4 text-primary">The Ultimate Link Shortener</h1>
-            <p class="text-xl text-secondary mb-4 max-w-lg">ShareU helps you shorten your long links into easy-to-share links. It's fast, free, and secure.</p>
-            <p class="text-lg text-secondary mb-8 max-w-lg">Start joining us and enjoy the features we have provided just for you!</p>
-
-            <!-- URL Input and Button -->
-            <div class="flex flex-col md:flex-row gap-4 mb-4 w-full">
-                <input type="url" id="long-url-input" placeholder="Enter your long URL here..." class="flex-grow p-4 rounded-xl border border-input bg-card text-white focus:outline-none focus:ring-2 focus:focus-ring-blue transition-all duration-300">
-                <button id="shorten-button" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-8 rounded-xl transition-colors duration-300 whitespace-nowrap">
-                    Create Link
+        <!-- Bagian Pemendek Tautan -->
+        <div id="shortener-page" class="page-content container-bg p-8 md:p-12 rounded-2xl custom-shadow w-full max-w-2xl">
+            <h2 class="text-3xl font-bold text-center mb-6">Shorten Your Link</h2>
+            
+            <div class="space-y-4">
+                <div class="form-group">
+                    <label for="long-url-input" class="block text-sm font-medium text-gray-700">Long URL</label>
+                    <input type="url" id="long-url-input" placeholder="https://example.com/very-long-link" class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div class="form-group">
+                    <label for="custom-domain-input" class="block text-sm font-medium text-gray-700">Custom Domain (Optional)</label>
+                    <div class="mt-1 flex items-center">
+                        <span class="text-gray-500 mr-2">/</span>
+                        <input type="text" id="custom-domain-input" placeholder="my-custom-link" class="flex-grow p-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                        <span id="domain-status" class="ml-2 text-xl"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="expiry-date-input" class="block text-sm font-medium text-gray-700">Expiry Date (Optional)</label>
+                    <input type="date" id="expiry-date-input" class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <button id="shorten-button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-md transition-colors duration-200">
+                    Shorten
                 </button>
             </div>
             
-            <!-- New Features Inputs -->
-            <div class="flex flex-col md:flex-row gap-4 mb-6 w-full">
-                <input type="text" id="custom-alias-input" placeholder="Enter a custom alias (optional)..." class="flex-grow p-4 rounded-xl border border-input bg-card text-white focus:outline-none focus:ring-2 focus:focus-ring-blue transition-all duration-300">
-                <select id="expiry-select" class="p-4 rounded-xl border border-input bg-card text-white focus:outline-none focus:ring-2 focus:focus-ring-blue transition-all duration-300">
-                    <option value="forever">Selamanya</option>
-                    <option value="1h">1 Jam</option>
-                    <option value="24h">24 Jam</option>
-                    <option value="7d">1 Minggu</option>
-                    <option value="30d">1 Bulan</option>
-                </select>
-            </div>
-
-            <!-- Short Link and Copy Button -->
-            <div id="result-container" class="hidden flex flex-col md:flex-row gap-4 items-center justify-center bg-gray-700 p-4 rounded-xl border border-gray-600 w-full">
-                <div id="short-url-output" class="flex-grow text-gray-200 p-2 break-all font-mono text-lg text-left"></div>
-                <button id="copy-button" class="bg-green-500 hover:bg-green-600 text-white py-2 px-6 rounded-lg transition-colors duration-300">
-                    Copy
-                </button>
+            <!-- Hasil dan QR Code -->
+            <div id="result-container" class="hidden mt-6 bg-gray-100 p-4 rounded-lg border border-gray-200">
+                <div class="flex flex-col md:flex-row items-center gap-4">
+                    <div id="short-url-output" class="flex-grow text-gray-600 p-2 break-all font-mono text-lg"></div>
+                    <button id="copy-button" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg transition-colors duration-200">
+                        Copy
+                    </button>
+                </div>
+                <div id="qrcode-container" class="mt-4 flex justify-center"></div>
             </div>
         </div>
 
-        <!-- About Section -->
-        <div class="bg-card p-8 md:p-12 rounded-2xl shadow-xl w-full max-w-2xl mt-8">
-            <h2 class="text-3xl font-bold mb-4 text-primary text-center">About This Web</h2>
-            <p class="text-secondary text-center mb-4">This website is designed for educational purposes to demonstrate link shortening technology and its core functionalities, including user authentication and data storage using Firebase. It also showcases how to implement dynamic content and a basic security warning system for URLs.</p>
-            <p class="text-secondary text-center">Created by: Spectacular Studio Indonesia</p>
+        <!-- Halaman Riwayat -->
+        <div id="history-page" class="page-content hidden w-full max-w-2xl">
+            <div class="container-bg p-8 md:p-12 rounded-2xl custom-shadow w-full">
+                <h2 class="text-3xl font-bold text-center mb-6">Link History</h2>
+                <div id="loading-history" class="text-center text-gray-500">Loading history...</div>
+                <div id="history-list" class="space-y-4"></div>
+            </div>
         </div>
 
-        <!-- Link History Section -->
-        <div class="bg-card p-8 md:p-12 rounded-2xl shadow-xl w-full max-w-2xl mt-8">
-            <h2 class="text-3xl font-bold mb-4 text-primary text-center">Link History</h2>
-            <ul id="history-list" class="flex flex-col gap-3">
-                <!-- Link history will be populated here by JavaScript -->
-            </ul>
+        <!-- Halaman Forum -->
+        <div id="forum-page" class="page-content hidden w-full max-w-2xl">
+            <div class="container-bg p-8 md:p-12 rounded-2xl custom-shadow w-full">
+                <h2 class="text-3xl font-bold text-center mb-6">Forum</h2>
+                <div id="forum-posts" class="space-y-6"></div>
+                <div class="mt-6">
+                    <h3 class="font-bold text-lg mb-2">Create a New Post</h3>
+                    <textarea id="forum-input" rows="4" class="block w-full p-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" placeholder="Write your post here..."></textarea>
+                    <button id="post-button" class="mt-3 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-md transition-colors duration-200">Post</button>
+                </div>
+            </div>
         </div>
-
-    </div>
-    
-    <!-- Redirect and Warning UI -->
-    <div id="redirect-ui" class="hidden fixed inset-0 flex flex-col lg:flex-row items-center justify-center text-center bg-gray-900 bg-opacity-90 z-50 p-4 gap-8">
         
-        <!-- Redirect Content (Left Side) -->
-        <div class="w-full lg:w-2/3 flex flex-col items-center justify-center bg-card p-8 rounded-2xl shadow-xl">
-            <h1 class="text-4xl font-bold mb-4 text-primary" id="redirect-title">Creating Download Link</h1>
-            <p class="text-lg text-secondary mb-4" id="redirect-message">Please wait 15 seconds...</p>
-            <div id="redirect-countdown" class="text-6xl font-bold text-blue-600 my-4">15</div>
-            <button id="go-link-button" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-4 px-8 rounded-xl transition-colors duration-300 hidden mt-4">
-                Go Link
-            </button>
-        </div>
-
-        <!-- Blog Breaking News & Ads (Right Side) -->
-        <div class="w-full lg:w-1/3 flex flex-col gap-8">
-            <!-- Google AdSense Automatic Ad Placeholder -->
-            <div class="w-full text-center bg-card p-4 rounded-xl shadow-xl border border-gray-600">
-                <p class="text-sm text-gray-400">Google AdSense Automatic Ad Placeholder</p>
-                <div class="h-24 bg-gray-700 rounded mt-2 flex items-center justify-center">
-                    <span class="text-gray-500">Ad Space</span>
-                </div>
-            </div>
-
-            <!-- Blog Breaking News -->
-            <div class="bg-card p-6 rounded-2xl shadow-xl">
-                <h2 class="text-2xl font-bold mb-4 text-primary">Breaking News</h2>
-                <div id="news-list" class="flex flex-col gap-4">
-                    <div class="p-3 bg-gray-700 rounded-lg">
-                        <h3 class="font-semibold text-lg text-white">Gemini Launches New Version</h3>
-                        <p class="text-sm text-gray-400">Google announced the latest version of their language model, promising improved performance and efficiency.</p>
-                        <a href="#" class="text-blue-400 text-sm mt-1 inline-block hover:underline">Read More</a>
-                    </div>
-                    <div class="p-3 bg-gray-700 rounded-lg">
-                        <h3 class="font-semibold text-lg text-white">New Smartphone Launched</h3>
-                        <p class="text-sm text-gray-400">A leading tech company has launched its latest flagship product with innovative features.</p>
-                        <a href="#" class="text-blue-400 text-sm mt-1 inline-block hover:underline">Read More</a>
-                    </div>
-                    <div class="p-3 bg-gray-700 rounded-lg">
-                        <h3 class="font-semibold text-lg text-white">AI Trends in Daily Life</h3>
-                        <p class="text-sm text-gray-400">An in-depth analysis of how artificial intelligence is becoming integrated into various aspects of our lives.</p>
-                        <a href="#" class="text-blue-400 text-sm mt-1 inline-block hover:underline">Read More</a>
-                    </div>
+        <!-- Halaman Tentang -->
+        <div id="about-page" class="page-content hidden w-full max-w-2xl">
+            <div class="container-bg p-8 md:p-12 rounded-2xl custom-shadow w-full">
+                <h2 class="text-3xl font-bold text-center mb-6">About ShareU</h2>
+                <p class="text-gray-700 leading-relaxed text-center">ShareU is a modern URL shortening service designed to provide more than just a short link. It offers features like custom domains, link expiration, and QR code generation. Built for educational purposes, it showcases advanced web development techniques including real-time database integration with Firestore and responsive design.</p>
+                <div class="mt-6 text-center text-sm text-gray-500">
+                    <p>Your User ID: <span id="user-id-span" class="font-mono">Loading...</span></p>
                 </div>
             </div>
         </div>
 
-    </div>
-
-    <!-- Security Warning UI -->
-    <div id="warning-ui" class="hidden fixed inset-0 flex items-center justify-center text-center bg-gray-900 bg-opacity-90 z-50 p-4">
-        <div class="bg-red-800 p-8 md:p-12 rounded-2xl shadow-xl w-full max-w-2xl text-white">
-            <h1 class="text-4xl font-bold mb-4">This Website Might Be Dangerous</h1>
-            <p class="text-lg text-red-200 mb-4">Chrome might have blocked this site because it contains potentially harmful content, such as phishing scams, malware, or spam.</p>
-            <div id="warning-details" class="bg-red-700 p-4 rounded-lg text-left text-sm hidden">
-                <h3 class="font-semibold mb-2">Details:</h3>
-                <ul class="list-disc list-inside space-y-1">
-                    <li>This URL has been flagged as suspicious by our security database.</li>
-                    <li>It may try to steal your personal information or install unwanted software.</li>
-                    <li>We recommend you do not proceed.</li>
-                </ul>
-            </div>
-            <button id="show-details-button" class="mt-6 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors duration-300">
-                Show Details
-            </button>
-            <div class="flex flex-col sm:flex-row justify-center gap-4 mt-4">
-                <button id="go-back-button" class="bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-6 rounded-lg transition-colors duration-300">
-                    Go Back
-                </button>
-                <button id="proceed-button" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-lg transition-colors duration-300">
-                    Proceed Anyway
+        <!-- UI Pengalihan dan Peringatan (Seperti sebelumnya) -->
+        <div id="redirect-ui" class="hidden fixed inset-0 flex items-center justify-center text-center bg-gray-900 bg-opacity-90 z-[100] p-4">
+            <div class="container-bg p-8 md:p-12 rounded-2xl custom-shadow w-full max-w-2xl">
+                <h1 class="text-4xl font-bold mb-4 text-blue-600" id="redirect-title">Your Download Link Is Ready</h1>
+                <p class="text-lg text-gray-600 mb-4" id="redirect-message">Please wait 15 seconds...</p>
+                <div id="redirect-countdown" class="text-6xl font-bold text-blue-600 my-4">15</div>
+                <button id="go-link-button" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-4 px-8 rounded-xl transition-colors duration-300 hidden mt-4">
+                    Continue
                 </button>
             </div>
         </div>
-    </div>
-
-    <!-- Custom Message Box -->
-    <div id="message-box" class="fixed bottom-4 right-4 bg-gray-800 text-white p-4 rounded-lg shadow-lg z-50 transform translate-y-full opacity-0 transition-all duration-500 ease-in-out">
-        <p id="message-text"></p>
-    </div>
-
-    <!-- QR Code Modal -->
-    <div id="qr-modal" class="modal hidden fixed inset-0 flex items-center justify-center z-50 p-4">
-        <div class="bg-card p-6 rounded-2xl shadow-xl text-center flex flex-col items-center">
-            <h2 class="text-2xl font-bold mb-4 text-primary">QR Code</h2>
-            <div id="qrcode-container" class="p-4 bg-white rounded-lg"></div>
-            <p class="text-sm text-secondary mt-2">Scan this QR code to open the link.</p>
-            <button id="close-qr-button" class="mt-6 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors duration-300">Tutup</button>
+        <div id="warning-ui" class="hidden fixed inset-0 flex items-center justify-center text-center bg-gray-900 bg-opacity-90 z-[100] p-4">
+            <div class="bg-red-800 p-8 md:p-12 rounded-2xl custom-shadow w-full max-w-2xl text-white">
+                <h1 class="text-4xl font-bold mb-4">This Website May Be Dangerous</h1>
+                <p class="text-lg text-red-200 mb-4">This site has been flagged as potentially harmful by our security database.</p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4 mt-4">
+                    <button id="go-back-button" class="bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-6 rounded-lg transition-colors duration-300">
+                        Go Back
+                    </button>
+                    <button id="proceed-button" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-lg transition-colors duration-300">
+                        Proceed Anyway
+                    </button>
+                </div>
+            </div>
         </div>
-    </div>
 
-    <!-- Expired Link Modal -->
-    <div id="expired-modal" class="modal hidden fixed inset-0 flex items-center justify-center z-50 p-4">
-        <div class="bg-red-800 p-6 rounded-2xl shadow-xl text-center">
-            <h2 class="text-2xl font-bold mb-4 text-white">Tautan Ini Telah Kedaluwarsa</h2>
-            <p class="text-sm text-red-200 mt-2">Maaf, tautan pendek yang Anda kunjungi tidak lagi aktif.</p>
-            <button id="close-expired-button" class="mt-6 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors duration-300">Kembali ke Beranda</button>
+        <!-- Kotak Pesan Kustom -->
+        <div id="message-box" class="fixed bottom-4 left-1/2 -translate-x-1/2 bg-gray-800 text-white p-4 rounded-lg shadow-lg z-[101] transform translate-y-full opacity-0 transition-all duration-500 ease-in-out">
+            <p id="message-text"></p>
         </div>
-    </div>
+    </main>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, query, where, onSnapshot, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, query, where, onSnapshot, runTransaction, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
         
         setLogLevel('debug');
 
-        let app;
-        let db;
-        let auth;
-        let userId = null;
-        let authReady = false;
-        
-        // --- Firebase Configuration ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyAlGXpZSyQab7riDteV5ppS3DXDJQHywKw",
-            authDomain: "modmanagerpro-248f5.firebaseapp.com",
-            projectId: "modmanagerpro-248f5",
-            storageBucket: "modmanagerpro-248f5.firebasestorage.app",
-            messagingSenderId: "594650288669",
-            appId: "1:594650288669:web:3308b084911e2ef7f1ecf4",
-            measurementId: "G-TE9234E3LP"
-        };
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        // --- Firebase Configuration & Initialization ---
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let db, auth;
+        let userId = null;
 
         // --- UI Elements ---
-        const mainUI = document.getElementById('main-ui');
-        const redirectUI = document.getElementById('redirect-ui');
-        const warningUI = document.getElementById('warning-ui');
+        const navButtons = document.querySelectorAll('.nav-btn');
+        const pages = document.querySelectorAll('.page-content');
+        const loadingSpinner = document.getElementById('loading-spinner');
         const longUrlInput = document.getElementById('long-url-input');
+        const customDomainInput = document.getElementById('custom-domain-input');
+        const expiryDateInput = document.getElementById('expiry-date-input');
         const shortenButton = document.getElementById('shorten-button');
-        const customAliasInput = document.getElementById('custom-alias-input');
-        const expirySelect = document.getElementById('expiry-select');
+        const domainStatus = document.getElementById('domain-status');
         const resultContainer = document.getElementById('result-container');
         const shortUrlOutput = document.getElementById('short-url-output');
         const copyButton = document.getElementById('copy-button');
+        const qrcodeContainer = document.getElementById('qrcode-container');
+        const historyList = document.getElementById('history-list');
+        const forumPosts = document.getElementById('forum-posts');
+        const forumInput = document.getElementById('forum-input');
+        const postButton = document.getElementById('post-button');
         const messageBox = document.getElementById('message-box');
         const messageText = document.getElementById('message-text');
+        const redirectUI = document.getElementById('redirect-ui');
+        const warningUI = document.getElementById('warning-ui');
         const goLinkButton = document.getElementById('go-link-button');
-        const showDetailsButton = document.getElementById('show-details-button');
-        const warningDetails = document.getElementById('warning-details');
         const goBackButton = document.getElementById('go-back-button');
         const proceedButton = document.getElementById('proceed-button');
-        const historyList = document.getElementById('history-list');
-        const qrModal = document.getElementById('qr-modal');
-        const qrcodeContainer = document.getElementById('qrcode-container');
-        const closeQrButton = document.getElementById('close-qr-button');
-        const expiredModal = document.getElementById('expired-modal');
-        const closeExpiredButton = document.getElementById('close-expired-button');
+        const userIdSpan = document.getElementById('user-id-span');
 
+        let currentPage = 'shortener';
 
         // --- Utility Functions ---
-        function showMessage(text) {
+        const showMessage = (text) => {
             messageText.textContent = text;
             messageBox.classList.remove('translate-y-full', 'opacity-0');
             messageBox.classList.add('translate-y-0', 'opacity-100');
@@ -255,9 +202,15 @@
                 messageBox.classList.remove('translate-y-0', 'opacity-100');
                 messageBox.classList.add('translate-y-full', 'opacity-0');
             }, 3000);
-        }
+        };
 
-        function startCountdown(duration, onTick, onComplete) {
+        const showPage = (pageName) => {
+            pages.forEach(page => page.classList.add('hidden'));
+            document.getElementById(`${pageName}-page`).classList.remove('hidden');
+            currentPage = pageName;
+        };
+
+        const startCountdown = (duration, onComplete) => {
             let timer = duration;
             document.getElementById('redirect-countdown').textContent = timer;
             const interval = setInterval(() => {
@@ -268,15 +221,36 @@
                     onComplete();
                 }
             }, 1000);
-        }
+        };
 
-        // --- Firebase Initialization ---
-        async function initializeFirebase() {
+        const generateQRCode = (text) => {
+            qrcodeContainer.innerHTML = '';
+            new QRCode(qrcodeContainer, {
+                text: text,
+                width: 128,
+                height: 128,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+        };
+
+        const getTruncatedUserId = () => {
+            return userId ? userId.substring(0, 5) : 'anon';
+        };
+
+        const getShortenedUrl = (shortCode) => {
+            return `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}/${shortCode}`;
+        };
+
+        // --- Firebase Initialization and Auth ---
+        const initializeFirebase = async () => {
+            loadingSpinner.classList.remove('hidden');
             try {
-                app = initializeApp(firebaseConfig);
+                const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
-                
+
                 if (initialAuthToken) {
                     await signInWithCustomToken(auth, initialAuthToken);
                 } else {
@@ -284,255 +258,84 @@
                 }
 
                 userId = auth.currentUser.uid;
-                authReady = true;
-                console.log("Berhasil masuk. User ID:", userId);
+                userIdSpan.textContent = userId;
                 
                 handleUrlPath();
                 setupRealtimeHistory();
-                
+                setupForumListener();
+
             } catch (error) {
-                console.error("Gagal terhubung ke Firebase:", error);
-                showMessage("Gagal terhubung. Silakan coba lagi nanti.");
+                console.error("Firebase initialization failed:", error);
+                showMessage("Failed to connect to Firebase. Please try again later.");
+            } finally {
+                loadingSpinner.classList.add('hidden');
             }
-        }
-        
-        initializeFirebase();
+        };
 
-        // --- Demo Blacklist for Warning System ---
-        const blockedSites = [
-            'phishing-demo.com',
-            'malware-example.org'
-        ];
-        
-        // --- Link History Functionality ---
-        function setupRealtimeHistory() {
-            if (!userId) {
-                return;
-            }
-            const linksCollection = collection(db, `artifacts/${appId}/public/data/short_urls`);
-            const q = query(linksCollection, where('createdBy', '==', userId));
-
-            onSnapshot(q, (snapshot) => {
-                historyList.innerHTML = '';
-                snapshot.forEach((doc) => {
-                    const data = doc.data();
-                    const fullShortUrl = `https://${window.location.hostname}/${data.shortCode}`;
-                    const listItem = document.createElement('li');
-                    
-                    const expiresText = data.expiresAt ? new Date(data.expiresAt.toDate()).toLocaleString() : 'Selamanya';
-                    const clicksText = data.clicks !== undefined ? `${data.clicks} Klik` : '0 Klik';
-
-                    listItem.className = "bg-gray-700 p-3 rounded-lg flex flex-col sm:flex-row justify-between items-center break-all";
-                    listItem.innerHTML = `
-                        <div class="flex-1 flex flex-col text-left">
-                            <span class="text-sm text-gray-400">Original:</span>
-                            <a href="${data.longUrl}" target="_blank" class="text-white text-sm hover:underline">${data.longUrl}</a>
-                            <span class="text-sm text-gray-400 mt-2">Kedaluwarsa:</span>
-                            <span class="text-white text-sm">${expiresText}</span>
-                        </div>
-                        <div class="flex flex-col text-right mt-2 sm:mt-0 items-end gap-2">
-                            <span class="text-sm text-gray-400">Tautan Pendek:</span>
-                            <a href="${fullShortUrl}" target="_blank" class="text-blue-400 font-mono hover:underline">${fullShortUrl}</a>
-                            <span class="text-sm font-semibold text-white mt-1">${clicksText}</span>
-                            <button class="bg-gray-600 hover:bg-gray-500 text-white font-semibold py-1 px-3 rounded-lg text-xs transition-colors duration-300 create-qr-button" data-link="${fullShortUrl}">
-                                Buat QR
-                            </button>
-                        </div>
-                    `;
-                    historyList.appendChild(listItem);
-                });
-                document.querySelectorAll('.create-qr-button').forEach(button => {
-                    button.addEventListener('click', (e) => {
-                        const link = e.target.dataset.link;
-                        showQrModal(link);
-                    });
-                });
-            }, (error) => {
-                console.error("Kesalahan saat mengambil riwayat tautan: ", error);
-                showMessage("Gagal memuat riwayat tautan.");
-            });
-        }
-        
-        // --- QR Code Modal Logic ---
-        function showQrModal(url) {
-            qrcodeContainer.innerHTML = '';
-            new QRCode(qrcodeContainer, {
-                text: url,
-                width: 200,
-                height: 200,
-                colorDark : "#1a1a1a",
-                colorLight : "#ffffff",
-                correctLevel : QRCode.CorrectLevel.H
-            });
-            qrModal.classList.remove('hidden');
-        }
-
-        closeQrButton.addEventListener('click', () => {
-            qrModal.classList.add('hidden');
-        });
-
-        // --- URL Handling and Redirect Flow ---
-        async function handleUrlPath() {
-            if (!authReady) {
-                return;
-            }
-
+        // --- Page Handling ---
+        const handleUrlPath = async () => {
             const path = window.location.pathname.substring(1);
-            if (path && path.length > 0) {
-                mainUI.classList.add('hidden');
+            if (path) {
+                showPage('shortener'); // Start on shortener page if a path is present
+                loadingSpinner.classList.remove('hidden');
                 
                 try {
-                    const linksCollection = collection(db, `artifacts/${appId}/public/data/short_urls`);
-                    const docRef = doc(linksCollection, path);
+                    const docRef = doc(db, `artifacts/${appId}/public/data/short_urls`, path);
                     const docSnap = await getDoc(docRef);
 
                     if (docSnap.exists()) {
                         const docData = docSnap.data();
-                        
-                        // Check for expiration
-                        const expiresAt = docData.expiresAt ? docData.expiresAt.toDate() : null;
-                        if (expiresAt && expiresAt < new Date()) {
-                            expiredModal.classList.remove('hidden');
-                            closeExpiredButton.onclick = () => { window.location.href = window.location.origin; };
-                            return; // Stop execution
-                        }
+                        const now = new Date();
+                        const expiryDate = docData.expiryDate ? new Date(docData.expiryDate) : null;
 
-                        // Increment click count using a transaction for safety
-                        try {
-                            await runTransaction(db, async (transaction) => {
-                                const sfDoc = await transaction.get(docRef);
-                                if (!sfDoc.exists()) {
-                                    throw "Document does not exist!";
-                                }
-                                const newClicks = (sfDoc.data().clicks || 0) + 1;
-                                transaction.update(docRef, { clicks: newClicks });
-                            });
-                            console.log("Click count successfully updated!");
-                        } catch (e) {
-                            console.error("Transaction failed: ", e);
-                        }
-
-                        const longUrl = docData.longUrl;
-                        if (longUrl) {
-                            const urlHost = new URL(longUrl).hostname;
-                            const isBlocked = blockedSites.some(site => urlHost.includes(site));
-
-                            if (isBlocked) {
-                                showWarningPage(longUrl);
-                            } else {
-                                startRedirectFlow(longUrl);
-                            }
+                        if (expiryDate && now > expiryDate) {
+                            redirectUI.classList.remove('hidden');
+                            document.getElementById('redirect-title').textContent = 'Link Expired';
+                            document.getElementById('redirect-message').textContent = 'This link has expired and is no longer active.';
+                            document.getElementById('redirect-countdown').classList.add('hidden');
+                            goLinkButton.classList.add('hidden');
                         } else {
-                            window.location.href = window.location.origin;
+                            incrementClickCountAndRedirect(docRef, docData.longUrl);
                         }
                     } else {
                         window.location.href = window.location.origin;
                     }
                 } catch (e) {
-                    console.error("Kesalahan saat mengambil dokumen: ", e);
+                    console.error("Error retrieving document:", e);
                     window.location.href = window.location.origin;
+                } finally {
+                    loadingSpinner.classList.add('hidden');
                 }
             } else {
-                mainUI.classList.remove('hidden');
-                redirectUI.classList.add('hidden');
-                warningUI.classList.add('hidden');
+                showPage('shortener');
             }
-        }
+        };
 
-        function startRedirectFlow(longUrl) {
-            redirectUI.classList.remove('hidden');
-            redirectUI.classList.add('flex');
-            document.getElementById('redirect-title').textContent = "Creating Download Link";
-            document.getElementById('redirect-message').textContent = "Please wait 15 seconds...";
-            goLinkButton.classList.add('hidden');
-
-            startCountdown(15, () => {}, () => {
-                document.getElementById('redirect-title').textContent = "Link Ready!";
-                document.getElementById('redirect-message').textContent = "Please click the button below to proceed.";
-                goLinkButton.classList.remove('hidden');
-            });
-
-            goLinkButton.onclick = () => {
-                window.location.href = longUrl;
-            };
-        }
-
-        function showWarningPage(longUrl) {
-            warningUI.classList.remove('hidden');
-            warningUI.classList.add('flex');
-            
-            showDetailsButton.onclick = () => {
-                warningDetails.classList.toggle('hidden');
-                if (warningDetails.classList.contains('hidden')) {
-                    showDetailsButton.textContent = "Show Details";
-                } else {
-                    showDetailsButton.textContent = "Hide Details";
-                }
-            };
-            
-            goBackButton.onclick = () => {
-                window.location.href = window.location.origin;
-            };
-
-            proceedButton.onclick = () => {
-                window.location.href = longUrl;
-            };
-        }
-
-        // --- Link Shortener Logic ---
+        // --- Link Shortening Logic ---
         shortenButton.addEventListener('click', async () => {
-            if (!authReady) {
-                showMessage("Aplikasi sedang memuat, harap tunggu sebentar.");
-                return;
-            }
             const longUrl = longUrlInput.value.trim();
-            const customAlias = customAliasInput.value.trim();
-            const expiryValue = expirySelect.value;
+            const customSlug = customDomainInput.value.trim();
+            const expiryDate = expiryDateInput.value;
 
             if (!longUrl) {
-                showMessage("Silakan masukkan URL yang valid.");
+                showMessage("Please enter a valid URL.");
                 return;
             }
-            
-            // Determine short code based on custom alias or generate random one
-            const shortCode = customAlias || Math.random().toString(36).substring(2, 8);
-            
-            shortenButton.disabled = true;
-            showMessage("Membuat tautan, harap tunggu...");
-            
+
+            const shortCode = customSlug || Math.random().toString(36).substring(2, 8);
             const urlWithProtocol = longUrl.startsWith('http://') || longUrl.startsWith('https://') ? longUrl : `https://${longUrl}`;
             
+            shortenButton.disabled = true;
+
             try {
                 const linksCollection = collection(db, `artifacts/${appId}/public/data/short_urls`);
                 const docRef = doc(linksCollection, shortCode);
-                const docSnap = await getDoc(docRef);
 
-                // Check if custom alias already exists
-                if (docSnap.exists() && customAlias) {
-                    showMessage("Alias kustom sudah ada. Silakan pilih yang lain.");
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists() && customSlug) {
+                    showMessage("This custom domain is already in use. Please choose another.");
                     shortenButton.disabled = false;
                     return;
-                }
-
-                // Calculate expiry date
-                let expiresAt = null;
-                if (expiryValue !== 'forever') {
-                    const now = new Date();
-                    switch (expiryValue) {
-                        case '1h':
-                            now.setHours(now.getHours() + 1);
-                            break;
-                        case '24h':
-                            now.setDate(now.getDate() + 1);
-                            break;
-                        case '7d':
-                            now.setDate(now.getDate() + 7);
-                            break;
-                        case '30d':
-                            now.setDate(now.getDate() + 30);
-                            break;
-                    }
-                    expiresAt = now;
                 }
                 
                 await setDoc(docRef, {
@@ -540,38 +343,191 @@
                     shortCode: shortCode,
                     createdAt: new Date(),
                     createdBy: userId,
-                    clicks: 0, // Initial click count
-                    expiresAt: expiresAt,
+                    expiryDate: expiryDate || null,
+                    clicks: 0,
                 });
                 
-                const fullShortUrl = `https://${window.location.hostname}/${shortCode}`;
+                const fullShortUrl = getShortenedUrl(shortCode);
                 shortUrlOutput.textContent = fullShortUrl;
                 resultContainer.classList.remove('hidden');
-                resultContainer.classList.add('flex');
+                generateQRCode(fullShortUrl);
                 
                 longUrlInput.value = "";
-                customAliasInput.value = "";
+                customDomainInput.value = "";
+                expiryDateInput.value = "";
                 shortenButton.disabled = false;
-                showMessage("Tautan berhasil dibuat!");
+                showMessage("Link created successfully!");
 
             } catch (e) {
-                console.error("Kesalahan saat menambahkan dokumen: ", e);
-                showMessage("Gagal membuat tautan. Silakan coba lagi.");
+                console.error("Error creating document: ", e);
+                showMessage("Failed to create link. Please try again.");
                 shortenButton.disabled = false;
             }
         });
 
-        // --- Copy Link Logic ---
-        copyButton.addEventListener('click', () => {
-            const urlToCopy = shortUrlOutput.textContent;
-            const tempInput = document.createElement('textarea');
-            tempInput.value = urlToCopy;
-            document.body.appendChild(tempInput);
-            document.execCommand('copy');
-            document.body.removeChild(tempInput);
-            showMessage("Tautan disalin!");
+        // --- Custom Domain Check ---
+        let debounceTimer;
+        customDomainInput.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(async () => {
+                const slug = customDomainInput.value.trim();
+                if (slug.length > 0) {
+                    const docRef = doc(db, `artifacts/${appId}/public/data/short_urls`, slug);
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        domainStatus.innerHTML = '<i class="fa-solid fa-times text-red-500"></i>';
+                    } else {
+                        domainStatus.innerHTML = '<i class="fa-solid fa-check text-green-500"></i>';
+                    }
+                } else {
+                    domainStatus.innerHTML = '';
+                }
+            }, 300); // Debounce for 300ms
         });
 
+        // --- Link Redirection and Click Count ---
+        async function incrementClickCountAndRedirect(docRef, longUrl) {
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const sfDoc = await transaction.get(docRef);
+                    if (!sfDoc.exists()) {
+                        throw "Document does not exist!";
+                    }
+                    const newClicks = (sfDoc.data().clicks || 0) + 1;
+                    transaction.update(docRef, { clicks: newClicks });
+                });
+                console.log("Click count updated successfully!");
+                const urlHost = new URL(longUrl).hostname;
+                const isBlocked = ['phishing-demo.com', 'malware-example.org'].some(site => urlHost.includes(site));
+
+                if (isBlocked) {
+                    showWarningPage(longUrl);
+                } else {
+                    startRedirectFlow(longUrl);
+                }
+            } catch (e) {
+                console.error("Transaction failed: ", e);
+                window.location.href = longUrl;
+            }
+        }
+        
+        // --- History Page ---
+        const setupRealtimeHistory = () => {
+            const linksCollection = collection(db, `artifacts/${appId}/public/data/short_urls`);
+            const q = query(linksCollection, where('createdBy', '==', userId));
+            
+            const loadingHistory = document.getElementById('loading-history');
+            loadingHistory.classList.remove('hidden');
+
+            onSnapshot(q, (snapshot) => {
+                historyList.innerHTML = '';
+                loadingHistory.classList.add('hidden');
+                
+                if (snapshot.empty) {
+                    historyList.innerHTML = '<p class="text-center text-gray-500">No links created yet.</p>';
+                    return;
+                }
+
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const listItem = document.createElement('div');
+                    listItem.className = "bg-gray-50 p-4 rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between";
+                    
+                    const longUrl = data.longUrl.length > 50 ? `${data.longUrl.substring(0, 50)}...` : data.longUrl;
+                    const fullShortUrl = getShortenedUrl(data.shortCode);
+                    const expiry = data.expiryDate ? new Date(data.expiryDate).toLocaleDateString() : 'Never';
+                    
+                    listItem.innerHTML = `
+                        <div class="flex-grow">
+                            <p class="text-xs text-gray-500">Original Link:</p>
+                            <a href="${data.longUrl}" target="_blank" class="text-sm font-medium text-blue-600 hover:underline break-all">${longUrl}</a>
+                            <p class="text-sm font-mono mt-2">${fullShortUrl}</p>
+                            <p class="text-xs text-gray-500 mt-1">Clicks: ${data.clicks || 0} | Expires: ${expiry}</p>
+                        </div>
+                        <div class="mt-4 sm:mt-0 flex items-center justify-center w-32 h-32 p-2 rounded-lg bg-white custom-shadow">
+                            <div id="qrcode-${data.shortCode}"></div>
+                        </div>
+                    `;
+                    historyList.appendChild(listItem);
+                    new QRCode(document.getElementById(`qrcode-${data.shortCode}`), {
+                        text: fullShortUrl,
+                        width: 100,
+                        height: 100
+                    });
+                });
+            }, (error) => {
+                console.error("Error fetching history: ", error);
+                showMessage("Failed to load link history.");
+            });
+        };
+
+        // --- Forum Page ---
+        const setupForumListener = () => {
+            const forumCollection = collection(db, `artifacts/${appId}/public/data/forum`);
+            const q = query(forumCollection);
+            
+            onSnapshot(q, (snapshot) => {
+                forumPosts.innerHTML = '';
+                if (snapshot.empty) {
+                    forumPosts.innerHTML = '<p class="text-center text-gray-500">No posts yet. Be the first to start a discussion!</p>';
+                } else {
+                    snapshot.forEach(doc => {
+                        const postData = doc.data();
+                        const postElement = document.createElement('div');
+                        postElement.className = "bg-gray-100 p-4 rounded-lg border border-gray-200";
+                        postElement.innerHTML = `
+                            <p class="text-sm font-bold text-blue-600">${postData.truncatedUserId}</p>
+                            <p class="text-gray-800 mt-1">${postData.content}</p>
+                            <p class="text-xs text-gray-500 mt-2">${postData.createdAt.toDate().toLocaleString()}</p>
+                        `;
+                        forumPosts.prepend(postElement);
+                    });
+                }
+            }, (error) => {
+                console.error("Error fetching forum posts:", error);
+            });
+        };
+
+        postButton.addEventListener('click', async () => {
+            const content = forumInput.value.trim();
+            if (!content) {
+                showMessage("Please write something to post.");
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, `artifacts/${appId}/public/data/forum`), {
+                    content: content,
+                    truncatedUserId: getTruncatedUserId(),
+                    createdAt: new Date(),
+                });
+                forumInput.value = '';
+                showMessage("Post created successfully!");
+            } catch (e) {
+                console.error("Error adding forum post:", e);
+                showMessage("Failed to create post. Please try again.");
+            }
+        });
+
+        // --- Event Listeners ---
+        navButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                showPage(button.dataset.page);
+            });
+        });
+
+        copyButton.addEventListener('click', () => {
+            const urlToCopy = shortUrlOutput.textContent;
+            navigator.clipboard.writeText(urlToCopy).then(() => {
+                showMessage("Link copied to clipboard!");
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+                showMessage("Failed to copy link.");
+            });
+        });
+
+        // Initial App Load
+        window.addEventListener('load', initializeFirebase);
     </script>
 </body>
 </html>
