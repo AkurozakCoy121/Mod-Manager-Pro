@@ -80,7 +80,8 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDocs, collection, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
+
         // Atur level log untuk debugging
         setLogLevel('debug');
 
@@ -91,16 +92,17 @@
         let authReady = false;
         
         // --- Konfigurasi Firebase ---
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-        const firebaseDefaultConfig = {
-            apiKey: "default-api-key",
-            authDomain: "default-auth-domain",
-            projectId: "default-project-id",
-            storageBucket: "default-storage-bucket",
-            messagingSenderId: "default-messaging-sender-id",
-            appId: "default-app-id",
+        // Menggunakan konfigurasi yang Anda berikan.
+        const firebaseConfig = {
+            apiKey: "AIzaSyAlGXpZSyQab7riDteV5ppS3DXDJQHywKw",
+            authDomain: "modmanagerpro-248f5.firebaseapp.com",
+            projectId: "modmanagerpro-248f5",
+            storageBucket: "modmanagerpro-248f5.firebasestorage.app",
+            messagingSenderId: "594650288669",
+            appId: "1:594650288669:web:3308b084911e2ef7f1ecf4",
+            measurementId: "G-TE9234E3LP"
         };
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : firebaseDefaultConfig;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
         // --- Elemen UI ---
@@ -149,6 +151,7 @@
             app = initializeApp(firebaseConfig);
             db = getFirestore(app);
             auth = getAuth(app);
+            const analytics = getAnalytics(app);
             
             // Pasang listener autentikasi hanya jika Firebase berhasil diinisialisasi
             onAuthStateChanged(auth, async (user) => {
