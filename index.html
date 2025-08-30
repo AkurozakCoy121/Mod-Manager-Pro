@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -113,6 +113,11 @@
 
     <!-- Kontainer Utama -->
     <main class="flex-grow flex flex-col items-center justify-center p-4">
+        <div id="loading-spinner" class="hidden fixed inset-0 flex flex-col items-center justify-center text-gray-500 z-[200] bg-white bg-opacity-80">
+            <i class="fa-solid fa-spinner fa-spin-pulse text-4xl mb-2"></i>
+            <p>Loading...</p>
+        </div>
+
         <!-- Bagian Pemendek Tautan -->
         <div id="shortener-page" class="page-content container-bg p-8 md:p-12 rounded-2xl custom-shadow w-full max-w-2xl">
             <h2 class="text-3xl font-bold text-center mb-6">Shorten Your Link</h2>
@@ -242,9 +247,6 @@
                     <span class="slider-text">Drag to Unlock</span>
                 </div>
                 <div id="redirect-countdown-container" class="hidden">
-                    <div id="countdown-progress" class="w-full h-2 bg-gray-200 rounded-full overflow-hidden mb-2">
-                        <div id="countdown-bar" class="h-full bg-blue-600 transition-all duration-100 ease-linear" style="width: 100%;"></div>
-                    </div>
                     <div id="redirect-countdown" class="text-6xl font-bold text-blue-600 my-4">15</div>
                 </div>
                 <button id="go-link-button" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-4 px-8 rounded-xl transition-colors duration-300 hidden mt-4">
@@ -317,6 +319,7 @@
         // --- UI Elements ---
         const navButtons = document.querySelectorAll('.nav-btn');
         const pages = document.querySelectorAll('.page-content');
+        const loadingSpinner = document.getElementById('loading-spinner');
         const longUrlInput = document.getElementById('long-url-input');
         const customDomainInput = document.getElementById('custom-domain-input');
         const expiryDateInput = document.getElementById('expiry-date-input');
@@ -356,8 +359,6 @@
         const editExpiryDateInput = document.getElementById('edit-expiry-date');
         const saveEditButton = document.getElementById('save-edit-button');
         const cancelEditButton = document.getElementById('cancel-edit-button');
-        const mainContent = document.querySelector('main');
-        const countdownBar = document.getElementById('countdown-bar');
 
         let currentPage = 'shortener';
         let shortenType = 'smart'; // Default shorten type
@@ -392,7 +393,6 @@
             const interval = setInterval(() => {
                 timer--;
                 document.getElementById('redirect-countdown').textContent = timer;
-                countdownBar.style.width = `${(timer / duration) * 100}%`;
                 if (timer <= 0) {
                     clearInterval(interval);
                     onComplete();
@@ -439,6 +439,7 @@
 
         // --- Firebase Configuration and Initialization ---
         const initializeFirebase = async () => {
+            loadingSpinner.classList.remove('hidden');
             try {
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
@@ -458,8 +459,7 @@
             } catch (error) {
                 console.error("Firebase initialization failed:", error);
                 showMessage("Failed to connect to Firebase. Please try again later.");
-                // Jika inisialisasi gagal, pastikan halaman utama tetap terlihat
-                mainContent.classList.remove('hidden');
+                loadingSpinner.classList.add('hidden');
             }
         };
 
@@ -467,46 +467,45 @@
         const handleUrlPath = async () => {
             const path = window.location.pathname.substring(1);
             const pathSegments = path.split('/');
-            const shortCode = pathSegments[0];
+            const shortCode = pathSegments[pathSegments.length - 1]; 
             
-            // Jika ada shortCode di URL, coba cek di database dan sembunyikan halaman utama
-            if (shortCode && !shortCode.includes('.') && !shortCode.includes('#') && shortCode.length > 0) {
-                mainContent.classList.add('hidden');
-                
-                try {
-                    const docRef = doc(db, `artifacts/${appId}/public/data/short_urls`, shortCode);
-                    const docSnap = await getDoc(docRef);
+            if (!shortCode || shortCode.includes('.') || shortCode.includes('#') || shortCode.includes(' ')) {
+                showPage('shortener');
+                return;
+            }
+            
+            loadingSpinner.classList.remove('hidden');
+            
+            try {
+                const docRef = doc(db, `artifacts/${appId}/public/data/short_urls`, shortCode);
+                const docSnap = await getDoc(docRef);
 
-                    if (docSnap.exists()) {
-                        const docData = docSnap.data();
-                        const now = new Date();
-                        const expiryDate = docData.expiryDate ? new Date(docData.expiryDate) : null;
-                        if (expiryDate && now > expiryDate) {
-                            redirectUI.classList.remove('hidden');
-                            setRandomBackground();
-                            document.getElementById('redirect-title').textContent = 'Link Kedaluwarsa';
-                            document.getElementById('redirect-message').textContent = 'Tautan ini telah kedaluwarsa dan tidak lagi aktif.';
-                            dragContainer.classList.add('hidden');
-                            document.getElementById('redirect-countdown-container').classList.add('hidden');
-                            goLinkButton.classList.add('hidden');
-                        } else if (docData.type === 'quick') {
-                            // Redirect langsung untuk tautan tipe 'quick'
-                            startQuickRedirectFlow(docData.longUrl, docRef);
-                        } else {
-                            startRedirectFlow(docRef, docData.longUrl);
-                        }
+                if (docSnap.exists()) {
+                    const docData = docSnap.data();
+                    const now = new Date();
+                    const expiryDate = docData.expiryDate ? new Date(docData.expiryDate) : null;
+                    if (expiryDate && now > expiryDate) {
+                        redirectUI.classList.remove('hidden');
+                        setRandomBackground();
+                        document.getElementById('redirect-title').textContent = 'Link Kedaluwarsa';
+                        document.getElementById('redirect-message').textContent = 'Tautan ini telah kedaluwarsa dan tidak lagi aktif.';
+                        dragContainer.classList.add('hidden');
+                        document.getElementById('redirect-countdown-container').classList.add('hidden');
+                        goLinkButton.classList.add('hidden');
+                    } else if (docData.type === 'quick') {
+                        // Redirect langsung untuk tautan tipe 'quick'
+                        startQuickRedirectFlow(docData.longUrl, docRef);
                     } else {
-                        // Jika shortCode tidak ditemukan, kembalikan ke halaman utama
-                        mainContent.classList.remove('hidden');
+                        startRedirectFlow(docRef, docData.longUrl);
                     }
-                } catch (e) {
-                    console.error("Error retrieving document:", e);
-                    // Jika ada error, kembalikan ke halaman utama
-                    mainContent.classList.remove('hidden');
+                } else {
+                    window.location.href = window.location.origin;
                 }
-            } else {
-                // Jika tidak ada shortCode atau tidak valid, tampilkan halaman utama
-                mainContent.classList.remove('hidden');
+            } catch (e) {
+                console.error("Error retrieving document:", e);
+                window.location.href = window.location.origin;
+            } finally {
+                loadingSpinner.classList.add('hidden');
             }
         };
 
@@ -656,7 +655,7 @@
                         throw "Dokumen tidak ada!";
                     }
                     const newClicks = (sfDoc.data().clicks || 0) + 1;
-                    transaction.update(sfDoc.ref, { clicks: newClicks });
+                    transaction.update(docRef, { clicks: newClicks });
                 });
                 console.log("Jumlah klik berhasil diperbarui!");
             } catch (e) {
@@ -694,6 +693,7 @@
                         startCountdown(15, () => {
                             document.getElementById('redirect-message').textContent = 'Klik tombol di bawah untuk melanjutkan.';
                             goLinkButton.classList.remove('hidden');
+                            incrementClickCountAndRedirect(docRef, longUrl);
                         });
                     }, 500);
                 }
@@ -714,10 +714,6 @@
                 }
             };
 
-            goLinkButton.onclick = () => {
-                incrementClickCountAndRedirect(docRef, longUrl);
-            };
-
             dragContainer.addEventListener('mousedown', handleDragStart);
             document.addEventListener('mousemove', handleDragMove);
             document.addEventListener('mouseup', handleDragEnd);
@@ -734,7 +730,7 @@
                 if (isBlocked) {
                     showWarningPage(longUrl);
                 } else {
-                    window.location.href = longUrl;
+                    goLinkButton.onclick = () => window.location.href = longUrl;
                 }
             });
         };
