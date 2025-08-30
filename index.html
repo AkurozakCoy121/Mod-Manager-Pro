@@ -469,45 +469,43 @@
             const pathSegments = path.split('/');
             const shortCode = pathSegments[0];
             
-            // Jika tidak ada shortCode di URL, tampilkan halaman utama
-            if (!shortCode || shortCode.includes('.') || shortCode.includes('#') || shortCode.includes(' ')) {
-                mainContent.classList.remove('hidden');
-                return;
-            }
-            
-            // Jika ada shortCode, coba cek di database dan sembunyikan halaman utama
-            mainContent.classList.add('hidden');
-            
-            try {
-                const docRef = doc(db, `artifacts/${appId}/public/data/short_urls`, shortCode);
-                const docSnap = await getDoc(docRef);
+            // Jika ada shortCode di URL, coba cek di database dan sembunyikan halaman utama
+            if (shortCode && !shortCode.includes('.') && !shortCode.includes('#') && shortCode.length > 0) {
+                mainContent.classList.add('hidden');
+                
+                try {
+                    const docRef = doc(db, `artifacts/${appId}/public/data/short_urls`, shortCode);
+                    const docSnap = await getDoc(docRef);
 
-                if (docSnap.exists()) {
-                    const docData = docSnap.data();
-                    const now = new Date();
-                    const expiryDate = docData.expiryDate ? new Date(docData.expiryDate) : null;
-                    if (expiryDate && now > expiryDate) {
-                        redirectUI.classList.remove('hidden');
-                        setRandomBackground();
-                        document.getElementById('redirect-title').textContent = 'Link Kedaluwarsa';
-                        document.getElementById('redirect-message').textContent = 'Tautan ini telah kedaluwarsa dan tidak lagi aktif.';
-                        dragContainer.classList.add('hidden');
-                        document.getElementById('redirect-countdown-container').classList.add('hidden');
-                        goLinkButton.classList.add('hidden');
-                    } else if (docData.type === 'quick') {
-                        // Redirect langsung untuk tautan tipe 'quick'
-                        startQuickRedirectFlow(docData.longUrl, docRef);
+                    if (docSnap.exists()) {
+                        const docData = docSnap.data();
+                        const now = new Date();
+                        const expiryDate = docData.expiryDate ? new Date(docData.expiryDate) : null;
+                        if (expiryDate && now > expiryDate) {
+                            redirectUI.classList.remove('hidden');
+                            setRandomBackground();
+                            document.getElementById('redirect-title').textContent = 'Link Kedaluwarsa';
+                            document.getElementById('redirect-message').textContent = 'Tautan ini telah kedaluwarsa dan tidak lagi aktif.';
+                            dragContainer.classList.add('hidden');
+                            document.getElementById('redirect-countdown-container').classList.add('hidden');
+                            goLinkButton.classList.add('hidden');
+                        } else if (docData.type === 'quick') {
+                            // Redirect langsung untuk tautan tipe 'quick'
+                            startQuickRedirectFlow(docData.longUrl, docRef);
+                        } else {
+                            startRedirectFlow(docRef, docData.longUrl);
+                        }
                     } else {
-                        startRedirectFlow(docRef, docData.longUrl);
+                        // Jika shortCode tidak ditemukan, kembalikan ke halaman utama
+                        mainContent.classList.remove('hidden');
                     }
-                } else {
-                    // Jika shortCode tidak ditemukan, kembalikan ke halaman utama
+                } catch (e) {
+                    console.error("Error retrieving document:", e);
+                    // Jika ada error, kembalikan ke halaman utama
                     mainContent.classList.remove('hidden');
-                    // Tidak perlu redirect, biarkan pengguna tetap di halaman ini
                 }
-            } catch (e) {
-                console.error("Error retrieving document:", e);
-                // Jika ada error, kembalikan ke halaman utama
+            } else {
+                // Jika tidak ada shortCode atau tidak valid, tampilkan halaman utama
                 mainContent.classList.remove('hidden');
             }
         };
@@ -658,7 +656,7 @@
                         throw "Dokumen tidak ada!";
                     }
                     const newClicks = (sfDoc.data().clicks || 0) + 1;
-                    transaction.update(docRef, { clicks: newClicks });
+                    transaction.update(sfDoc.ref, { clicks: newClicks });
                 });
                 console.log("Jumlah klik berhasil diperbarui!");
             } catch (e) {
