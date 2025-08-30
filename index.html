@@ -242,6 +242,9 @@
                     <span class="slider-text">Drag to Unlock</span>
                 </div>
                 <div id="redirect-countdown-container" class="hidden">
+                    <div id="countdown-progress" class="w-full h-2 bg-gray-200 rounded-full overflow-hidden mb-2">
+                        <div id="countdown-bar" class="h-full bg-blue-600 transition-all duration-100 ease-linear" style="width: 100%;"></div>
+                    </div>
                     <div id="redirect-countdown" class="text-6xl font-bold text-blue-600 my-4">15</div>
                 </div>
                 <button id="go-link-button" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-4 px-8 rounded-xl transition-colors duration-300 hidden mt-4">
@@ -353,6 +356,8 @@
         const editExpiryDateInput = document.getElementById('edit-expiry-date');
         const saveEditButton = document.getElementById('save-edit-button');
         const cancelEditButton = document.getElementById('cancel-edit-button');
+        const mainContent = document.querySelector('main');
+        const countdownBar = document.getElementById('countdown-bar');
 
         let currentPage = 'shortener';
         let shortenType = 'smart'; // Default shorten type
@@ -387,6 +392,7 @@
             const interval = setInterval(() => {
                 timer--;
                 document.getElementById('redirect-countdown').textContent = timer;
+                countdownBar.style.width = `${(timer / duration) * 100}%`;
                 if (timer <= 0) {
                     clearInterval(interval);
                     onComplete();
@@ -462,9 +468,11 @@
             const shortCode = pathSegments[pathSegments.length - 1]; 
             
             if (!shortCode || shortCode.includes('.') || shortCode.includes('#') || shortCode.includes(' ')) {
-                showPage('shortener');
+                mainContent.classList.remove('hidden');
                 return;
             }
+            
+            mainContent.classList.add('hidden'); // Hide main content immediately
             
             try {
                 const docRef = doc(db, `artifacts/${appId}/public/data/short_urls`, shortCode);
@@ -681,7 +689,6 @@
                         startCountdown(15, () => {
                             document.getElementById('redirect-message').textContent = 'Klik tombol di bawah untuk melanjutkan.';
                             goLinkButton.classList.remove('hidden');
-                            incrementClickCountAndRedirect(docRef, longUrl);
                         });
                     }, 500);
                 }
@@ -702,6 +709,10 @@
                 }
             };
 
+            goLinkButton.onclick = () => {
+                incrementClickCountAndRedirect(docRef, longUrl);
+            };
+
             dragContainer.addEventListener('mousedown', handleDragStart);
             document.addEventListener('mousemove', handleDragMove);
             document.addEventListener('mouseup', handleDragEnd);
@@ -718,7 +729,7 @@
                 if (isBlocked) {
                     showWarningPage(longUrl);
                 } else {
-                    goLinkButton.onclick = () => window.location.href = longUrl;
+                    window.location.href = longUrl;
                 }
             });
         };
