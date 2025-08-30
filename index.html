@@ -58,6 +58,28 @@
             color: #4a5568;
             font-weight: 600;
         }
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            z-index: 10;
+        }
+        .dropdown-menu.active {
+            display: block;
+        }
+        .dropdown-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: background-color 0.2s;
+        }
+        .dropdown-item:hover {
+            background-color: #f3f4f6;
+        }
     </style>
 </head>
 <body class="flex flex-col min-h-screen">
@@ -111,9 +133,16 @@
                     <label for="expiry-date-input" class="block text-sm font-medium text-gray-700">Expiry Date (Optional)</label>
                     <input type="date" id="expiry-date-input" class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
                 </div>
-                <button id="shorten-button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-md transition-colors duration-200">
-                    Shorten
-                </button>
+                <div class="relative w-full">
+                    <button id="shorten-button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-md transition-colors duration-200 flex items-center justify-center gap-2">
+                        <span id="shorten-text">Shorten</span>
+                        <i id="dropdown-icon" class="fa-solid fa-angle-down"></i>
+                    </button>
+                    <div id="shorten-options" class="dropdown-menu">
+                        <div class="dropdown-item" data-type="smart">Smart Shorten</div>
+                        <div class="dropdown-item" data-type="quick">Quick Shorten</div>
+                    </div>
+                </div>
             </div>
             
             <!-- Hasil dan QR Code -->
@@ -272,6 +301,9 @@
         const customDomainInput = document.getElementById('custom-domain-input');
         const expiryDateInput = document.getElementById('expiry-date-input');
         const shortenButton = document.getElementById('shorten-button');
+        const shortenOptions = document.getElementById('shorten-options');
+        const dropdownIcon = document.getElementById('dropdown-icon');
+        const shortenText = document.getElementById('shorten-text');
         const domainStatus = document.getElementById('domain-status');
         const resultContainer = document.getElementById('result-container');
         const shortUrlOutput = document.getElementById('short-url-output');
@@ -292,11 +324,9 @@
         const userIdSpan = document.getElementById('user-id-span');
         const suggestionContainer = document.getElementById('suggestion-container');
         const suggestionList = document.getElementById('suggestion-list');
-
         const dragContainer = document.getElementById('drag-container');
         const dragThumb = document.getElementById('drag-thumb');
         const sliderText = document.querySelector('.slider-text');
-
         const editModal = document.getElementById('edit-modal');
         const editDocIdInput = document.getElementById('edit-doc-id');
         const editLongUrlInput = document.getElementById('edit-long-url');
@@ -306,6 +336,7 @@
         const cancelEditButton = document.getElementById('cancel-edit-button');
 
         let currentPage = 'shortener';
+        let shortenType = 'smart'; // Default shorten type
 
         // --- Utility Functions ---
         const showMessage = (text) => {
@@ -436,6 +467,11 @@
                         dragContainer.classList.add('hidden');
                         document.getElementById('redirect-countdown-container').classList.add('hidden');
                         goLinkButton.classList.add('hidden');
+                    } else if (docData.type === 'quick') {
+                        // Redirect langsung untuk tautan tipe 'quick'
+                        const longUrl = docData.longUrl;
+                        await incrementClickCount(docRef);
+                        window.location.href = longUrl;
                     } else {
                         startRedirectFlow(docRef, docData.longUrl);
                     }
@@ -451,63 +487,79 @@
         };
 
         // --- Link Shortening Logic ---
-        shortenButton.addEventListener('click', async () => {
-            const longUrl = longUrlInput.value.trim();
-            const customSlug = normalizeSlug(customDomainInput.value.trim());
-            const expiryDate = expiryDateInput.value;
+        shortenButton.addEventListener('click', () => {
+            shortenOptions.classList.toggle('active');
+            dropdownIcon.classList.toggle('fa-angle-down');
+            dropdownIcon.classList.toggle('fa-angle-up');
+        });
+        
+        document.querySelectorAll('.dropdown-item').forEach(item => {
+            item.addEventListener('click', async (e) => {
+                shortenType = e.target.dataset.type;
+                shortenText.textContent = e.target.textContent;
+                shortenOptions.classList.remove('active');
+                dropdownIcon.classList.remove('fa-angle-up');
+                dropdownIcon.classList.add('fa-angle-down');
 
-            if (!longUrl) {
-                showMessage("Mohon masukkan URL yang valid.");
-                return;
-            }
-
-            const shortCode = customSlug || Math.random().toString(36).substring(2, 8);
-            const urlWithProtocol = longUrl.startsWith('http://') || longUrl.startsWith('https://') ? longUrl : `https://${longUrl}`;
-            
-            if (customSlug && !/^[a-zA-Z0-9-]+$/.test(customSlug)) {
-                showMessage("Custom domain hanya menerima huruf, angka, dan tanda hubung.");
-                return;
-            }
-
-            shortenButton.disabled = true;
-
-            try {
-                const linksCollection = collection(db, `artifacts/${appId}/public/data/short_urls`);
-                const docRef = doc(linksCollection, shortCode);
-
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists() && customSlug) {
-                    showMessage("Custom domain ini sudah digunakan. Mohon pilih yang lain.");
-                    shortenButton.disabled = false;
+                const longUrl = longUrlInput.value.trim();
+                const customSlug = normalizeSlug(customDomainInput.value.trim());
+                const expiryDate = expiryDateInput.value;
+                const isSmart = shortenType === 'smart';
+                
+                if (!longUrl) {
+                    showMessage("Mohon masukkan URL yang valid.");
                     return;
                 }
                 
-                await setDoc(docRef, {
-                    longUrl: urlWithProtocol,
-                    shortCode: shortCode,
-                    createdAt: new Date(),
-                    createdBy: userId,
-                    expiryDate: expiryDate || null,
-                    clicks: 0,
-                });
+                const shortCode = customSlug || Math.random().toString(36).substring(2, 8);
+                const urlWithProtocol = longUrl.startsWith('http://') || longUrl.startsWith('https://') ? longUrl : `https://${longUrl}`;
                 
-                const fullShortUrl = getShortenedUrl(shortCode);
-                shortUrlOutput.textContent = fullShortUrl;
-                shortUrlOutput.href = fullShortUrl;
-                resultContainer.classList.remove('hidden');
-                generateQRCode(fullShortUrl);
+                if (customSlug && !/^[a-zA-Z0-9-]+$/.test(customSlug)) {
+                    showMessage("Custom domain hanya menerima huruf, angka, dan tanda hubung.");
+                    return;
+                }
                 
-                longUrlInput.value = "";
-                customDomainInput.value = "";
-                expiryDateInput.value = "";
-                shortenButton.disabled = false;
-                showMessage("Tautan berhasil dibuat!");
+                shortenButton.disabled = true;
 
-            } catch (e) {
-                console.error("Error creating document: ", e);
-                showMessage("Gagal membuat tautan. Mohon coba lagi.");
-                shortenButton.disabled = false;
-            }
+                try {
+                    const linksCollection = collection(db, `artifacts/${appId}/public/data/short_urls`);
+                    const docRef = doc(linksCollection, shortCode);
+
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists() && customSlug) {
+                        showMessage("Custom domain ini sudah digunakan. Mohon pilih yang lain.");
+                        shortenButton.disabled = false;
+                        return;
+                    }
+                    
+                    await setDoc(docRef, {
+                        longUrl: urlWithProtocol,
+                        shortCode: shortCode,
+                        createdAt: new Date(),
+                        createdBy: userId,
+                        expiryDate: expiryDate || null,
+                        clicks: 0,
+                        type: isSmart ? 'smart' : 'quick',
+                    });
+                    
+                    const fullShortUrl = getShortenedUrl(shortCode);
+                    shortUrlOutput.textContent = fullShortUrl;
+                    shortUrlOutput.href = fullShortUrl;
+                    resultContainer.classList.remove('hidden');
+                    generateQRCode(fullShortUrl);
+                    
+                    longUrlInput.value = "";
+                    customDomainInput.value = "";
+                    expiryDateInput.value = "";
+                    shortenButton.disabled = false;
+                    showMessage("Tautan berhasil dibuat!");
+
+                } catch (e) {
+                    console.error("Error creating document: ", e);
+                    showMessage("Gagal membuat tautan. Mohon coba lagi.");
+                    shortenButton.disabled = false;
+                }
+            });
         });
 
         // --- Custom Domain Check and Suggestions ---
@@ -551,7 +603,7 @@
         });
 
         // --- Link Redirection and Click Count ---
-        async function incrementClickCountAndRedirect(docRef, longUrl) {
+        async function incrementClickCount(docRef) {
             try {
                 await runTransaction(db, async (transaction) => {
                     const sfDoc = await transaction.get(docRef);
@@ -562,17 +614,8 @@
                     transaction.update(docRef, { clicks: newClicks });
                 });
                 console.log("Jumlah klik berhasil diperbarui!");
-                const urlHost = new URL(longUrl).hostname;
-                const isBlocked = ['phishing-demo.com', 'malware-example.org'].some(site => urlHost.includes(site));
-
-                if (isBlocked) {
-                    showWarningPage(longUrl);
-                } else {
-                    goLinkButton.onclick = () => window.location.href = longUrl;
-                }
             } catch (e) {
                 console.error("Transaksi gagal: ", e);
-                window.location.href = longUrl;
             }
         }
         
@@ -585,14 +628,8 @@
             
             let hasVerified = false;
 
-            const startDrag = (e) => {
-                isDragging = true;
-                e.preventDefault();
-                dragContainerWidth = dragContainer.offsetWidth;
-            };
-
-            const doDrag = (e) => {
-                if (!isDragging) return;
+            const handleDragMove = (e) => {
+                if (!isDragging || hasVerified) return;
                 let clientX = e.clientX || e.touches[0].clientX;
                 let newX = clientX - dragContainer.getBoundingClientRect().left - dragThumb.offsetWidth / 2;
                 newX = Math.max(0, Math.min(newX, dragContainerWidth - dragThumb.offsetWidth));
@@ -616,20 +653,39 @@
                     }, 500);
                 }
             };
+            
+            const handleDragStart = (e) => {
+                isDragging = true;
+                e.preventDefault();
+                dragContainerWidth = dragContainer.offsetWidth;
+            };
 
-            const stopDrag = () => {
+            const handleDragEnd = () => {
                 isDragging = false;
                 if (!hasVerified) {
                     dragThumb.style.transform = `translateX(0px)`;
                 }
             };
 
-            dragContainer.addEventListener('mousedown', startDrag);
-            document.addEventListener('mousemove', doDrag);
-            document.addEventListener('mouseup', stopDrag);
-            dragContainer.addEventListener('touchstart', startDrag);
-            document.addEventListener('touchmove', doDrag);
-            document.addEventListener('touchend', stopDrag);
+            dragContainer.addEventListener('mousedown', handleDragStart);
+            document.addEventListener('mousemove', handleDragMove);
+            document.addEventListener('mouseup', handleDragEnd);
+            dragContainer.addEventListener('touchstart', handleDragStart);
+            document.addEventListener('touchmove', handleDragMove);
+            document.addEventListener('touchend', handleDragEnd);
+        };
+
+        const incrementClickCountAndRedirect = (docRef, longUrl) => {
+            incrementClickCount(docRef).then(() => {
+                const urlHost = new URL(longUrl).hostname;
+                const isBlocked = ['phishing-demo.com', 'malware-example.org'].some(site => urlHost.includes(site));
+
+                if (isBlocked) {
+                    showWarningPage(longUrl);
+                } else {
+                    goLinkButton.onclick = () => window.location.href = longUrl;
+                }
+            });
         };
 
         const showWarningPage = (longUrl) => {
@@ -677,7 +733,7 @@
                             <p class="text-xs text-gray-500">Tautan Asli:</p>
                             <a href="${data.longUrl}" target="_blank" rel="noopener noreferrer" class="text-sm font-medium text-blue-600 hover:underline break-all">${longUrl}</a>
                             <p class="text-sm font-mono mt-2">${fullShortUrl}</p>
-                            <p class="text-xs text-gray-500 mt-1">Klik: ${data.clicks || 0} | Kedaluwarsa: ${expiry}</p>
+                            <p class="text-xs text-gray-500 mt-1">Klik: ${data.clicks || 0} | Kedaluwarsa: ${expiry} | Tipe: ${data.type || 'smart'}</p>
                         </div>
                         <div class="mt-4 sm:mt-0 flex flex-col gap-2 items-center justify-center">
                             <div class="w-24 h-24 p-2 rounded-lg bg-white custom-shadow">
