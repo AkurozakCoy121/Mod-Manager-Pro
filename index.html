@@ -26,7 +26,6 @@
         .bg-cover-random {
             background-size: cover;
             background-position: center;
-            background-repeat: no-repeat;
         }
         .slider-container {
             width: 100%;
@@ -40,10 +39,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: background-color 0.3s ease;
-        }
-        .slider-container.verified {
-            background-color: #10b981;
         }
         .slider-thumb {
             width: 50px;
@@ -58,15 +53,10 @@
             align-items: center;
             justify-content: center;
             color: white;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         .slider-text {
             color: #4a5568;
             font-weight: 600;
-            transition: color 0.3s ease;
-        }
-        .slider-container.verified .slider-text {
-            color: white;
         }
         .dropdown-menu {
             display: none;
@@ -113,7 +103,7 @@
 
     <!-- Kontainer Utama -->
     <main class="flex-grow flex flex-col items-center justify-center p-4">
-        <div id="loading-spinner" class="hidden fixed inset-0 flex flex-col items-center justify-center text-gray-500 z-[200] bg-white bg-opacity-80">
+        <div id="loading-spinner" class="hidden flex flex-col items-center justify-center text-gray-500">
             <i class="fa-solid fa-spinner fa-spin-pulse text-4xl mb-2"></i>
             <p>Loading...</p>
         </div>
@@ -237,8 +227,8 @@
             </div>
         </div>
 
-        <!-- UI Pengalihan dan Peringatan -->
-        <div id="redirect-ui" class="hidden fixed inset-0 flex flex-col items-center justify-center text-center bg-gray-900 bg-opacity-90 z-[100] p-4 bg-cover-random transition-opacity duration-300">
+        <!-- UI Pengalihan dan Peringatan (Seperti sebelumnya) -->
+        <div id="redirect-ui" class="hidden fixed inset-0 flex flex-col items-center justify-center text-center bg-gray-900 bg-opacity-90 z-[100] p-4 bg-cover-random">
             <div class="container-bg p-8 md:p-12 rounded-2xl custom-shadow w-full max-w-2xl">
                 <h1 class="text-4xl font-bold mb-4 text-blue-600" id="redirect-title">Tautan Siap</h1>
                 <p class="text-lg text-gray-600 mb-4" id="redirect-message">Silahkan selesaikan verifikasi berikut</p>
@@ -254,19 +244,6 @@
                 </button>
             </div>
         </div>
-        
-        <!-- UI Quick Shorten Selamat Datang -->
-        <div id="quick-redirect-ui" class="hidden fixed inset-0 flex flex-col items-center justify-center text-center bg-gray-900 bg-opacity-90 z-[100] p-4 bg-cover-random transition-opacity duration-300">
-            <div class="container-bg p-8 md:p-12 rounded-2xl custom-shadow w-full max-w-2xl">
-                <h1 class="text-4xl font-bold mb-4 text-blue-600">Selamat Datang di Tautan Cepat ShareU</h1>
-                <p class="text-lg text-gray-600 mb-4">Anda akan segera diarahkan ke tujuan.</p>
-                <p class="text-gray-500 text-sm mb-4">Fitur ini tidak memerlukan verifikasi atau hitungan mundur. Ini cara tercepat untuk berbagi link!</p>
-                <button id="quick-redirect-button" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-4 px-8 rounded-xl transition-colors duration-300 mt-4">
-                    Lanjutkan Sekarang
-                </button>
-            </div>
-        </div>
-
         <div id="warning-ui" class="hidden fixed inset-0 flex items-center justify-center text-center bg-gray-900 bg-opacity-90 z-[100] p-4">
             <div class="bg-red-800 p-8 md:p-12 rounded-2xl custom-shadow w-full max-w-2xl text-white">
                 <h1 class="text-4xl font-bold mb-4">Situs Web Ini Mungkin Berbahaya</h1>
@@ -340,8 +317,6 @@
         const messageBox = document.getElementById('message-box');
         const messageText = document.getElementById('message-text');
         const redirectUI = document.getElementById('redirect-ui');
-        const quickRedirectUI = document.getElementById('quick-redirect-ui');
-        const quickRedirectButton = document.getElementById('quick-redirect-button');
         const warningUI = document.getElementById('warning-ui');
         const goLinkButton = document.getElementById('go-link-button');
         const goBackButton = document.getElementById('go-back-button');
@@ -383,7 +358,6 @@
         const setRandomBackground = () => {
             const randomNumber = Math.floor(Math.random() * 1000) + 1;
             redirectUI.style.backgroundImage = `url('https://picsum.photos/1920/1080?random=${randomNumber}')`;
-            quickRedirectUI.style.backgroundImage = `url('https://picsum.photos/1920/1080?random=${randomNumber}')`;
         };
 
         const startCountdown = (duration, onComplete) => {
@@ -474,6 +448,8 @@
                 return;
             }
             
+            redirectUI.classList.remove('hidden');
+            setRandomBackground();
             loadingSpinner.classList.remove('hidden');
             
             try {
@@ -486,7 +462,6 @@
                     const expiryDate = docData.expiryDate ? new Date(docData.expiryDate) : null;
                     if (expiryDate && now > expiryDate) {
                         redirectUI.classList.remove('hidden');
-                        setRandomBackground();
                         document.getElementById('redirect-title').textContent = 'Link Kedaluwarsa';
                         document.getElementById('redirect-message').textContent = 'Tautan ini telah kedaluwarsa dan tidak lagi aktif.';
                         dragContainer.classList.add('hidden');
@@ -494,7 +469,9 @@
                         goLinkButton.classList.add('hidden');
                     } else if (docData.type === 'quick') {
                         // Redirect langsung untuk tautan tipe 'quick'
-                        startQuickRedirectFlow(docData.longUrl, docRef);
+                        const longUrl = docData.longUrl;
+                        await incrementClickCount(docRef);
+                        window.location.href = longUrl;
                     } else {
                         startRedirectFlow(docRef, docData.longUrl);
                     }
@@ -506,14 +483,6 @@
                 window.location.href = window.location.origin;
             } finally {
                 loadingSpinner.classList.add('hidden');
-            }
-        };
-
-        const startQuickRedirectFlow = (longUrl, docRef) => {
-            setRandomBackground();
-            quickRedirectUI.classList.remove('hidden');
-            quickRedirectButton.onclick = () => {
-                incrementClickCountAndRedirect(docRef, longUrl);
             }
         };
 
@@ -542,7 +511,7 @@
                     return;
                 }
                 
-                let shortCode = customSlug || Math.random().toString(36).substring(2, 8);
+                const shortCode = customSlug || Math.random().toString(36).substring(2, 8);
                 const urlWithProtocol = longUrl.startsWith('http://') || longUrl.startsWith('https://') ? longUrl : `https://${longUrl}`;
                 
                 if (customSlug && !/^[a-zA-Z0-9-]+$/.test(customSlug)) {
@@ -555,8 +524,8 @@
                 try {
                     const linksCollection = collection(db, `artifacts/${appId}/public/data/short_urls`);
                     const docRef = doc(linksCollection, shortCode);
-                    const docSnap = await getDoc(docRef);
 
+                    const docSnap = await getDoc(docRef);
                     if (docSnap.exists() && customSlug) {
                         showMessage("Custom domain ini sudah digunakan. Mohon pilih yang lain.");
                         shortenButton.disabled = false;
@@ -624,19 +593,6 @@
                     const docSnap = await getDoc(docRef);
                     if (docSnap.exists()) {
                         domainStatus.innerHTML = '<i class="fa-solid fa-times text-red-500"></i>';
-                        const suggestions = generateUniqueSuggestions(slug, 3);
-                        suggestions.forEach(suggestion => {
-                            const suggestionButton = document.createElement('button');
-                            suggestionButton.textContent = suggestion;
-                            suggestionButton.className = "px-3 py-1 bg-blue-100 text-blue-800 rounded-full hover:bg-blue-200 transition-colors duration-200";
-                            suggestionButton.addEventListener('click', () => {
-                                customDomainInput.value = suggestion;
-                                suggestionContainer.classList.add('hidden');
-                            });
-                            suggestionList.appendChild(suggestionButton);
-                        });
-                        suggestionContainer.classList.remove('hidden');
-
                     } else {
                         domainStatus.innerHTML = '<i class="fa-solid fa-check text-green-500"></i>';
                     }
@@ -665,7 +621,6 @@
         
         const startRedirectFlow = (docRef, longUrl) => {
             redirectUI.classList.remove('hidden');
-            setRandomBackground();
             document.getElementById('redirect-title').textContent = 'Tautan Siap';
             document.getElementById('redirect-message').textContent = 'Silahkan selesaikan verifikasi berikut';
             dragContainer.classList.remove('hidden');
@@ -683,7 +638,7 @@
                 if (newX >= dragContainerWidth * DRAG_THRESHOLD && !hasVerified) {
                     hasVerified = true;
                     dragThumb.style.transform = `translateX(${dragContainerWidth - dragThumb.offsetWidth}px)`;
-                    dragContainer.classList.add('verified');
+                    dragContainer.classList.add('bg-green-500');
                     sliderText.textContent = "Berhasil!";
                     
                     setTimeout(() => {
@@ -709,8 +664,6 @@
                 isDragging = false;
                 if (!hasVerified) {
                     dragThumb.style.transform = `translateX(0px)`;
-                    dragContainer.classList.remove('verified');
-                    sliderText.textContent = "Drag to Unlock";
                 }
             };
 
