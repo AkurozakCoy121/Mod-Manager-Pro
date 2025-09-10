@@ -472,15 +472,12 @@
         // --- Page Handling ---
         const handleUrlPath = async () => {
             const path = window.location.pathname.substring(1);
-            const pathSegments = path.split('/');
-            const shortCode = pathSegments[0];
             
-            // Jika ada shortCode di URL, coba cek di database dan sembunyikan halaman utama
-            if (shortCode && !shortCode.includes('.') && !shortCode.includes('#') && shortCode.length > 0) {
+            if (path && !path.includes('.') && !path.includes('#') && path.length > 0) {
                 mainContent.classList.add('hidden');
                 
                 try {
-                    const docRef = doc(db, `artifacts/${appId}/public/data/short_urls`, shortCode);
+                    const docRef = doc(db, `artifacts/${appId}/public/data/short_urls`, path);
                     const docSnap = await getDoc(docRef);
 
                     if (docSnap.exists()) {
@@ -507,15 +504,18 @@
                     } else {
                         // Jika shortCode tidak ditemukan, kembalikan ke halaman utama
                         mainContent.classList.remove('hidden');
+                        showPage('shortener');
                     }
                 } catch (e) {
                     console.error("Error retrieving document:", e);
                     // Jika ada error, kembalikan ke halaman utama
                     mainContent.classList.remove('hidden');
+                    showPage('shortener');
                 }
             } else {
                 // Jika tidak ada shortCode atau tidak valid, tampilkan halaman utama
                 mainContent.classList.remove('hidden');
+                showPage('shortener');
             }
         };
 
