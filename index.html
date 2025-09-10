@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -26,6 +26,7 @@
         .bg-cover-random {
             background-size: cover;
             background-position: center;
+            background-repeat: no-repeat;
         }
         .slider-container {
             width: 100%;
@@ -39,6 +40,10 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: background-color 0.3s ease;
+        }
+        .slider-container.verified {
+            background-color: #10b981;
         }
         .slider-thumb {
             width: 50px;
@@ -53,10 +58,37 @@
             align-items: center;
             justify-content: center;
             color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         .slider-text {
             color: #4a5568;
             font-weight: 600;
+            transition: color 0.3s ease;
+        }
+        .slider-container.verified .slider-text {
+            color: white;
+        }
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            z-index: 10;
+        }
+        .dropdown-menu.active {
+            display: block;
+        }
+        .dropdown-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: background-color 0.2s;
+        }
+        .dropdown-item:hover {
+            background-color: #f3f4f6;
         }
     </style>
 </head>
@@ -81,11 +113,6 @@
 
     <!-- Kontainer Utama -->
     <main class="flex-grow flex flex-col items-center justify-center p-4">
-        <div id="loading-spinner" class="hidden flex flex-col items-center justify-center text-gray-500">
-            <i class="fa-solid fa-spinner fa-spin-pulse text-4xl mb-2"></i>
-            <p>Loading...</p>
-        </div>
-
         <!-- Bagian Pemendek Tautan -->
         <div id="shortener-page" class="page-content container-bg p-8 md:p-12 rounded-2xl custom-shadow w-full max-w-2xl">
             <h2 class="text-3xl font-bold text-center mb-6">Shorten Your Link</h2>
@@ -111,9 +138,17 @@
                     <label for="expiry-date-input" class="block text-sm font-medium text-gray-700">Expiry Date (Optional)</label>
                     <input type="date" id="expiry-date-input" class="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
                 </div>
-                <button id="shorten-button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-md transition-colors duration-200">
-                    Shorten
-                </button>
+                <div class="relative w-full">
+                    <button id="shorten-button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-md transition-colors duration-200 flex items-center justify-center gap-2">
+                        <span id="shorten-text">Shorten</span>
+                        <i id="dropdown-icon" class="fa-solid fa-angle-down"></i>
+                    </button>
+                    <div id="shorten-options" class="dropdown-menu">
+                        <div class="dropdown-item" data-type="smart">Smart Shorten</div>
+                        <div class="dropdown-item" data-type="quick">Quick Shorten</div>
+                        <div class="dropdown-item" data-type="no_wait">Shorten no Wait</div>
+                    </div>
+                </div>
             </div>
             
             <!-- Hasil dan QR Code -->
@@ -198,8 +233,8 @@
             </div>
         </div>
 
-        <!-- UI Pengalihan dan Peringatan (Seperti sebelumnya) -->
-        <div id="redirect-ui" class="hidden fixed inset-0 flex flex-col items-center justify-center text-center bg-gray-900 bg-opacity-90 z-[100] p-4 bg-cover-random">
+        <!-- UI Pengalihan dan Peringatan -->
+        <div id="redirect-ui" class="hidden fixed inset-0 flex flex-col items-center justify-center text-center bg-gray-900 bg-opacity-90 z-[100] p-4 bg-cover-random transition-opacity duration-300">
             <div class="container-bg p-8 md:p-12 rounded-2xl custom-shadow w-full max-w-2xl">
                 <h1 class="text-4xl font-bold mb-4 text-blue-600" id="redirect-title">Tautan Siap</h1>
                 <p class="text-lg text-gray-600 mb-4" id="redirect-message">Silahkan selesaikan verifikasi berikut</p>
@@ -208,6 +243,9 @@
                     <span class="slider-text">Drag to Unlock</span>
                 </div>
                 <div id="redirect-countdown-container" class="hidden">
+                    <div id="countdown-progress" class="w-full h-2 bg-gray-200 rounded-full overflow-hidden mb-2">
+                        <div id="countdown-bar" class="h-full bg-blue-600 transition-all duration-100 ease-linear" style="width: 100%;"></div>
+                    </div>
                     <div id="redirect-countdown" class="text-6xl font-bold text-blue-600 my-4">15</div>
                 </div>
                 <button id="go-link-button" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-4 px-8 rounded-xl transition-colors duration-300 hidden mt-4">
@@ -215,6 +253,19 @@
                 </button>
             </div>
         </div>
+        
+        <!-- UI Quick Shorten Selamat Datang -->
+        <div id="quick-redirect-ui" class="hidden fixed inset-0 flex flex-col items-center justify-center text-center bg-gray-900 bg-opacity-90 z-[100] p-4 bg-cover-random transition-opacity duration-300">
+            <div class="container-bg p-8 md:p-12 rounded-2xl custom-shadow w-full max-w-2xl">
+                <h1 class="text-4xl font-bold mb-4 text-blue-600">Selamat Datang di Tautan Cepat ShareU</h1>
+                <p class="text-lg text-gray-600 mb-4">Anda akan segera diarahkan ke tujuan.</p>
+                <p class="text-gray-500 text-sm mb-4">Fitur ini tidak memerlukan verifikasi atau hitungan mundur. Ini cara tercepat untuk berbagi link!</p>
+                <button id="quick-redirect-button" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-4 px-8 rounded-xl transition-colors duration-300 mt-4">
+                    Lanjutkan Sekarang
+                </button>
+            </div>
+        </div>
+
         <div id="warning-ui" class="hidden fixed inset-0 flex items-center justify-center text-center bg-gray-900 bg-opacity-90 z-[100] p-4">
             <div class="bg-red-800 p-8 md:p-12 rounded-2xl custom-shadow w-full max-w-2xl text-white">
                 <h1 class="text-4xl font-bold mb-4">Situs Web Ini Mungkin Berbahaya</h1>
@@ -238,7 +289,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, collection, query, where, onSnapshot, runTransaction, addDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
@@ -267,11 +318,13 @@
         // --- UI Elements ---
         const navButtons = document.querySelectorAll('.nav-btn');
         const pages = document.querySelectorAll('.page-content');
-        const loadingSpinner = document.getElementById('loading-spinner');
         const longUrlInput = document.getElementById('long-url-input');
         const customDomainInput = document.getElementById('custom-domain-input');
         const expiryDateInput = document.getElementById('expiry-date-input');
         const shortenButton = document.getElementById('shorten-button');
+        const shortenOptions = document.getElementById('shorten-options');
+        const dropdownIcon = document.getElementById('dropdown-icon');
+        const shortenText = document.getElementById('shorten-text');
         const domainStatus = document.getElementById('domain-status');
         const resultContainer = document.getElementById('result-container');
         const shortUrlOutput = document.getElementById('short-url-output');
@@ -285,6 +338,8 @@
         const messageBox = document.getElementById('message-box');
         const messageText = document.getElementById('message-text');
         const redirectUI = document.getElementById('redirect-ui');
+        const quickRedirectUI = document.getElementById('quick-redirect-ui');
+        const quickRedirectButton = document.getElementById('quick-redirect-button');
         const warningUI = document.getElementById('warning-ui');
         const goLinkButton = document.getElementById('go-link-button');
         const goBackButton = document.getElementById('go-back-button');
@@ -292,11 +347,9 @@
         const userIdSpan = document.getElementById('user-id-span');
         const suggestionContainer = document.getElementById('suggestion-container');
         const suggestionList = document.getElementById('suggestion-list');
-
         const dragContainer = document.getElementById('drag-container');
         const dragThumb = document.getElementById('drag-thumb');
         const sliderText = document.querySelector('.slider-text');
-
         const editModal = document.getElementById('edit-modal');
         const editDocIdInput = document.getElementById('edit-doc-id');
         const editLongUrlInput = document.getElementById('edit-long-url');
@@ -304,8 +357,12 @@
         const editExpiryDateInput = document.getElementById('edit-expiry-date');
         const saveEditButton = document.getElementById('save-edit-button');
         const cancelEditButton = document.getElementById('cancel-edit-button');
+        const mainContent = document.querySelector('main');
+        const countdownBar = document.getElementById('countdown-bar');
+        const countdownContainer = document.getElementById('redirect-countdown-container');
 
         let currentPage = 'shortener';
+        let shortenType = 'smart'; // Default shorten type
 
         // --- Utility Functions ---
         const showMessage = (text) => {
@@ -327,15 +384,17 @@
         const setRandomBackground = () => {
             const randomNumber = Math.floor(Math.random() * 1000) + 1;
             redirectUI.style.backgroundImage = `url('https://picsum.photos/1920/1080?random=${randomNumber}')`;
+            quickRedirectUI.style.backgroundImage = `url('https://picsum.photos/1920/1080?random=${randomNumber}')`;
         };
 
         const startCountdown = (duration, onComplete) => {
             let timer = duration;
             document.getElementById('redirect-countdown').textContent = timer;
-            document.getElementById('redirect-countdown-container').classList.remove('hidden');
+            countdownContainer.classList.remove('hidden');
             const interval = setInterval(() => {
                 timer--;
                 document.getElementById('redirect-countdown').textContent = timer;
+                countdownBar.style.width = `${(timer / duration) * 100}%`;
                 if (timer <= 0) {
                     clearInterval(interval);
                     onComplete();
@@ -382,27 +441,31 @@
 
         // --- Firebase Configuration and Initialization ---
         const initializeFirebase = async () => {
-            loadingSpinner.classList.remove('hidden');
             try {
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
-                userId = auth.currentUser.uid;
-                userIdSpan.textContent = userId;
                 
-                await handleUrlPath();
-                setupRealtimeHistory();
-                setupForumListener();
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                    } else {
+                        // Jika tidak ada pengguna, login secara anonim
+                        await signInAnonymously(auth);
+                        userId = auth.currentUser.uid;
+                    }
+                    userIdSpan.textContent = userId;
+                    
+                    await handleUrlPath();
+                    setupRealtimeHistory();
+                    setupForumListener();
+                });
 
             } catch (error) {
                 console.error("Firebase initialization failed:", error);
                 showMessage("Failed to connect to Firebase. Please try again later.");
-                loadingSpinner.classList.add('hidden');
+                // Jika inisialisasi gagal, pastikan halaman utama tetap terlihat
+                mainContent.classList.remove('hidden');
             }
         };
 
@@ -410,104 +473,133 @@
         const handleUrlPath = async () => {
             const path = window.location.pathname.substring(1);
             const pathSegments = path.split('/');
-            const shortCode = pathSegments[pathSegments.length - 1]; 
+            const shortCode = pathSegments[0];
             
-            if (!shortCode || shortCode.includes('.') || shortCode.includes('#') || shortCode.includes(' ')) {
-                showPage('shortener');
-                return;
-            }
-            
-            redirectUI.classList.remove('hidden');
-            setRandomBackground();
-            loadingSpinner.classList.remove('hidden');
-            
-            try {
-                const docRef = doc(db, `artifacts/${appId}/public/data/short_urls`, shortCode);
-                const docSnap = await getDoc(docRef);
+            // Jika ada shortCode di URL, coba cek di database dan sembunyikan halaman utama
+            if (shortCode && !shortCode.includes('.') && !shortCode.includes('#') && shortCode.length > 0) {
+                mainContent.classList.add('hidden');
+                
+                try {
+                    const docRef = doc(db, `artifacts/${appId}/public/data/short_urls`, shortCode);
+                    const docSnap = await getDoc(docRef);
 
-                if (docSnap.exists()) {
-                    const docData = docSnap.data();
-                    const now = new Date();
-                    const expiryDate = docData.expiryDate ? new Date(docData.expiryDate) : null;
-                    if (expiryDate && now > expiryDate) {
-                        redirectUI.classList.remove('hidden');
-                        document.getElementById('redirect-title').textContent = 'Link Kedaluwarsa';
-                        document.getElementById('redirect-message').textContent = 'Tautan ini telah kedaluwarsa dan tidak lagi aktif.';
-                        dragContainer.classList.add('hidden');
-                        document.getElementById('redirect-countdown-container').classList.add('hidden');
-                        goLinkButton.classList.add('hidden');
+                    if (docSnap.exists()) {
+                        const docData = docSnap.data();
+                        const now = new Date();
+                        const expiryDate = docData.expiryDate ? new Date(docData.expiryDate) : null;
+                        if (expiryDate && now > expiryDate) {
+                            redirectUI.classList.remove('hidden');
+                            setRandomBackground();
+                            document.getElementById('redirect-title').textContent = 'Link Kedaluwarsa';
+                            document.getElementById('redirect-message').textContent = 'Tautan ini telah kedaluwarsa dan tidak lagi aktif.';
+                            dragContainer.classList.add('hidden');
+                            countdownContainer.classList.add('hidden');
+                            goLinkButton.classList.add('hidden');
+                        } else if (docData.type === 'quick') {
+                            // Redirect langsung untuk tautan tipe 'quick'
+                            startQuickRedirectFlow(docData.longUrl, docRef);
+                        } else if (docData.type === 'no_wait') {
+                             // Redirect dengan drag tapi tanpa countdown
+                            startNoWaitRedirectFlow(docData.longUrl, docRef);
+                        } else {
+                            startRedirectFlow(docRef, docData.longUrl);
+                        }
                     } else {
-                        startRedirectFlow(docRef, docData.longUrl);
+                        // Jika shortCode tidak ditemukan, kembalikan ke halaman utama
+                        mainContent.classList.remove('hidden');
                     }
-                } else {
-                    window.location.href = window.location.origin;
+                } catch (e) {
+                    console.error("Error retrieving document:", e);
+                    // Jika ada error, kembalikan ke halaman utama
+                    mainContent.classList.remove('hidden');
                 }
-            } catch (e) {
-                console.error("Error retrieving document:", e);
-                window.location.href = window.location.origin;
-            } finally {
-                loadingSpinner.classList.add('hidden');
+            } else {
+                // Jika tidak ada shortCode atau tidak valid, tampilkan halaman utama
+                mainContent.classList.remove('hidden');
+            }
+        };
+
+        const startQuickRedirectFlow = (longUrl, docRef) => {
+            setRandomBackground();
+            quickRedirectUI.classList.remove('hidden');
+            quickRedirectButton.onclick = () => {
+                incrementClickCountAndRedirect(docRef, longUrl);
             }
         };
 
         // --- Link Shortening Logic ---
-        shortenButton.addEventListener('click', async () => {
-            const longUrl = longUrlInput.value.trim();
-            const customSlug = normalizeSlug(customDomainInput.value.trim());
-            const expiryDate = expiryDateInput.value;
+        shortenButton.addEventListener('click', () => {
+            shortenOptions.classList.toggle('active');
+            dropdownIcon.classList.toggle('fa-angle-down');
+            dropdownIcon.classList.toggle('fa-angle-up');
+        });
+        
+        document.querySelectorAll('.dropdown-item').forEach(item => {
+            item.addEventListener('click', async (e) => {
+                shortenType = e.target.dataset.type;
+                shortenText.textContent = e.target.textContent;
+                shortenOptions.classList.remove('active');
+                dropdownIcon.classList.remove('fa-angle-up');
+                dropdownIcon.classList.add('fa-angle-down');
 
-            if (!longUrl) {
-                showMessage("Mohon masukkan URL yang valid.");
-                return;
-            }
-
-            const shortCode = customSlug || Math.random().toString(36).substring(2, 8);
-            const urlWithProtocol = longUrl.startsWith('http://') || longUrl.startsWith('https://') ? longUrl : `https://${longUrl}`;
-            
-            if (customSlug && !/^[a-zA-Z0-9-]+$/.test(customSlug)) {
-                showMessage("Custom domain hanya menerima huruf, angka, dan tanda hubung.");
-                return;
-            }
-
-            shortenButton.disabled = true;
-
-            try {
-                const linksCollection = collection(db, `artifacts/${appId}/public/data/short_urls`);
-                const docRef = doc(linksCollection, shortCode);
-
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists() && customSlug) {
-                    showMessage("Custom domain ini sudah digunakan. Mohon pilih yang lain.");
-                    shortenButton.disabled = false;
+                const longUrl = longUrlInput.value.trim();
+                const customSlug = normalizeSlug(customDomainInput.value.trim());
+                const expiryDate = expiryDateInput.value;
+                
+                if (!longUrl) {
+                    showMessage("Mohon masukkan URL yang valid.");
                     return;
                 }
                 
-                await setDoc(docRef, {
-                    longUrl: urlWithProtocol,
-                    shortCode: shortCode,
-                    createdAt: new Date(),
-                    createdBy: userId,
-                    expiryDate: expiryDate || null,
-                    clicks: 0,
-                });
+                let shortCode = customSlug || Math.random().toString(36).substring(2, 8);
+                const urlWithProtocol = longUrl.startsWith('http://') || longUrl.startsWith('https://') ? longUrl : `https://${longUrl}`;
                 
-                const fullShortUrl = getShortenedUrl(shortCode);
-                shortUrlOutput.textContent = fullShortUrl;
-                shortUrlOutput.href = fullShortUrl;
-                resultContainer.classList.remove('hidden');
-                generateQRCode(fullShortUrl);
+                if (customSlug && !/^[a-zA-Z0-9-]+$/.test(customSlug)) {
+                    showMessage("Custom domain hanya menerima huruf, angka, dan tanda hubung.");
+                    return;
+                }
                 
-                longUrlInput.value = "";
-                customDomainInput.value = "";
-                expiryDateInput.value = "";
-                shortenButton.disabled = false;
-                showMessage("Tautan berhasil dibuat!");
+                shortenButton.disabled = true;
 
-            } catch (e) {
-                console.error("Error creating document: ", e);
-                showMessage("Gagal membuat tautan. Mohon coba lagi.");
-                shortenButton.disabled = false;
-            }
+                try {
+                    const linksCollection = collection(db, `artifacts/${appId}/public/data/short_urls`);
+                    const docRef = doc(linksCollection, shortCode);
+                    const docSnap = await getDoc(docRef);
+
+                    if (docSnap.exists() && customSlug) {
+                        showMessage("Custom domain ini sudah digunakan. Mohon pilih yang lain.");
+                        shortenButton.disabled = false;
+                        return;
+                    }
+                    
+                    await setDoc(docRef, {
+                        longUrl: urlWithProtocol,
+                        shortCode: shortCode,
+                        createdAt: new Date(),
+                        createdBy: userId,
+                        expiryDate: expiryDate || null,
+                        clicks: 0,
+                        type: shortenType,
+                    });
+                    
+                    const fullShortUrl = getShortenedUrl(shortCode);
+                    shortUrlOutput.textContent = fullShortUrl;
+                    shortUrlOutput.href = fullShortUrl;
+                    resultContainer.classList.remove('hidden');
+                    generateQRCode(fullShortUrl);
+                    
+                    longUrlInput.value = "";
+                    customDomainInput.value = "";
+                    expiryDateInput.value = "";
+                    shortenButton.disabled = false;
+                    showMessage("Tautan berhasil dibuat!");
+
+                } catch (e) {
+                    console.error("Error creating document: ", e);
+                    showMessage("Gagal membuat tautan. Mohon coba lagi.");
+                    shortenButton.disabled = false;
+                }
+            });
         });
 
         // --- Custom Domain Check and Suggestions ---
@@ -541,6 +633,19 @@
                     const docSnap = await getDoc(docRef);
                     if (docSnap.exists()) {
                         domainStatus.innerHTML = '<i class="fa-solid fa-times text-red-500"></i>';
+                        const suggestions = generateUniqueSuggestions(slug, 3);
+                        suggestions.forEach(suggestion => {
+                            const suggestionButton = document.createElement('button');
+                            suggestionButton.textContent = suggestion;
+                            suggestionButton.className = "px-3 py-1 bg-blue-100 text-blue-800 rounded-full hover:bg-blue-200 transition-colors duration-200";
+                            suggestionButton.addEventListener('click', () => {
+                                customDomainInput.value = suggestion;
+                                suggestionContainer.classList.add('hidden');
+                            });
+                            suggestionList.appendChild(suggestionButton);
+                        });
+                        suggestionContainer.classList.remove('hidden');
+
                     } else {
                         domainStatus.innerHTML = '<i class="fa-solid fa-check text-green-500"></i>';
                     }
@@ -551,7 +656,7 @@
         });
 
         // --- Link Redirection and Click Count ---
-        async function incrementClickCountAndRedirect(docRef, longUrl) {
+        async function incrementClickCount(docRef) {
             try {
                 await runTransaction(db, async (transaction) => {
                     const sfDoc = await transaction.get(docRef);
@@ -559,77 +664,122 @@
                         throw "Dokumen tidak ada!";
                     }
                     const newClicks = (sfDoc.data().clicks || 0) + 1;
-                    transaction.update(docRef, { clicks: newClicks });
+                    transaction.update(sfDoc.ref, { clicks: newClicks });
                 });
                 console.log("Jumlah klik berhasil diperbarui!");
+            } catch (e) {
+                console.error("Transaksi gagal: ", e);
+            }
+        }
+        
+        const setupDragLogic = (onVerified) => {
+            let isDragging = false;
+            let startPos = 0;
+            const dragThumb = document.getElementById('drag-thumb');
+            const dragContainer = document.getElementById('drag-container');
+            const sliderText = document.querySelector('.slider-text');
+            const dragContainerWidth = dragContainer.offsetWidth;
+
+            const updateThumbPosition = (x) => {
+                let newX = x - dragContainer.getBoundingClientRect().left - dragThumb.offsetWidth / 2;
+                newX = Math.max(0, Math.min(newX, dragContainerWidth - dragThumb.offsetWidth));
+                dragThumb.style.transform = `translateX(${newX}px)`;
+
+                if (newX >= dragContainerWidth * DRAG_THRESHOLD) {
+                    if (isDragging) {
+                        isDragging = false;
+                        dragThumb.style.transform = `translateX(${dragContainerWidth - dragThumb.offsetWidth}px)`;
+                        dragContainer.classList.add('verified');
+                        sliderText.textContent = "Berhasil!";
+                        onVerified();
+                    }
+                }
+            };
+
+            const handleStart = (e) => {
+                isDragging = true;
+                e.preventDefault();
+                dragContainerWidth = dragContainer.offsetWidth;
+                startPos = e.clientX || e.touches[0].clientX;
+                dragContainer.classList.remove('verified');
+            };
+
+            const handleMove = (e) => {
+                if (!isDragging) return;
+                const clientX = e.clientX || e.touches[0].clientX;
+                updateThumbPosition(clientX);
+            };
+
+            const handleEnd = () => {
+                if (isDragging) {
+                    isDragging = false;
+                    dragThumb.style.transform = `translateX(0px)`;
+                }
+            };
+            
+            dragContainer.addEventListener('mousedown', handleStart);
+            document.addEventListener('mousemove', handleMove);
+            document.addEventListener('mouseup', handleEnd);
+
+            dragContainer.addEventListener('touchstart', handleStart);
+            document.addEventListener('touchmove', handleMove);
+            document.addEventListener('touchend', handleEnd);
+        };
+        
+        const startRedirectFlow = (docRef, longUrl) => {
+            redirectUI.classList.remove('hidden');
+            setRandomBackground();
+            countdownContainer.classList.add('hidden');
+            goLinkButton.classList.add('hidden');
+            document.getElementById('redirect-title').textContent = 'Tautan Siap';
+            document.getElementById('redirect-message').textContent = 'Silahkan selesaikan verifikasi berikut';
+            dragContainer.classList.remove('hidden');
+            
+            setupDragLogic(() => {
+                setTimeout(() => {
+                    dragContainer.classList.add('hidden');
+                    document.getElementById('redirect-title').textContent = 'Tautan Anda Siap!';
+                    document.getElementById('redirect-message').textContent = 'Tunggu 15 detik untuk melanjutkan...';
+                    startCountdown(15, () => {
+                        document.getElementById('redirect-message').textContent = 'Klik tombol di bawah untuk melanjutkan.';
+                        goLinkButton.classList.remove('hidden');
+                    });
+                }, 500);
+            });
+            
+            goLinkButton.onclick = () => {
+                incrementClickCountAndRedirect(docRef, longUrl);
+            };
+        };
+
+        const startNoWaitRedirectFlow = (longUrl, docRef) => {
+            redirectUI.classList.remove('hidden');
+            setRandomBackground();
+            countdownContainer.classList.add('hidden');
+            goLinkButton.classList.add('hidden');
+            document.getElementById('redirect-title').textContent = 'Verifikasi Tautan';
+            document.getElementById('redirect-message').textContent = 'Tarik untuk melanjutkan ke tautan tujuan';
+            dragContainer.classList.remove('hidden');
+
+            setupDragLogic(() => {
+                setTimeout(() => {
+                    incrementClickCountAndRedirect(docRef, longUrl);
+                }, 500);
+            });
+        };
+
+
+        const incrementClickCountAndRedirect = (docRef, longUrl) => {
+            incrementClickCount(docRef).then(() => {
                 const urlHost = new URL(longUrl).hostname;
                 const isBlocked = ['phishing-demo.com', 'malware-example.org'].some(site => urlHost.includes(site));
 
                 if (isBlocked) {
                     showWarningPage(longUrl);
                 } else {
-                    goLinkButton.onclick = () => window.location.href = longUrl;
+                    window.location.href = longUrl;
                 }
-            } catch (e) {
-                console.error("Transaksi gagal: ", e);
-                window.location.href = longUrl;
-            }
-        }
-        
-        const startRedirectFlow = (docRef, longUrl) => {
-            redirectUI.classList.remove('hidden');
-            document.getElementById('redirect-title').textContent = 'Tautan Siap';
-            document.getElementById('redirect-message').textContent = 'Silahkan selesaikan verifikasi berikut';
-            dragContainer.classList.remove('hidden');
-            dragThumb.style.transform = `translateX(0px)`;
-            
-            let hasVerified = false;
-
-            const startDrag = (e) => {
-                isDragging = true;
-                e.preventDefault();
-                dragContainerWidth = dragContainer.offsetWidth;
-            };
-
-            const doDrag = (e) => {
-                if (!isDragging) return;
-                let clientX = e.clientX || e.touches[0].clientX;
-                let newX = clientX - dragContainer.getBoundingClientRect().left - dragThumb.offsetWidth / 2;
-                newX = Math.max(0, Math.min(newX, dragContainerWidth - dragThumb.offsetWidth));
-                dragThumb.style.transform = `translateX(${newX}px)`;
-
-                if (newX >= dragContainerWidth * DRAG_THRESHOLD && !hasVerified) {
-                    hasVerified = true;
-                    dragThumb.style.transform = `translateX(${dragContainerWidth - dragThumb.offsetWidth}px)`;
-                    dragContainer.classList.add('bg-green-500');
-                    sliderText.textContent = "Berhasil!";
-                    
-                    setTimeout(() => {
-                        dragContainer.classList.add('hidden');
-                        document.getElementById('redirect-title').textContent = 'Tautan Anda Siap!';
-                        document.getElementById('redirect-message').textContent = 'Tunggu 15 detik untuk melanjutkan...';
-                        startCountdown(15, () => {
-                            document.getElementById('redirect-message').textContent = 'Klik tombol di bawah untuk melanjutkan.';
-                            goLinkButton.classList.remove('hidden');
-                            incrementClickCountAndRedirect(docRef, longUrl);
-                        });
-                    }, 500);
-                }
-            };
-
-            const stopDrag = () => {
-                isDragging = false;
-                if (!hasVerified) {
-                    dragThumb.style.transform = `translateX(0px)`;
-                }
-            };
-
-            dragContainer.addEventListener('mousedown', startDrag);
-            document.addEventListener('mousemove', doDrag);
-            document.addEventListener('mouseup', stopDrag);
-            dragContainer.addEventListener('touchstart', startDrag);
-            document.addEventListener('touchmove', doDrag);
-            document.addEventListener('touchend', stopDrag);
+            });
         };
 
         const showWarningPage = (longUrl) => {
@@ -646,7 +796,7 @@
         
         // --- History Page ---
         const setupRealtimeHistory = () => {
-            if (!db) return;
+            if (!db || !userId) return;
             const linksCollection = collection(db, `artifacts/${appId}/public/data/short_urls`);
             const q = query(linksCollection, where('createdBy', '==', userId));
             
@@ -677,7 +827,7 @@
                             <p class="text-xs text-gray-500">Tautan Asli:</p>
                             <a href="${data.longUrl}" target="_blank" rel="noopener noreferrer" class="text-sm font-medium text-blue-600 hover:underline break-all">${longUrl}</a>
                             <p class="text-sm font-mono mt-2">${fullShortUrl}</p>
-                            <p class="text-xs text-gray-500 mt-1">Klik: ${data.clicks || 0} | Kedaluwarsa: ${expiry}</p>
+                            <p class="text-xs text-gray-500 mt-1">Klik: ${data.clicks || 0} | Kedaluwarsa: ${expiry} | Tipe: ${data.type || 'smart'}</p>
                         </div>
                         <div class="mt-4 sm:mt-0 flex flex-col gap-2 items-center justify-center">
                             <div class="w-24 h-24 p-2 rounded-lg bg-white custom-shadow">
