@@ -151,6 +151,27 @@
         .iframe-active #iframe-wrapper {
             height: calc(100% - 60px); 
         }
+
+        /* Mouse/Activity Detector UI (New) */
+        #activity-detector {
+            height: 50px;
+            background-color: #e5e7eb;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+        #activity-progress {
+            height: 100%;
+            width: 0%;
+            background-color: #22c55e; /* Green-500 */
+            transition: width 0.1s linear;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: white;
+        }
     </style>
 </head>
 <body class="flex flex-col min-h-screen">
@@ -438,19 +459,23 @@
         </div>
 
 
-        <div id="redirect-ui" class="hidden fixed inset-0 flex flex-col items-center justify-center text-center bg-gray-900 bg-opacity-90 z-[100] p-4 bg-cover-random">
+        <div id="redirect-ui" class="hidden fixed inset-0 flex flex-col items-center justify-center text-center bg-gray-900 bg-opacity-90 z-[100] p-4">
             <div class="container-bg p-8 md:p-12 rounded-3xl custom-shadow w-full max-w-2xl">
                 <h1 class="text-4xl font-bold mb-4 text-blue-600" id="redirect-title">Link Ready</h1>
-                <p class="text-lg text-gray-600 mb-4" id="redirect-message">Please complete the verification below</p>
-                <div id="drag-container" class="slider-container my-4">
-                    <div class="slider-thumb" id="drag-thumb" style="width: 10%;"><i class="fa-solid fa-arrow-right"></i></div>
-                    <span class="slider-text">Drag to Unlock</span>
+                <p class="text-lg text-gray-600 mb-4" id="redirect-message">Mohon tunggu 15 detik untuk verifikasi anti-bot.</p>
+                
+                <div id="activity-detector" class="my-6">
+                    <div id="activity-progress">
+                        <span id="activity-text">Mohon Gerakkan Mouse/Sentuh Layar</span>
+                    </div>
                 </div>
+
                 <div id="redirect-countdown-container" class="hidden">
                     <div id="redirect-countdown" class="text-6xl font-bold text-blue-600 my-4">15</div>
                 </div>
+                
                 <button id="go-link-button" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-4 px-8 rounded-xl transition-colors duration-300 hidden mt-4">
-                    Continue
+                    Continue to Link
                 </button>
             </div>
         </div>
@@ -499,6 +524,7 @@
         const ADMIN_UID = 'uYFcTwxCdIQJNy5irJF8Scb7Xuq2';
         const TOXIC_WORDS = ['fuck', 'shit', 'asshole', 'bitch', 'kontol', 'memek', 'anjing', 'babi', 'tolol', 'goblok', 'jancuk'];
         const CHAT_COOLDOWN_SECONDS = 5;
+        const ANTI_BOT_DURATION = 15; // Waktu verifikasi anti-bot (detik)
 
         // --- Firebase Configuration & Initialization ---
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
@@ -515,14 +541,17 @@
 
         let db, auth;
         let userId = null;
-        let isDragging = false;
-        let dragContainerWidth;
-        const DRAG_THRESHOLD = 0.9;
         let isIframeShorten = false;
         let isMaintenanceMode = false;
         let isChatBanned = false;
         let lastChatMessageTime = 0;
         let currentPage = 'shortener'; // Default page
+        
+        // --- Anti-Bot State (New) ---
+        let isActivityDetected = false;
+        let activityInterval = null;
+        let activityTimer = 0;
+        let antiBotPass = false;
 
 
         // --- UI Elements ---
@@ -546,13 +575,17 @@
         const qrcodeContainer = document.getElementById('qrcode-container');
         const copyButton = document.getElementById('copy-button');
         const downloadQrButton = document.getElementById('download-qr-button');
-        const dragContainer = document.getElementById('drag-container');
-        const dragThumb = document.getElementById('drag-thumb');
+        // Drag UI elements removed
         const goLinkButton = document.getElementById('go-link-button');
         const redirectCountdown = document.getElementById('redirect-countdown');
         const redirectCountdownContainer = document.getElementById('redirect-countdown-container');
         
-        // New UI Elements
+        // New Anti-Bot UI Elements
+        const activityDetector = document.getElementById('activity-detector');
+        const activityProgress = document.getElementById('activity-progress');
+        const activityText = document.getElementById('activity-text');
+        
+        // Admin UI Elements (rest)
         const adminNavBtn = document.getElementById('admin-nav-btn');
         const globalWarningUI = document.getElementById('global-warning-ui');
         const globalWarningText = document.getElementById('global-warning-text');
@@ -637,7 +670,7 @@
             return TOXIC_WORDS.some(word => lowerText.includes(word));
         };
 
-        // --- Dark Mode Logic (New) ---
+        // --- Dark Mode Logic ---
         const toggleDarkMode = (isDark) => {
             if (isDark) {
                 document.body.classList.add('dark-mode');
@@ -662,7 +695,7 @@
             }
         };
 
-        // --- Global Settings Logic (New) ---
+        // --- Global Settings Logic ---
         const setupGlobalSettingsListener = () => {
             const docRef = doc(db, `artifacts/${appId}/public/data/global_settings`, 'status');
 
@@ -785,17 +818,21 @@
                     setupAdminLinkManagement();
                 }
                 
-                // --- PENAMBAHAN FUNGSI PENTING: Pengecekan URL untuk Redirect ---
-                await handleUrlPath(); 
-                // Jika handleUrlPath tidak mengalihkan (misal: ada di root path), inisialisasi listener lainnya
-                setupRealtimeHistory();
-                setupForumListener();
-                setupChatAdminListener();
-
-                // Initial page load (only if not redirected)
-                if (window.location.pathname === '/' || window.location.pathname.startsWith('/index.html')) {
-                    showPage('shortener');
+                // --- PENTING: Pengecekan URL untuk Redirect ---
+                const isRedirecting = await handleUrlPath(); 
+                
+                if (!isRedirecting) {
+                    // Jika handleUrlPath tidak mengalihkan (misal: ada di root path), inisialisasi listener lainnya
+                    setupRealtimeHistory();
+                    setupForumListener();
+                    setupChatAdminListener();
+                
+                    // Initial page load
+                    if (window.location.pathname === '/' || window.location.pathname.startsWith('/index.html')) {
+                        showPage('shortener');
+                    }
                 }
+                
                 loadingSpinner.classList.add('hidden');
 
             } catch (error) {
@@ -810,7 +847,7 @@
             const path = window.location.pathname.substring(1);
             if (!path || path.startsWith('index.html')) {
                 // We are at the root or main file, show main content
-                return;
+                return false; // Not redirecting
             }
 
             const docRef = doc(db, `artifacts/${appId}/public/data/short_urls`, path);
@@ -823,88 +860,103 @@
                     if (data.expiryDate && new Date(data.expiryDate) < new Date()) {
                         document.getElementById('redirect-title').textContent = 'Link Expired';
                         document.getElementById('redirect-message').textContent = 'This shortened link has expired.';
-                        dragContainer.classList.add('hidden');
+                        activityDetector.classList.add('hidden');
                         goLinkButton.classList.remove('hidden');
                         goLinkButton.textContent = 'Go Home';
                         goLinkButton.onclick = () => window.location.href = window.location.origin;
                         redirectUI.classList.remove('hidden');
                         loadingSpinner.classList.add('hidden');
-                        return;
+                        return true;
                     }
 
-                    // 2. Increment Clicks (Atomic Update)
-                    await updateDoc(docRef, { clicks: increment(1) });
-
-                    // 3. Start Redirect Flow
+                    // 2. Start Redirect Flow (with Anti-Bot)
                     startRedirectFlow(data);
+                    return true; // Is redirecting
                     
                 } else {
                     // Link not found, redirect to home with error
                     showMessage(`Short link /${path} not found.`);
                     window.location.replace(window.location.origin);
+                    return true; // Redirecting away from this page
                 }
             } catch (error) {
                 console.error("Error handling redirect:", error);
                 showMessage("Error during redirection process.");
                 window.location.replace(window.location.origin);
+                return true; // Redirecting away from this page
             }
         };
 
-        // --- Drag and Redirect Flow ---
+        // --- Anti-Bot & Redirect Flow (Updated) ---
         const startRedirectFlow = (data) => {
             document.body.classList.add('iframe-active');
             redirectUI.classList.remove('hidden');
             loadingSpinner.classList.add('hidden');
+            activityDetector.classList.remove('hidden');
+            goLinkButton.classList.add('hidden');
+            antiBotPass = false;
+            isActivityDetected = false;
+            activityTimer = 0;
+            activityProgress.style.width = '0%';
+            activityText.textContent = 'Mohon Gerakkan Mouse/Sentuh Layar';
+            
+            // Listeners untuk deteksi aktivitas
+            document.addEventListener('mousemove', handleActivity);
+            document.addEventListener('touchstart', handleActivity);
+            document.addEventListener('scroll', handleActivity);
 
-            // Setup Drag Logic
-            dragContainerWidth = dragContainer.offsetWidth;
-            dragThumb.onmousedown = (e) => startDrag(e, data);
-            dragThumb.ontouchstart = (e) => startDrag(e.touches[0], data);
+            // Start activity check and timer
+            activityInterval = setInterval(() => {
+                if (isActivityDetected) {
+                    activityTimer++;
+                    const progress = (activityTimer / ANTI_BOT_DURATION) * 100;
+                    activityProgress.style.width = `${progress}%`;
+                    activityText.textContent = `Aktivitas Terdeteksi. Menunggu ${ANTI_BOT_DURATION - activityTimer} detik...`;
+
+                    if (activityTimer >= ANTI_BOT_DURATION) {
+                        clearInterval(activityInterval);
+                        document.removeEventListener('mousemove', handleActivity);
+                        document.removeEventListener('touchstart', handleActivity);
+                        document.removeEventListener('scroll', handleActivity);
+                        
+                        antiBotPass = true;
+                        activityProgress.style.width = '100%';
+                        activityText.textContent = 'Verifikasi Berhasil!';
+                        
+                        // Start countdown to Final Redirect
+                        startCountdown(data);
+                    }
+                    isActivityDetected = false; // Reset flag for next interval
+                } else {
+                    activityText.textContent = 'Aktivitas Tidak Terdeteksi. Gerakkan Mouse!';
+                }
+            }, 1000);
         };
-        
-        const startDrag = (e, data) => {
-            e.preventDefault();
-            isDragging = true;
-            document.onmousemove = (e) => dragMove(e, data);
-            document.onmouseup = dragEnd;
-            document.ontouchmove = (e) => dragMove(e.touches[0], data);
-            document.ontouchend = dragEnd;
+
+        const handleActivity = () => {
+             // Set flag to true if any mouse movement, touch, or scroll event is detected
+            isActivityDetected = true;
         };
 
-        const dragMove = (e, data) => {
-            if (!isDragging) return;
-            const containerRect = dragContainer.getBoundingClientRect();
-            let newPos = e.clientX - containerRect.left - dragThumb.offsetWidth / 2;
-
-            if (newPos < 0) newPos = 0;
-            if (newPos > dragContainerWidth - dragThumb.offsetWidth) {
-                newPos = dragContainerWidth - dragThumb.offsetWidth;
+        const startCountdown = async (data) => {
+            // PENTING: Increment Clicks DILAKUKAN DI SINI, setelah verifikasi anti-bot berhasil.
+            try {
+                const docRef = doc(db, `artifacts/${appId}/public/data/short_urls`, data.shortCode);
+                await updateDoc(docRef, { clicks: increment(1) });
+                console.log("Clicks incremented successfully after anti-bot verification.");
+            } catch (e) {
+                console.error("Failed to increment clicks:", e);
+                // Lanjutkan ke redirect meskipun gagal update klik, agar pengunjung tidak terhambat.
             }
 
-            dragThumb.style.transform = `translateX(${newPos}px)`;
+            activityDetector.classList.add('hidden');
+            redirectCountdownContainer.classList.remove('hidden');
+            document.getElementById('redirect-title').textContent = 'Lanjut ke Link';
+            document.getElementById('redirect-message').textContent = 'Verifikasi berhasil. Klik tombol untuk melanjutkan.';
 
-            const ratio = newPos / (dragContainerWidth - dragThumb.offsetWidth);
-            if (ratio >= DRAG_THRESHOLD) {
-                // Drag complete, start countdown
-                dragEnd();
-                dragContainer.classList.add('hidden');
-                redirectCountdownContainer.classList.remove('hidden');
-                startCountdown(data);
-            }
-        };
-
-        const dragEnd = () => {
-            isDragging = false;
-            document.onmousemove = null;
-            document.onmouseup = null;
-            document.ontouchmove = null;
-            document.ontouchend = null;
-        };
-
-        const startCountdown = (data) => {
-            let count = 15;
+            let count = 3; // Ubah hitungan mundur menjadi singkat setelah verifikasi anti-bot
             redirectCountdown.textContent = count;
-
+            
             const interval = setInterval(() => {
                 count--;
                 redirectCountdown.textContent = count;
@@ -917,6 +969,8 @@
                     goLinkButton.onclick = () => {
                         handleFinalRedirect(data);
                     };
+                    // Auto-click for better UX
+                    goLinkButton.click(); 
                 }
             }, 1000);
         };
@@ -1009,7 +1063,7 @@
             }
         });
 
-        // --- History / Realtime Data Listeners ---
+        // --- History / Realtime Data Listeners (Perbaikan: Null/Undefined Check) ---
 
         const setupRealtimeHistory = () => {
             const linksCollection = collection(db, `artifacts/${appId}/public/data/short_urls`);
@@ -1124,7 +1178,7 @@
             }
         });
 
-        // --- Admin Link Management (New) ---
+        // --- Admin Link Management ---
 
         const setupAdminLinkManagement = () => {
             if (!isAdmin()) return;
@@ -1175,7 +1229,7 @@
             });
         };
 
-        // --- Chat Admin Logic (New) ---
+        // --- Chat Admin Logic ---
 
         const setupChatAdminListener = () => {
             if (!db) return;
@@ -1261,7 +1315,7 @@
             }
         });
 
-        // --- Admin Specific Event Listeners (New) ---
+        // --- Admin Specific Event Listeners ---
 
         // Global Settings Toggles
         maintenanceToggle.addEventListener('click', () => {
