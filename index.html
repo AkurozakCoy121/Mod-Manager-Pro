@@ -507,7 +507,7 @@
             apiKey: "AIzaSyAlGXpZSyQab7riDteV5ppS3DXDJQHywKw",
             authDomain: "modmanagerpro-248f5.firebaseapp.com",
             projectId: "modmanagerpro-248f5",
-            storageBucket: "modmanagerpro-248f5.firebasestorage.app",
+            storageBucket: "modmanagerpro-248f5.appspot.com",
             messagingSenderId: "594650288669",
             appId: "1:594650288669:web:3308b084911e2ef7f1ecf4",
             measurementId: "G-TE9234E3LP"
@@ -923,7 +923,13 @@
                     const postElement = document.createElement('div');
                     postElement.className = "bg-gray-50 p-4 rounded-xl border border-gray-200";
                     
-                    const time = data.createdAt ? data.createdAt.toDate().toLocaleString() : 'Just now';
+                    // --- PERBAIKAN: Cek apakah perlu toDate() sebelum memanggil toLocaleString() ---
+                    const time = data.createdAt 
+                        ? (typeof data.createdAt.toDate === 'function' 
+                            ? data.createdAt.toDate().toLocaleString() 
+                            : data.createdAt.toLocaleString()) 
+                        : 'Just now';
+                    
                     const userDisplay = data.createdBy === userId ? 'You' : data.createdBy.substring(0, 5);
                     
                     postElement.innerHTML = `
@@ -1034,11 +1040,18 @@
                     messageElement.className = `max-w-[70%] ${alignmentClass} p-3 rounded-xl shadow-md ${colorClass} w-fit`;
                     messageElement.style.marginLeft = isSender ? 'auto' : 'unset';
                     messageElement.style.marginRight = isSender ? 'unset' : 'auto';
+                    
+                    // --- PERBAIKAN: Cek apakah perlu toDate() sebelum memanggil toLocaleTimeString() ---
+                    const chatTime = data.createdAt 
+                        ? (typeof data.createdAt.toDate === 'function' 
+                            ? data.createdAt.toDate().toLocaleTimeString() 
+                            : data.createdAt.toLocaleTimeString())
+                        : 'Unknown Time';
 
                     messageElement.innerHTML = `
                         <p class="text-xs font-semibold mb-1 ${isSender ? 'text-blue-100' : (isSystemAdmin ? 'text-red-600' : 'text-blue-500')}">${senderLabel}</p>
                         <p>${data.content}</p>
-                        <p class="text-[10px] text-right mt-1 ${isSender ? 'text-blue-200' : 'text-gray-500'}">${data.createdAt.toDate().toLocaleTimeString()}</p>
+                        <p class="text-[10px] text-right mt-1 ${isSender ? 'text-blue-200' : 'text-gray-500'}">${chatTime}</p>
                     `;
                     chatWindow.appendChild(messageElement);
                 });
@@ -1203,7 +1216,6 @@
             addLinkModal.classList.remove('hidden');
         });
         
-        // --- KOREKSI PENTING: Variabel diganti dari cancelAddLinkModalBtn menjadi cancelAddLinkButton ---
         cancelAddLinkButton.addEventListener('click', () => {
             addLinkModal.classList.add('hidden');
         });
