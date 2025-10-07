@@ -11,7 +11,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
-/* ====== RESET & BASE ====== */
+/* ===== RESET & BASE ===== */
 body {
     font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
     background: linear-gradient(135deg,#e0e7ff 0%, #f0f2f5 100%);
@@ -19,7 +19,15 @@ body {
     margin: 0;
     min-height: 100vh;
     transition: background 0.4s, color 0.4s;
+    box-sizing: border-box;
 }
+*,
+*:before,
+*:after {
+    box-sizing: inherit;
+}
+
+/* ====== CARD CONTAINER ====== */
 .container-bg {
     background: #fff;
     border-radius: 24px;
@@ -33,6 +41,42 @@ body {
 }
 .custom-shadow {
     box-shadow: 0 8px 32px rgba(40,60,90,0.12);
+}
+
+/* ====== NAVBAR ====== */
+.navbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: center;
+    align-items: center;
+    margin: 24px auto 8px auto;
+    width: 100%;
+    max-width: 900px;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 6px 24px rgba(50,60,90,0.10);
+    padding: 18px 0;
+    overflow-x: auto;
+}
+.nav-btn {
+    background: #f3f6fa;
+    border: none;
+    border-radius: 14px;
+    padding: 12px 30px;
+    font-weight: 600;
+    font-size: 1rem;
+    color: #2563eb;
+    margin: 0 2px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.09);
+    transition: background 0.2s, color 0.2s;
+    white-space: nowrap;
+}
+.nav-btn:hover,
+.nav-btn.active {
+    background: #2563eb;
+    color: #fff;
 }
 
 /* ====== INPUTS & TEXTAREAS ====== */
@@ -250,6 +294,40 @@ button:focus {
     padding: 0 10px;
 }
 
+/* ====== FOOTER BAR (FIX TOMBOL) ====== */
+.footer-bar, #footer-bar, .url-footer-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+    background: #222;
+    color: #fff;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1vw;
+    box-sizing: border-box;
+}
+.footer-bar button,
+#footer-bar button,
+.url-footer-bar button,
+#start-shortening-btn {
+    max-width: 100%;
+    min-width: 120px;
+    box-sizing: border-box;
+    border-radius: 10px;
+    font-size: 1rem;
+    padding: 12px 26px;
+    margin: 12px 0;
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    transition: background 0.2s;
+    white-space: normal;
+    word-break: break-word;
+}
+
 /* ====== DARK MODE ====== */
 body.dark-mode {
     background: linear-gradient(135deg,#101828 0%, #1f2937 100%);
@@ -303,8 +381,22 @@ body.dark-mode #iframe-footbar {
     background: linear-gradient(90deg,#16213d 60%,#2563eb 100%);
     color: #fff;
 }
+body.dark-mode .footer-bar,
+body.dark-mode #footer-bar,
+body.dark-mode .url-footer-bar {
+    background: #161b22;
+    color: #fff;
+}
 
 /* ====== RESPONSIVE ====== */
+@media (max-width: 900px) {
+    .navbar {
+        padding-left: 4vw;
+        padding-right: 4vw;
+        gap: 8px;
+        max-width: 100vw;
+    }
+}
 @media (max-width: 600px) {
     .container-bg {
         max-width: 98vw;
@@ -345,7 +437,23 @@ body.dark-mode #iframe-footbar {
         font-size: 1rem;
         padding: 10px 8px;
     }
-}
+    .footer-bar, #footer-bar, .url-footer-bar {
+        flex-direction: column;
+        padding: 0 2vw;
+        height: auto;
+        align-items: stretch;
+    }
+    .footer-bar button,
+    #footer-bar button,
+    .url-footer-bar button,
+    #start-shortening-btn {
+        width: 100%;
+        min-width: unset;
+        font-size: 0.98rem;
+        margin: 12px 0 8px 0;
+        padding: 14px 0;
+        border-radius: 12px;
+    }
     </style>
 </head>
 <body class="flex flex-col min-h-screen">
