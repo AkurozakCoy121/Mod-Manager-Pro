@@ -12,9 +12,10 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
 :root {
-    /* Primary Colors */
-    --color-primary: #2563eb; /* Indigo-Blue */
-    --color-secondary: #22d3ee; /* Cyan */
+    /* Primary Color Palette */
+    --color-primary-main: #2563eb; /* Blue Indigo */
+    --color-primary-light: #3b82f6; /* Lighter Primary for gradients/accents */
+    --color-secondary-accent: #22d3ee; /* Cyan */
     --color-success: #22c55e; /* Green */
     --color-text-dark: #222;
     --color-text-light: #f3f6fa;
@@ -24,13 +25,12 @@
     --bg-body-end: #f0f2f5;
     --bg-card: #fff;
     --bg-input: #f3f6fa;
-    --bg-nav-btn: #f3f6fa;
+    --bg-shadow-color: rgba(50,60,90,0.15);
 
-    /* Shadow/Box Styling */
-    --shadow-card: 0 12px 40px 0 rgba(50,60,90,0.15);
-    --shadow-input: 0 1px 3px rgba(90,120,150,0.06);
-    --border-radius-main: 24px;
-    --border-radius-sm: 16px;
+    /* Spacing & Borders */
+    --border-radius-xl: 24px;
+    --border-radius-lg: 16px;
+    --border-radius-md: 12px;
 }
 
 /* DARK MODE VARIABLES */
@@ -38,12 +38,486 @@ body.dark-mode {
     --bg-body-start: #101828;
     --bg-body-end: #1f2937;
     --bg-card: #16213d;
-    --bg-input: #1a2336;
-    --bg-nav-btn: #1a2336;
-    --color-primary: #38bdf8; /* Lighter blue for better contrast in dark mode */
-    --color-secondary: #2563eb;
+    --bg-input: #1e293b;
+    --color-primary-main: #38bdf8; /* Sky Blue for contrast */
+    --color-primary-light: #60a5fa;
+    --color-secondary-accent: #2563eb;
     --color-text-dark: #f3f6fa;
-    --shadow-card: 0 12px 40px 0 rgba(0,0,0,0.30); /* Darker shadow for depth */
+    --bg-shadow-color: rgba(0,0,0,0.4);
+}
+
+/* ===== 2. RESET & BASE (FIX UI POTONG: padding-bottom) ===== */
+body {
+    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, var(--bg-body-start) 0%, var(--bg-body-end) 100%);
+    color: var(--color-text-dark);
+    margin: 0;
+    min-height: 100vh;
+    /* FIX UI POTONG: Menambahkan padding untuk memberi ruang pada fixed footer */
+    padding-bottom: 90px;
+    transition: background 0.4s, color 0.4s;
+    box-sizing: border-box;
+    overflow-x: hidden; /* Mencegah scroll horizontal */
+}
+*,
+*:before,
+*:after {
+    box-sizing: inherit;
+}
+
+/* ====== 3. CARD CONTAINER ====== */
+.container-bg {
+    background: var(--bg-card);
+    border-radius: var(--border-radius-xl);
+    box-shadow: 0 12px 40px 0 var(--bg-shadow-color);
+    max-width: 420px;
+    margin: 48px auto 60px auto;
+    padding: 40px 28px;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s, box-shadow 0.3s;
+}
+.custom-shadow {
+    box-shadow: 0 8px 32px rgba(40,60,90,0.12);
+}
+
+/* ====== 4. NAVBAR (Improved Aesthetics & Scrollability) ====== */
+.navbar {
+    display: flex;
+    flex-wrap: nowrap; /* Mencegah wrap agar navigasi tetap horizontal */
+    gap: 12px;
+    justify-content: center;
+    align-items: center;
+    margin: 24px auto 16px auto;
+    width: 100%;
+    max-width: 900px;
+    background: var(--bg-card);
+    border-radius: var(--border-radius-lg);
+    box-shadow: 0 6px 24px rgba(50,60,90,0.10);
+    padding: 16px 24px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* Scroll lebih halus di iOS */
+    scrollbar-width: none; /* Sembunyikan scrollbar di Firefox */
+}
+.navbar::-webkit-scrollbar {
+    display: none; /* Sembunyikan scrollbar di Chrome/Safari */
+}
+.nav-btn {
+    background: var(--bg-input);
+    border: none;
+    border-radius: var(--border-radius-md);
+    padding: 10px 22px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--color-primary-main);
+    flex-shrink: 0; /* Penting agar tombol tidak mengecil */
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(37,99,235,0.05);
+    transition: background 0.2s, color 0.2s, transform 0.1s;
+    white-space: nowrap;
+}
+.nav-btn:hover,
+.nav-btn.active {
+    background: var(--color-primary-main);
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px var(--color-primary-main)30;
+}
+.nav-btn.active {
+    transform: none; /* Active state does not need lift */
+}
+body.dark-mode .nav-btn {
+    background: #1a2336;
+}
+body.dark-mode .nav-btn:hover,
+body.dark-mode .nav-btn.active {
+    background: var(--color-primary-main);
+    color: #fff;
+}
+
+/* ====== 5. INPUTS & TEXTAREAS (Improved Focus State) ====== */
+input, textarea {
+    width: 100%;
+    border: 1px solid transparent; /* Added subtle border */
+    border-radius: var(--border-radius-lg);
+    background: var(--bg-input);
+    padding: 16px 18px;
+    font-size: 1.05rem;
+    margin-top: 10px;
+    color: var(--color-text-dark);
+    box-shadow: 0 1px 3px rgba(90,120,150,0.06);
+    transition: all 0.2s;
+    outline: none;
+}
+input:focus, textarea:focus {
+    background: var(--bg-card); /* Lighter background on focus */
+    border-color: var(--color-primary-main); /* Primary color border */
+    box-shadow: 0 0 0 3px var(--color-primary-main)50;
+}
+textarea { resize: vertical; min-height: 46px; }
+
+/* Dark Mode Input */
+body.dark-mode input, body.dark-mode textarea {
+    background: var(--bg-input);
+    color: var(--color-text-dark);
+    box-shadow: 0 1px 3px rgba(24,37,58,0.12);
+}
+body.dark-mode input:focus, body.dark-mode textarea:focus {
+    background: #1e293b;
+    border-color: var(--color-primary-main);
+    box-shadow: 0 0 0 3px var(--color-primary-main)50;
+}
+
+/* ====== 6. BUTTONS (Standardized Gradients) ====== */
+button {
+    border: none;
+    border-radius: var(--border-radius-lg);
+    padding: 16px 0;
+    width: 100%;
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: #fff;
+    background: linear-gradient(90deg, var(--color-primary-main) 60%, var(--color-secondary-accent) 100%);
+    box-shadow: 0 4px 24px var(--color-primary-main)30;
+    margin-top: 20px;
+    cursor: pointer;
+    transition: transform 0.18s, box-shadow 0.18s, background 0.18s;
+    outline: none;
+    letter-spacing: 0.03em;
+}
+button:active {
+    transform: scale(0.985);
+    box-shadow: 0 2px 8px var(--color-primary-main)50;
+}
+#copy-btn {
+    background: linear-gradient(90deg, var(--color-success) 60%, #38bdf8 100%);
+    box-shadow: 0 2px 8px var(--color-success)30;
+    margin-top: 12px;
+    padding: 12px 0;
+    border-radius: var(--border-radius-md);
+    font-size: 1rem;
+}
+#copy-btn:hover {
+    background: linear-gradient(90deg, #16a34a 60%, var(--color-success) 100%);
+}
+
+/* Dark Mode Toggle */
+#darkModeToggle {
+    background: var(--bg-card);
+    color: var(--color-primary-main);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    box-shadow: 0 2px 8px var(--color-primary-main)30;
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    z-index: 2;
+    transition: all 0.2s;
+}
+#darkModeToggle:hover {
+    background: var(--color-primary-main);
+    color: #fff;
+}
+body.dark-mode #darkModeToggle {
+    background: #1e293b;
+    color: var(--color-primary-main);
+}
+body.dark-mode #darkModeToggle:hover {
+    background: var(--color-primary-main);
+    color: #fff;
+}
+
+/* ====== 7. SLIDER / TOGGLE (Consistent Theming) ====== */
+.slider-container {
+    width: 100%;
+    height: 56px;
+    background: var(--bg-input);
+    border-radius: var(--border-radius-lg);
+    margin: 22px 0 12px 0;
+    display: flex;
+    align-items: center;
+    position: relative;
+    box-shadow: 0 1px 4px rgba(90,120,150,0.06);
+}
+#shorten-type-slider .slider-thumb {
+    position: absolute;
+    left: 4px;
+    top: 4px;
+    width: calc(50% - 4px); /* Kalkulasi yang lebih akurat */
+    height: 48px;
+    background: linear-gradient(90deg, var(--color-primary-main) 70%, var(--color-secondary-accent) 100%);
+    border-radius: var(--border-radius-md);
+    transition: transform 0.34s cubic-bezier(0.6,0,0.2,1), background 0.34s cubic-bezier(0.4,0,0.2,1);
+    box-shadow: 0 2px 8px var(--color-primary-main)20;
+    z-index: 1;
+}
+#shorten-type-slider .slider-thumb.iframe {
+    transform: translateX(100%); /* Geser penuh */
+    background: linear-gradient(90deg, var(--color-secondary-accent) 70%, var(--color-primary-main) 100%);
+}
+.slider-option {
+    flex: 1;
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.04rem;
+    color: var(--color-primary-main);
+    z-index: 2;
+    position: relative;
+    cursor: pointer;
+    letter-spacing: 0.01em;
+    transition: color 0.2s;
+    user-select: none;
+}
+.slider-option.active {
+    color: #fff;
+}
+
+/* Dark Mode Slider */
+body.dark-mode #shorten-type-slider .slider-thumb {
+    background: linear-gradient(90deg, var(--color-primary-main) 70%, var(--color-secondary-accent) 100%);
+}
+body.dark-mode #shorten-type-slider .slider-thumb.iframe {
+    background: linear-gradient(90deg, var(--color-secondary-accent) 70%, var(--color-primary-main) 100%);
+}
+
+/* ====== 8. RESULT CARD ====== */
+#result-container {
+    margin-top: 32px;
+    display: none;
+}
+#result-container > div {
+    background: var(--bg-input);
+    border-radius: var(--border-radius-md);
+    padding: 20px 18px;
+    box-shadow: 0 1px 6px rgba(90,120,150,0.07);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 1.05rem;
+}
+#shortened-url {
+    font-weight: 700;
+    font-size: 1.12rem;
+    word-break: break-all;
+    color: var(--color-primary-main);
+}
+body.dark-mode #result-container > div {
+    background: #1a2336;
+    color: #e0e0e0;
+}
+body.dark-mode #shortened-url {
+    color: var(--color-primary-main);
+}
+
+/* ====== 9. ACTIVITY DETECTOR ====== */
+#activity-detector {
+    height: 54px;
+    background: var(--bg-input);
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+    margin-top: 34px;
+    position: relative;
+    box-shadow: 0 1px 4px rgba(90,120,150,0.05);
+}
+#activity-progress {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--color-success) 60%, #38bdf8 100%);
+    transition: width 0.14s linear;
+    border-radius: var(--border-radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: white;
+    font-size: 1rem;
+}
+body.dark-mode #activity-detector {
+    background: #1a2336;
+}
+
+/* ====== 10. IFRAME PREVIEW (TIDAK DIHAPUS - Sesuai Permintaan) ====== */
+#iframe-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 90;
+    background: #18253a99; /* Semi-transparent dark overlay */
+    display: none;
+    /* Added flex for centering */
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Align ke atas agar ada ruang untuk footbar */
+}
+#iframe-wrapper iframe {
+    width: 96vw; /* Slightly less wide */
+    height: 80vh; /* Slightly less high */
+    border: none;
+    margin-top: 6vh;
+    border-radius: var(--border-radius-lg);
+    box-shadow: 0 6px 32px rgba(24,37,58,0.30);
+    display: block;
+}
+#iframe-footbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+    background: linear-gradient(90deg, var(--color-primary-main) 60%, var(--color-secondary-accent) 100%);
+    color: white;
+    z-index: 99;
+    box-shadow: 0 -2px 12px var(--color-primary-main)30;
+    font-size: 1.1rem;
+    padding: 14px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+#close-iframe.nav-btn {
+    background: none;
+    color: #fff;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0 10px;
+    box-shadow: none;
+}
+
+/* Dark Mode Iframe Footbar */
+body.dark-mode #iframe-footbar {
+    background: linear-gradient(90deg, #16213d 60%, var(--color-primary-main) 100%);
+    color: #fff;
+}
+
+/* ====== 11. FOOTER BAR (FIX UI POTONG: Responsiveness & Padding) ====== */
+.footer-bar, #footer-bar, .url-footer-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+    /* Gunakan variabel untuk konsistensi Light/Dark Mode */
+    background: var(--bg-card);
+    color: var(--color-text-dark);
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Centered content */
+    padding: 8px 1vw;
+    box-sizing: border-box;
+    box-shadow: 0 -4px 12px rgba(0,0,0,0.08); /* Shadow di atas */
+    transition: background 0.3s, color 0.3s;
+}
+.footer-bar button,
+#footer-bar button,
+.url-footer-bar button,
+#start-shortening-btn {
+    max-width: 400px; /* Batasi lebar tombol di desktop */
+    min-width: 120px;
+    box-sizing: border-box;
+    border-radius: var(--border-radius-md);
+    font-size: 1.05rem;
+    padding: 14px 26px;
+    margin: 8px 0; /* Margin vertikal lebih kecil */
+    /* Gradient default */
+    background: linear-gradient(90deg, var(--color-primary-main) 60%, var(--color-secondary-accent) 100%);
+    color: #fff;
+    border: none;
+    transition: background 0.2s, transform 0.1s;
+    white-space: normal;
+    word-break: break-word;
+}
+
+/* Dark Mode Footer Bar */
+body.dark-mode .footer-bar,
+body.dark-mode #footer-bar,
+body.dark-mode .url-footer-bar {
+    background: #161b22;
+    color: #fff;
+    box-shadow: 0 -4px 12px rgba(0,0,0,0.3);
+}
+
+
+/* ====== 12. RESPONSIVE (Perbaikan Mobile View) ====== */
+@media (max-width: 900px) {
+    .navbar {
+        padding-left: 4vw;
+        padding-right: 4vw;
+        gap: 8px;
+        max-width: 100vw;
+    }
+}
+@media (max-width: 600px) {
+    /* FIX UI POTONG: Pastikan body padding lebih besar dari footer height */
+    body {
+        padding-bottom: 95px; /* Disesuaikan untuk mobile footer yang bertumpuk */
+    }
+
+    .container-bg {
+        max-width: 100%;
+        padding: 16vw 4vw 8vw 4vw; /* Padding disesuaikan */
+        border-radius: var(--border-radius-lg);
+        margin: 12px auto;
+    }
+    #darkModeToggle {
+        width: 36px;
+        height: 36px;
+        font-size: 1.12rem;
+        top: 10px;
+        right: 12px;
+    }
+    button, #copy-btn {
+        padding: 14px 0;
+        font-size: 1rem;
+        border-radius: var(--border-radius-md);
+        margin-top: 14px;
+    }
+    input, textarea, .slider-container, #activity-detector {
+        font-size: 0.98rem;
+        border-radius: var(--border-radius-md);
+        padding: 12px;
+    }
+    #result-container > div {
+        padding: 14px 12px;
+        border-radius: var(--border-radius-md);
+        font-size: 0.98rem;
+    }
+    #iframe-wrapper iframe {
+        width: 96vw;
+        height: 80vh;
+        margin-top: 8vh; /* Space from top */
+        border-radius: 8px;
+    }
+    #iframe-footbar {
+        font-size: 1rem;
+        padding: 12px 10px;
+    }
+
+    /* FIX UI POTONG: Footer button stacked properly */
+    .footer-bar, #footer-bar, .url-footer-bar {
+        flex-direction: column;
+        padding: 8px 4vw; /* Increased side padding */
+        height: auto;
+        align-items: stretch; /* Tombol merata dari kiri ke kanan */
+    }
+    .footer-bar button,
+    #footer-bar button,
+    .url-footer-bar button,
+    #start-shortening-btn {
+        width: 100%;
+        max-width: 100%;
+        min-width: unset;
+        font-size: 1rem;
+        margin: 6px 0;
+        padding: 14px 0;
+        border-radius: var(--border-radius-md);
+    }
 }
     </style>
 </head>
